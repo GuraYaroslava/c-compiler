@@ -1,5 +1,4 @@
-#ifndef _SYMBOL_H
-#define _SYMBOL_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -201,5 +200,3 @@ public:
     SymVarGlobal(BaseToken*, SymType*);
     ~SymVarGlobal();
 };
-
-#endif _SYMBOL_H

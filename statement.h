@@ -1,5 +1,4 @@
-#ifndef _STATEMENT_H
-#define _STATEMENT_H
+#pragma once
 
 #include "node.h"
 class SymTable;
@@ -133,5 +132,3 @@ public:
 
     void StmtPrint(ostream &out/*, /*int*/);
 };
-
-#endif _STATEMENT_H

@@ -1,5 +1,4 @@
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
 
 #include "scanner.h"
 #include "node.h"
@@ -17,5 +16,3 @@ public:
     Node* ParseFactor();
     void PrintTree(Node*, int, int, ostream&);
 };
-
-#endif PARSER_H

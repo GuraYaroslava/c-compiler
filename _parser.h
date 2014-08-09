@@ -1,5 +1,4 @@
-#ifndef _PARSER_H
-#define _PARSER_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -80,4 +79,3 @@ public:
 
     friend NodeVar;
 };
-#endif _PARSER_H

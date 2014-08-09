@@ -1,5 +1,4 @@
-#ifndef SCANNER_H //стражи повторного включения
-#define SCANNER_H
+#pragma once
 
 #include <map>
 #include <vector>
@@ -48,5 +47,3 @@ private:
     friend class Parser;
     friend class Lexer;
 };
-
-#endif SCANNER_H

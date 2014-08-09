@@ -1,5 +1,4 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -10,36 +9,50 @@ using namespace std;
 enum TokenType
 {
     DEFAULT,
-    LX_BOF,
-    LX_EOF,
-    SPACE,
-    NEWLINE,
-    KEY_WORD,
+    UNKNOWN,
+    BOF_,
+    EOF_,
+
+    //tokens
+    IDENTIFIER,
+    CONSTANT,
+    KEYWORD,
     OPERATOR,
     SEPARATOR,
-    NUMBER_INT,
-    NUMBER_DOUBLE,
     STRING,
-    IDENTIFIER,
-    COMMENT,
-    UNKNOWN,
 
-    //SEPARATORS
+    //token's separators
+    COMMENT,
+    NEWLINE,
+    WHITESPACE,
+
+    //constants
+    CHARACTER,
+    NUMBER_INT,
+    NUMBER_FLOAT,
+
+    //separators
+    FIGURE_LEFT_BRACKET,
+    FIGURE_RIGHT_BRACKET,
     ROUND_LEFT_BRACKET,
     ROUND_RIGHT_BRACKET,
     SQUARE_LEFT_BRACKET,
     SQUARE_RIGHT_BRACKET,
-    FIGURE_LEFT_BRACKET,
-    FIGURE_RIGHT_BRACKET,
-    SEMICOLON,
-    COMMA,
 
-    //OPERATORS
+    //operators
+    ARROW,
+    COMMA,
+    POINT,
+    SEMICOLON,
+
     ASSIGN,
+
     EQUAL,
     NOT_EQUAL,
+
     GREATER,
     LESS,
+
     GREATER_EQUAL,
     LESS_EQUAL,
 
@@ -55,15 +68,14 @@ enum TokenType
     DIV_ASSIGN,
     MOD_ASSIGN,
 
-    INCREASE,
-    DECREASE,
+    //INCREASE,
+    //DECREASE,
+    //QUESTION,
+    //COLON,
 
     NOT,
     AND,
     OR,
-
-    QUESTION,
-    COLON,
 
     BIT_AND,
     BIT_OR,
@@ -77,14 +89,11 @@ enum TokenType
     BIT_XOR_ASSIGN,
     BIT_OR_ASSIGN,
 
-    ARROW,
-    POINT,
-
-    //KEY_WORDS
-    CONST,
+    //keywords
     INT,
-    DOUBLE,
+    FLOAT,
     CHAR,
+    //VOID,
 
     DO,
     WHILE,
@@ -113,15 +122,15 @@ public:
     BaseToken(const BaseToken *token);
     ~BaseToken();
 
-    map <TokenType, string> token_name;
+    map <TokenType, string> tokenTypeToString;
 
+    string GetText();
     int GetLine();
     int GetPosition();
-    string GetText();
     TokenType GetType();
 
     bool IsOperand();
-    void InitTokenNameTable();
+    void InitTokenTypeTable();
     virtual void Print(ostream &fout);
     bool operator == (TokenType);
     bool operator != (TokenType);
@@ -151,5 +160,3 @@ Type GetValue(BaseToken *token)
     Type value_ = dynamic_cast <TokenVal <Type> *> (token)->value;
     return value_;
 }
-
-#endif TOKEN_H

@@ -1,5 +1,4 @@
-#ifndef EXCEPTION_H
-#define EXCEPTION_H
+#pragma once
 
 #include <string>
 using namespace std;
@@ -12,5 +11,3 @@ public:
     Exception(int, int, string);
     string GetException();
 };
-
-#endif EXCEPTION_H

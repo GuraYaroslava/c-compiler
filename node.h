@@ -1,5 +1,4 @@
-#ifndef NODE_H
-#define NODE_H
+#pragma once
 
 #include <vector>
 //#include "symbol.h"
@@ -131,5 +130,3 @@ public:
     SymType* GetType();
     friend Parser;
 };
-
-#endif NODE_H
