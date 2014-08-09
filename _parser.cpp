@@ -84,7 +84,7 @@ SyntaxNode* Parser::ParseFactor()
     BaseToken* token = lexer.Peek();
     SyntaxNode *res = new NodeVar(token);
     TokenType t_token = token->GetType();
-    if (t_token == LX_EOF)
+    if (t_token == EOF_)
         Error("Invalid expression.");
     if (t_token != SEMICOLON && t_token != ROUND_RIGHT_BRACKET) lexer.Get();
     if (t_token == ROUND_LEFT_BRACKET)
@@ -144,7 +144,7 @@ void Parser::ParseFuncCall(SyntaxNode* &node, BaseToken* &oper)
         if (*t_param != t_arg)
             throw Exception(0, 0, "The type of argument does not match the type of parameter.");
         dynamic_cast <NodeCall*> (node)->AddArg(expr);
-        if (*lexer.Peek() == LX_EOF)
+        if (*lexer.Peek() == EOF_)
             Error("Missing close round right bracket after function argument list.");
         if (*lexer.Peek() == COMMA)
             lexer.Get();
@@ -330,7 +330,7 @@ void Parser::ParseDirectDeclarator()
     {
         dcl.push_back(lexer.Peek());
         lexer.Get();
-        while (*lexer.Peek() != ROUND_RIGHT_BRACKET && *lexer.Peek() != LX_EOF) 
+        while (*lexer.Peek() != ROUND_RIGHT_BRACKET && *lexer.Peek() != EOF_)
         {
             SymType* t = ParseType();
             ParseDeclarator();
@@ -339,7 +339,7 @@ void Parser::ParseDirectDeclarator()
                 Error("Invalid parameter list function.");
             if (*lexer.Peek() == COMMA) {dcl.push_back(lexer.Peek());lexer.Get();}
         }
-        if (*lexer.Peek() != ROUND_RIGHT_BRACKET || *lexer.Peek() == LX_EOF) 
+        if (*lexer.Peek() != ROUND_RIGHT_BRACKET || *lexer.Peek() == EOF_)
             Error("Missing close round bracket.");
         dcl.push_back(lexer.Peek()); 
         lexer.Get();
@@ -696,7 +696,7 @@ void Parser::Init()
     priority_table[COMMA] = 1;
     
     priority_table[SEMICOLON] = 1000;
-    priority_table[LX_EOF] = 1000;
+    priority_table[EOF_] = 1000;
 
 
     //UNARY

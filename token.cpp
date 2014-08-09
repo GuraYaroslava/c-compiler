@@ -3,13 +3,13 @@
 #include <sstream>
 #include "token.h"
 
-BaseToken::BaseToken()//: text(""), line(0), position(0), type(LX_BOF) {InitTokenNameTable();};
+BaseToken::BaseToken()
 {
     text = "";
-    line = 0;
-    position = 0;
-    type = LX_BOF;
-    InitTokenNameTable();
+    line = 1;
+    position = 1;
+    type = BOF_;
+    InitTokenTypeTable();
 }
 
 BaseToken::BaseToken(string text_, int line_, int pos_, TokenType type_)
@@ -18,7 +18,7 @@ BaseToken::BaseToken(string text_, int line_, int pos_, TokenType type_)
     line = line_;
     position = pos_;
     type = type_;
-    InitTokenNameTable();
+    InitTokenTypeTable();
 }
 
 BaseToken::BaseToken(const BaseToken* token_)
@@ -27,7 +27,7 @@ BaseToken::BaseToken(const BaseToken* token_)
     line = token_->line;
     position = token_->position;
     type = token_->type;
-    InitTokenNameTable();
+    InitTokenTypeTable();
 }
 
 BaseToken::~BaseToken() {};
@@ -54,7 +54,7 @@ TokenType BaseToken::GetType()
 
 void BaseToken::Print(ostream &fout)
 {
-    fout << setw(20) << token_name[GetType()] << "\t";
+    fout << setw(20) << tokenTypeToString[GetType()] << "\t";
     fout << setw(10) << GetLine() << "\t";
     fout << setw(10) << GetPosition() + 1 << "\t";
     fout << setw(10) << GetText() << "\t";
@@ -62,101 +62,93 @@ void BaseToken::Print(ostream &fout)
 
 bool BaseToken::IsOperand()
 {
-    return type == NUMBER_INT || type == NUMBER_DOUBLE || type == IDENTIFIER;
+    return type == NUMBER_INT || type == NUMBER_FLOAT || type == IDENTIFIER;
 }
 
-bool BaseToken::operator == (TokenType t_token)
+bool BaseToken::operator == (TokenType type_)
 {
-    return type == t_token;
+    return type == type_;
 }
 
-bool BaseToken::operator != (TokenType t_token)
+bool BaseToken::operator != (TokenType type_)
 {
-    return type != t_token;
+    return type != type_;
 }
 
-void BaseToken::InitTokenNameTable()
+void BaseToken::InitTokenTypeTable()
 {
-    token_name[KEY_WORD] = "KEY_WORD";
-    token_name[OPERATOR] = "OPERATOR";
-    token_name[SEPARATOR] = "SEPARATOR";
-    token_name[NUMBER_INT] = "NUMBER_INT";
-    token_name[NUMBER_DOUBLE] = "NUMBER_DOUBLE";
-    token_name[IDENTIFIER] ="IDENTIFIER";
-    token_name[STRING] = "STRING";
-    token_name[LX_EOF] = "EOF";
-    token_name[LX_BOF] = "BOF";
-
-    //SEPARATORS
-    token_name[ROUND_LEFT_BRACKET] = "ROUND_LEFT_BRACKET";
-    token_name[ROUND_RIGHT_BRACKET] = "ROUND_RIGHT_BRACKET";
-    token_name[SQUARE_LEFT_BRACKET] = "SQUARE_LEFT_BRACKET";
-    token_name[SQUARE_RIGHT_BRACKET] = "SQUARE_RIGHT_BRACKET";
-    token_name[FIGURE_LEFT_BRACKET] = "FIGURE_LEFT_BRACKET";
-    token_name[FIGURE_RIGHT_BRACKET] = "FIGURE_RIGHT_BRACKET";
-    token_name[SEMICOLON] = "SEMICOLON";
-    token_name[COMMA] = "COMMA";
-
-    //OPERATORS
-    token_name[ASSIGN] = "ASSIGN";
-    token_name[EQUAL] = "EQUAL";
-    token_name[NOT_EQUAL] = "NOT_EQUAL";
-    token_name[GREATER] = "GREATER";
-    token_name[LESS] = "LESS";
-    token_name[GREATER_EQUAL] = "GREATER_EQUAL";
-    token_name[LESS_EQUAL] = "LESS_EQUAL";
-
-    token_name[ADDITION] = "ADDITION";
-    token_name[SUBSTRACTION] = "SUBSTRACTION";
-    token_name[MULTIPLICATION] = "MULTIPLICATION";
-    token_name[DIVISION] = "DIVISION";
-    token_name[MODULO] = "MODULO";
-
-    token_name[ADD_ASSIGN] = "ADD_ASSIGN";
-    token_name[SUB_ASSIGN] = "SUB_ASSIGN";
-    token_name[MUL_ASSIGN] = "MULTI_ASSIGN";
-    token_name[DIV_ASSIGN] = "DIV_ASSIGN";
-    token_name[MOD_ASSIGN] = "MOD_ASSIGN";
-
-    token_name[INCREASE] = "INCREASE";
-    token_name[DECREASE] = "DECREASE";
-
-    token_name[NOT] = "NOT";
-    token_name[AND] = "AND";
-    token_name[OR] = "OR";
-        
-    token_name[QUESTION] = "QUESTION";
-    token_name[COLON] = "COLON";
-    token_name[OR] = "OR";
-
-    token_name[BIT_AND] = "BIT_AND";
-    token_name[BIT_OR] = "BIT_OR";
-    token_name[BIT_XOR] = "BIT_XOR";
-    token_name[BIT_NOT] = "BIT_NOT";
-    token_name[BIT_SHIFT_LEFT] = "BIT_SHIFT_LEFT";
-    token_name[BIT_SHIFT_RIGHT] = "BIT_SHIFT_RIGHT";
-    token_name[BIT_AND_ASSIGN] = "BIT_AND_ASSIGN";
-    token_name[BIT_OR_ASSIGN] = "BIT_OR_ASSIGN";
-    token_name[BIT_XOR_ASSIGN] = "BIT_XOR_ASSIGN";
-
-    token_name[ARROW] = "ARROW";
-    token_name[POINT] = "POINT";
-
-    //KEY_WORDS
-    token_name[CONST] = "CONST";
-    token_name[INT] = "INT";
-    token_name[DOUBLE] = "DOUBLE";
-    token_name[CHAR] = "CHAR";
-
-    token_name[DO] = "DO";
-    token_name[WHILE] = "WHILE";
-    token_name[IF] = "IF";
-    token_name[ELSE] = "ELSE";
-    token_name[FOR] = "FOR";
-
-    token_name[BREAK] = "BREAK";
-    token_name[CONTINUE] = "CONTINUE";
-    token_name[RETURN] = "RETURN";
-
-    token_name[STRUCT] = "STRUCT";
+    tokenTypeToString[DEFAULT] = "DEFAULT";
+    tokenTypeToString[UNKNOWN] = "UNKNOWN";
+    tokenTypeToString[EOF_] = "EOF";
+    tokenTypeToString[BOF_] = "BOF";
+    //tokens
+    tokenTypeToString[IDENTIFIER] ="IDENTIFIER";
+    tokenTypeToString[CONSTANT] ="CONSTANT";
+    tokenTypeToString[KEYWORD] = "KEYWORD";
+    tokenTypeToString[OPERATOR] = "OPERATOR";
+    tokenTypeToString[SEPARATOR] = "SEPARATOR";
+    tokenTypeToString[STRING] = "STRING";
+    //constants
+    tokenTypeToString[NUMBER_INT] = "NUMBER_INT";
+    tokenTypeToString[NUMBER_FLOAT] = "NUMBER_FLOAT";
+    tokenTypeToString[CHARACTER] = "CHARACTER";
+    //separators
+    tokenTypeToString[FIGURE_LEFT_BRACKET] = "FIGURE_LEFT_BRACKET";
+    tokenTypeToString[FIGURE_RIGHT_BRACKET] = "FIGURE_RIGHT_BRACKET";
+    tokenTypeToString[ROUND_LEFT_BRACKET] = "ROUND_LEFT_BRACKET";
+    tokenTypeToString[ROUND_RIGHT_BRACKET] = "ROUND_RIGHT_BRACKET";
+    tokenTypeToString[SQUARE_LEFT_BRACKET] = "SQUARE_LEFT_BRACKET";
+    tokenTypeToString[SQUARE_RIGHT_BRACKET] = "SQUARE_RIGHT_BRACKET";
+    //operators
+    tokenTypeToString[ARROW] = "ARROW";
+    tokenTypeToString[COMMA] = "COMMA";
+    tokenTypeToString[POINT] = "POINT";
+    tokenTypeToString[SEMICOLON] = "SEMICOLON";
+    tokenTypeToString[ASSIGN] = "ASSIGN";
+    tokenTypeToString[EQUAL] = "EQUAL";
+    tokenTypeToString[NOT_EQUAL] = "NOT_EQUAL";
+    tokenTypeToString[GREATER] = "GREATER";
+    tokenTypeToString[LESS] = "LESS";
+    tokenTypeToString[GREATER_EQUAL] = "GREATER_EQUAL";
+    tokenTypeToString[LESS_EQUAL] = "LESS_EQUAL";
+    tokenTypeToString[ADDITION] = "ADDITION";
+    tokenTypeToString[SUBSTRACTION] = "SUBSTRACTION";
+    tokenTypeToString[MULTIPLICATION] = "MULTIPLICATION";
+    tokenTypeToString[DIVISION] = "DIVISION";
+    tokenTypeToString[MODULO] = "MODULO";
+    tokenTypeToString[ADD_ASSIGN] = "ADD_ASSIGN";
+    tokenTypeToString[SUB_ASSIGN] = "SUB_ASSIGN";
+    tokenTypeToString[MUL_ASSIGN] = "MULTI_ASSIGN";
+    tokenTypeToString[DIV_ASSIGN] = "DIV_ASSIGN";
+    tokenTypeToString[MOD_ASSIGN] = "MOD_ASSIGN";
+    //tokenTypeToString[INCREASE] = "INCREASE";
+    //tokenTypeToString[DECREASE] = "DECREASE";
+    //tokenTypeToString[QUESTION] = "QUESTION";
+    //tokenTypeToString[COLON] = "COLON";
+    tokenTypeToString[NOT] = "NOT";
+    tokenTypeToString[AND] = "AND";
+    tokenTypeToString[OR] = "OR";
+    tokenTypeToString[BIT_AND] = "BIT_AND";
+    tokenTypeToString[BIT_OR] = "BIT_OR";
+    tokenTypeToString[BIT_XOR] = "BIT_XOR";
+    tokenTypeToString[BIT_NOT] = "BIT_NOT";
+    tokenTypeToString[BIT_SHIFT_LEFT] = "BIT_SHIFT_LEFT";
+    tokenTypeToString[BIT_SHIFT_RIGHT] = "BIT_SHIFT_RIGHT";
+    tokenTypeToString[BIT_AND_ASSIGN] = "BIT_AND_ASSIGN";
+    tokenTypeToString[BIT_OR_ASSIGN] = "BIT_OR_ASSIGN";
+    tokenTypeToString[BIT_XOR_ASSIGN] = "BIT_XOR_ASSIGN";
+    //keywords
+    tokenTypeToString[INT] = "INT";
+    tokenTypeToString[FLOAT] = "FLOAT";
+    tokenTypeToString[CHAR] = "CHAR";
+    //tokenTypeToString[VOID] = "VOID";
+    tokenTypeToString[DO] = "DO";
+    tokenTypeToString[WHILE] = "WHILE";
+    tokenTypeToString[IF] = "IF";
+    tokenTypeToString[ELSE] = "ELSE";
+    tokenTypeToString[FOR] = "FOR";
+    tokenTypeToString[BREAK] = "BREAK";
+    tokenTypeToString[CONTINUE] = "CONTINUE";
+    tokenTypeToString[RETURN] = "RETURN";
+    tokenTypeToString[STRUCT] = "STRUCT";
 }

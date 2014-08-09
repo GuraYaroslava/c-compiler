@@ -6,7 +6,7 @@
 #include "scanner.h"
 #include "exception.h"
 
-Scanner::Scanner(const char *input): fin(input), curr_token(new BaseToken("", curr_line, curr_pos, LX_BOF))
+Scanner::Scanner(const char *input): fin(input), curr_token(new BaseToken("", curr_line, curr_pos, BOF_))
 {
     curr_pos = 0;
     curr_line = 1;
@@ -40,7 +40,7 @@ BaseToken* Scanner::Next()
     if (ch == '\0' || ch == '\n')
     {
         curr_token = NewLine();
-        if (*curr_token != LX_EOF) Next();
+        if (*curr_token != EOF_) Next();
     }
     else if (ch == '/')
         curr_token = GetComment();
@@ -63,12 +63,12 @@ BaseToken* Scanner::Next()
 
 bool Scanner::HasNext()
 {
-    return curr_token->GetType() != LX_EOF;
+    return curr_token->GetType() != EOF_;
 }
 
 BaseToken* Scanner::NewLine()
 {
-    if (fin.eof()) return new BaseToken("EOF", curr_line, curr_pos, LX_EOF);
+    if (fin.eof()) return new BaseToken("EOF", curr_line, curr_pos, EOF_);
     getline(fin, curr_str);
     return new BaseToken("", ++curr_line, curr_pos = 0, NEWLINE);
 }
@@ -83,7 +83,7 @@ BaseToken* Scanner::GetIdentificator(char ch)
         ch = curr_str [++curr_pos];
     } while ((('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z') || ch == '_') || isdigit(ch));
     //TokenType t_token = (key_word[lexeme]) ? KEY_WORD : IDENTIFIER;
-    //string v_token = (key_word[lexeme]) ? token.token_name [key_word[lexeme]] : lexeme;
+    //string v_token = (key_word[lexeme]) ? token.tokenTypeToString [key_word[lexeme]] : lexeme;
     //return new TokenVal<string> (lexeme, curr_line, curr_pos, t_token, v_token);
     if (key_word[lexeme]) return new TokenVal<TokenType> (lexeme, curr_line, curr_pos, key_word[lexeme], key_word[lexeme]);
     else return new TokenVal <string> (lexeme, curr_line, curr_pos, IDENTIFIER, lexeme);
@@ -150,7 +150,7 @@ BaseToken* Scanner::GetNumber(char ch)
                     } while (isdigit(ch));
                     break;
                 case AFTER_POINT:
-                    t_token = NUMBER_DOUBLE;
+                    t_token = NUMBER_FLOAT;
                     //if (!isdigit(curr_str[curr_pos+1])) throw Exception(curr_line, curr_pos, "More than one symbol \".\" in the number.");
                     do 
                     {
@@ -160,7 +160,7 @@ BaseToken* Scanner::GetNumber(char ch)
                     if (ch == '.') throw Exception(curr_line, curr_pos, "More than one symbol \".\" in the number.");
                     break;
                 case AFTER_E:
-                    t_token = NUMBER_DOUBLE;
+                    t_token = NUMBER_FLOAT;
                     lexeme += ch;
                     ch = curr_str[++curr_pos];
                     if (isdigit(ch))
@@ -228,7 +228,7 @@ BaseToken* Scanner::GetComment()
         { 
             if (ch == '\0') 
             {
-                if (NewLine()->GetType() == LX_EOF) 
+                if (NewLine()->GetType() == EOF_) 
                     throw Exception(curr_line, curr_pos, "Unfinished comment.");
                 ch = curr_str[curr_pos];
                 continue;
@@ -287,7 +287,7 @@ BaseToken* Scanner::GetString()
         }
         if (ch == '\0')
         {
-            if (NewLine()->GetType() == LX_EOF) 
+            if (NewLine()->GetType() == EOF_)
                 throw Exception(curr_line, curr_pos, "Unfinished string.");
             lexeme += '\n';
             text += '\n';
@@ -328,8 +328,10 @@ void Scanner::InitSeparatorsTable()
 void Scanner::InitOperationsTable()
 {
     operation["="] =  ASSIGN;
+
     operation["=="] = EQUAL;
     operation["!="] = NOT_EQUAL;
+
     operation[">"] =  GREATER;
     operation["<"] =  LESS;
     operation[">="] = GREATER_EQUAL;
@@ -337,10 +339,11 @@ void Scanner::InitOperationsTable()
 
     operation["+"] =  ADDITION;
     operation["-"] =  SUBSTRACTION;
+
     operation["*"] =  MULTIPLICATION;
     operation["/"] =  DIVISION;
     operation["%"] =  MODULO;
-    
+
     operation["+="] = ADD_ASSIGN;
     operation["-="] = SUB_ASSIGN;
     operation["*="] = MUL_ASSIGN;
@@ -361,14 +364,16 @@ void Scanner::InitOperationsTable()
     operation["|"] =  BIT_OR;
     operation["^"] =  BIT_XOR;
     operation["~"] =  BIT_NOT;
+
     operation[">>"] = BIT_SHIFT_RIGHT;
     operation["<<"] = BIT_SHIFT_LEFT;
+
     operation[">>="] = BIT_SHIFT_RIGHT_ASSIGN;
     operation["<<="] = BIT_SHIFT_LEFT_ASSIGN;
     operation["&="] = BIT_AND_ASSIGN;
     operation["|="] = BIT_OR_ASSIGN;
     operation["^="] = BIT_XOR_ASSIGN;
-    
+
     operation["->"] = ARROW;
     operation["."] =  POINT;
 }
@@ -379,13 +384,13 @@ void Scanner::InitKeyWordsTable()
     key_word["int"] = INT;
     key_word["double"] = DOUBLE;
     key_word["char"] = CHAR;
-    
+
     key_word["do"] = DO;
     key_word["while"] = WHILE;
     key_word["else"] = ELSE;
     key_word["if"] = IF;
     key_word["for"] = FOR;
-    
+
     key_word["break"] = BREAK;
     key_word["continue"] = CONTINUE;
     key_word["return"] = RETURN;

@@ -75,8 +75,8 @@ bool SymType::operator != (SymType* right)
     cout << "////////////" << endl
          << /*this->type->GetText () << endl <<*/ endl << right->type->GetText() << endl << "/////////////////////" << endl;
     cout << "////////////" << endl
-         << this->type->token_name[this->type->GetType()] << endl << endl
-         << right->type->token_name[right->type->GetType()] << endl << "/////////////////////" << endl;
+         << this->type->tokenTypeToString[this->type->GetType()] << endl << endl
+         << right->type->tokenTypeToString[right->type->GetType()] << endl << "/////////////////////" << endl;
 
     bool res = true;
     /*if (static_cast <SymTypeInteger*> (this) && dynamic_cast <SymTypeInteger*> (right))

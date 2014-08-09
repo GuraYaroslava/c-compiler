@@ -24,7 +24,7 @@ Node* SimpleParser::ParseExpr()
     //    Token *add = new Token("+", 0, 0, ADDITION);
     //    TokenNumberInt *nul = new TokenNumberInt("0", 0, 0, NUMBER_INT, 0);
     //    Node* subtrahend = new Node(new Node(NULL, NULL, nul), ParseFactor(), token);
-    //    if ((token = scanner.Next())->GetType() != LX_EOF && token->GetType() != ROUND_RIGHT_BRACKET)
+    //    if ((token = scanner.Next())->GetType() != EOF_ && token->GetType() != ROUND_RIGHT_BRACKET)
     //        return new Node(left, new Node(subtrahend, ParseExpr(), token), add);
     //    return new Node(left, new Node(subtrahend, new Node(NULL, NULL, nul), add), add);
     //}
