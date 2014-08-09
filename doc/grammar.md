@@ -3,7 +3,7 @@
 # Notation
 
 To describe the grammar are used
-the [Backus-Naur Form](#http://en.wikipedia.org/wiki/Backus–Naur_Form).
+the [Backus-Naur Form](http://en.wikipedia.org/wiki/Backus–Naur_Form).
 The meta-symbols of BNF are:
 
 - `< >` angle brackets used to surround category names
