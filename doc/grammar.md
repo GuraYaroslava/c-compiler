@@ -104,11 +104,10 @@ The characters `//` start a comment, which terminates with the next new-line cha
 ## Keywords
 
 ```
-<keyword> ::= `break`    | `char`   | `const`
-            | `continue` | `do`     | `else`
-            | `float`    | `for`    | `if`
-            | `int`      | `return` | `struct`
-            | `void`     | `while`
+<keyword> ::= `break` | `char`   | `continue` | `do`
+            | `else`  | `float`  | `for`      | `if`
+            | `int`   | `return` | `struct`   | `void`
+            | `while`
 ```
 
 ## Constants
