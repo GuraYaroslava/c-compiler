@@ -66,7 +66,7 @@ Node* SimpleParser::ParseFactor()
     }
     if (t_token == IDENTIFIER
         || t_token == NUMBER_INT
-        || t_token == NUMBER_DOUBLE)
+        || t_token == NUMBER_FLOAT)
         return new Node(NULL, NULL, token);
     throw Exception(scanner.curr_line, scanner.curr_pos, "Missing operand.");
 };

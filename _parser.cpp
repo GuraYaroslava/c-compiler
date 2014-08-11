@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
-#include <ctime> 
+#include <ctime>
 
 #include "exception.h"
 #include "_parser.h"
@@ -16,7 +16,7 @@
 
 SyntaxNode* Parser::ParseExpression(int priority)
 {
-    if (priority == PREFIX) 
+    if (priority == PREFIX)
     {
         BaseToken* oper = lexer.Peek();
         if (unary_oper[oper->GetType()])
@@ -62,13 +62,13 @@ SyntaxNode* Parser::ParseExpression(int priority)
                 left = new NodeRecordAccess(left, oper, field);
                 dynamic_cast <NodeRecordAccess*>(left)->symbol = dynamic_cast <SymVar*> (s);
             }
-            if (t_oper == INCREASE || t_oper == DECREASE)
-                left = new NodeBinaryOp(left, oper, NULL);
+            //if (t_oper == INCREASE || t_oper == DECREASE)
+            //    left = new NodeBinaryOp(left, oper, NULL);
         }
         else
         {
             SyntaxNode *right = ParseExpression(priority + (right_assoc_oper[t_oper] == true ? 0 : 1));
-            if (right == NULL) 
+            if (right == NULL)
                 Error("Missing operand. [ParseExpression]");
             left = new NodeBinaryOp(left, oper, right);
         }
@@ -96,17 +96,17 @@ SyntaxNode* Parser::ParseFactor()
             Error("Missing close bracket. [ParseFactor]");
         return expr;
     }    
-    if (t_token == KEY_WORD || t_token == IDENTIFIER || t_token == NUMBER_INT ||
-        t_token == NUMBER_DOUBLE || t_token == STRING || t_token == CHAR) 
+    if (t_token == KEYWORD || t_token == IDENTIFIER || t_token == NUMBER_INT ||
+        t_token == NUMBER_FLOAT || t_token == STRING || t_token == CHAR)
     {
         // А что делать со стрингами и зарезервированным словом? 
         if (t_token == CHAR)
         {
             s = new SymVar(token, new SymTypeChar(new BaseToken("char", lexer.GetLine(), lexer.GetPos(), CHAR)));
         }
-        if (t_token == NUMBER_DOUBLE)
+        if (t_token == NUMBER_FLOAT)
         {
-            s = new SymVar(token, new SymTypeDouble(new BaseToken("double", lexer.GetLine(), lexer.GetPos(), DOUBLE)));
+            s = new SymVar(token, new SymTypeDouble(new BaseToken("double", lexer.GetLine(), lexer.GetPos(), FLOAT)));
         }
         if (t_token == NUMBER_INT)
         {
@@ -125,7 +125,7 @@ SyntaxNode* Parser::ParseFactor()
 
 void Parser::ParseFuncCall(SyntaxNode* &node, BaseToken* &oper)
 {
-    if (!dynamic_cast <SymFunc*> (dynamic_cast <NodeVar*> (node)->symbol)) 
+    if (!dynamic_cast <SymFunc*> (dynamic_cast <NodeVar*> (node)->symbol))
         Error("Using a variable as a function call.");
     SymFunc *s = dynamic_cast <SymFunc*> (dynamic_cast <NodeVar*> (node)->symbol);
     node = new NodeCall(node, oper);
@@ -169,7 +169,7 @@ SymType* Parser::ParseType()
             type = new SymTypeInteger(token);
             lexer.Get();
             break;
-        case DOUBLE:
+        case FLOAT:
             type = new SymTypeDouble(token);
             lexer.Get();
             break;
@@ -256,7 +256,7 @@ Symbol* Parser::Translator(int end) // end - на каком месте закончили разбирать 
                     i = begin;
                     if (*dcl[i] == COMMA) --i;
                 }
-                if (*dcl[i-1] == IDENTIFIER) name = dcl[--i]; 
+                if (*dcl[i-1] == IDENTIFIER) name = dcl[--i];
                 else name = new BaseToken(GetRandomName(), lexer.GetPos(), lexer.GetPos(), IDENTIFIER);
                 symbol = new SymFunc(name, type, func_sym_table);
                 break;
@@ -264,7 +264,7 @@ Symbol* Parser::Translator(int end) // end - на каком месте закончили разбирать 
             case SQUARE_LEFT_BRACKET:
                 type = new SymTypeArray(dynamic_cast <SymType*> (symbol));
                 while (*dcl[--i] == NUMBER_INT)
-                    dynamic_cast <SymTypeArray*> (type)->AddLevel(GetValue <double> (dcl[i]));
+                    dynamic_cast <SymTypeArray*> (type)->AddLevel(GetValue <int> (dcl[i]));
                 symbol = type;
                 i++;
                 break;
@@ -451,7 +451,7 @@ Statement* Parser::ParseStatement()
                 Error("Requires an expression in round brackets.");
             lexer.Get();
             token = lexer.Peek();
-            if (*token == INT || *token == DOUBLE  || *token == CHAR || *token == STRUCT)
+            if (*token == INT || *token == FLOAT || *token == CHAR || *token == STRUCT)
                 Error("Do not need to declare variables here.");
             expr1 = ParseExpression(0);
             if (*lexer.Peek() != SEMICOLON) Error("Invalid condition in the statement 'for'.[;]");
@@ -510,10 +510,10 @@ Statement* Parser::ParseStatement()
 
         default:
             //то, с чего не может начинаться выражение... тут бы еще добавить нужно ~, *
-            if (*lexer.Peek() != IDENTIFIER && *lexer.Peek() != NUMBER_DOUBLE && *lexer.Peek() != NUMBER_INT && 
+            if (*lexer.Peek() != IDENTIFIER && *lexer.Peek() != NUMBER_FLOAT && *lexer.Peek() != NUMBER_INT &&
                 *lexer.Peek() != ROUND_LEFT_BRACKET &&
                 *lexer.Peek() != ADDITION && *lexer.Peek() != SUBSTRACTION &&
-                *lexer.Peek() != DECREASE && *lexer.Peek() != INCREASE &&
+                //*lexer.Peek() != DECREASE && *lexer.Peek() != INCREASE &&
                 *lexer.Peek() != SEMICOLON &&
                 *lexer.Peek() != CHAR &&
                 *lexer.Peek() != BIT_NOT)//если пустой оператор ;
@@ -580,7 +580,7 @@ void Parser::PrintSymbols(ostream &out)
     if (!stmt.empty())
     {
         out << "Global statements:" << endl;
-        for (int i=0; i<stmt.size(); i++)
+        for (unsigned int i = 0; i < stmt.size(); ++i)
             stmt[i]->StmtPrint(out);
     }
 }
@@ -632,7 +632,7 @@ Parser::Parser(const char *fin): lexer(fin), curr_type(NULL), curr_stmt(DEFAULT)
     stack = new SymTableStack();
     stack->Push(new SymTable());
     stack->Add(new  SymTypeInteger(new BaseToken("int", 0, 0, INT)));
-    stack->Add(new  SymTypeDouble(new BaseToken("double", 0, 0, DOUBLE)));
+    stack->Add(new  SymTypeDouble(new BaseToken("double", 0, 0, FLOAT)));
     stack->Add(new  SymTypeChar(new BaseToken("char", 0, 0, CHAR)));
 }
 Parser::~Parser() {}
@@ -656,8 +656,8 @@ void Parser::Init()
     priority_table[SQUARE_RIGHT_BRACKET] = 1000;
     priority_table[ARROW] = 16;
     priority_table[POINT] = 16;
-    priority_table[INCREASE] = 16;
-    priority_table[DECREASE] = 16;
+    //priority_table[INCREASE] = 16;
+    //priority_table[DECREASE] = 16;
 
     //PREFIX
     //increace/decreace = 15
@@ -704,8 +704,8 @@ void Parser::Init()
     unary_oper[NOT] = true;
     unary_oper[BIT_NOT] = true;            //~
     unary_oper[BIT_AND] = true;            //get address 
-    unary_oper[INCREASE] = true;
-    unary_oper[DECREASE] = true;
+    //unary_oper[INCREASE] = true;
+    //unary_oper[DECREASE] = true;
     unary_oper[ADDITION] = true;
     unary_oper[SUBSTRACTION] = true;
     unary_oper[MULTIPLICATION] = true;    //dereference
