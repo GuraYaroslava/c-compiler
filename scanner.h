@@ -10,6 +10,10 @@ using namespace std;
 class Scanner
 {
 public:
+    map <string, TokenType> keywords;
+    map <string, TokenType> operators;
+    map <char, string> escape_sequence;
+
     Scanner(const char*);
     ~Scanner();
 
@@ -18,30 +22,29 @@ public:
     BaseToken* Next();
 
 private:
-    map <string, TokenType> key_word;
-    map <string, TokenType> operation;
-    map <char, TokenType> separator;
-    map <char, char> escape_sequence;
-        
-    void InitKeyWordsTable();
-    void InitOperationsTable();
-    void InitSeparatorsTable();
-    void InitEscapeSequencesTable();
-
-    BaseToken* NewLine();
-    BaseToken* GetIdentificator(char);
-    BaseToken* GetNumber(char); 
-    BaseToken* GetSeparator(char);
-    BaseToken* GetOperation(char);
-    BaseToken* GetComment();
-    BaseToken* GetChar();
-    BaseToken* GetString();
-
     int curr_pos;
     int curr_line;
     BaseToken* curr_token;
-    string curr_str;
+
     ifstream fin;
+
+    void InitKeyWordsTable();
+    void InitOperatorsTable();
+    void InitEscapeSequencesTable();
+
+    void GetWhiteSpace();
+    bool GetSpace();
+    bool GetComment();
+
+    BaseToken* GetIdentificator();
+    BaseToken* GetNumber();
+    BaseToken* GetFloatNumber(string);
+    BaseToken* GetChar();
+    BaseToken* GetOperator();
+    BaseToken* GetString();
+
+    char GetCh();
+    void UnGetCh();
 
     friend class SimpleParser;
     friend class Parser;

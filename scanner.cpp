@@ -2,18 +2,22 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+
+#include "utils.h"
 #include "token.h"
 #include "scanner.h"
 #include "exception.h"
 
-Scanner::Scanner(const char *input): fin(input), curr_token(new BaseToken("", curr_line, curr_pos, BOF_))
+Scanner::Scanner(const char* input)
 {
     curr_pos = 0;
     curr_line = 1;
-    getline(fin, curr_str);
+    curr_token = new BaseToken("BOF", curr_line, curr_pos, BOF_);
+
+    fin.open(input);
+
     InitKeyWordsTable();
-    InitOperationsTable();
-    InitSeparatorsTable();
+    InitOperatorsTable();
     InitEscapeSequencesTable();
 }
 
@@ -23,6 +27,11 @@ Scanner::~Scanner()
     //curr_token = NULL;
 }
 
+bool Scanner::HasNext()
+{
+    return curr_token->GetType() != EOF_;
+}
+
 BaseToken* Scanner::Get()
 {
     return curr_token;
@@ -30,370 +39,461 @@ BaseToken* Scanner::Get()
 
 BaseToken* Scanner::Next()
 {
-    char ch = curr_str[curr_pos];
+    GetWhiteSpace();
 
-    while (isspace(ch))
+    char ch = fin.peek();
+    if (fin.eof())
     {
-        ch = curr_str[++curr_pos];
+        curr_token = new BaseToken("EOF", curr_line, ++curr_pos, EOF_);
     }
-
-    if (ch == '\0' || ch == '\n')
+    else if (isalpha(ch) || ch == '_')
     {
-        curr_token = NewLine();
-        if (*curr_token != EOF_) Next();
+        curr_token = GetIdentificator();
     }
-    else if (ch == '/')
-        curr_token = GetComment();
-    else if (('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z') || ch == '_')
-        curr_token = GetIdentificator(ch);
-    else if (isdigit(ch) /*|| ch == '.'*/)    //.5=0.5
-        curr_token = GetNumber(ch);
-    else if (separator[ch])
-        curr_token = GetSeparator(ch);
-    else if (operation[string(1, ch)])
-        curr_token = GetOperation(ch);
+    else if (isdigit(ch))
+    {
+        curr_token = GetNumber();
+    }
+    else if (operators[string(1, ch)])
+    {
+        curr_token = GetOperator();
+    }
     else if (ch == '\'')
+    {
         curr_token = GetChar();
+    }
     else if (ch == '"')
+    {
         curr_token = GetString();
-    else 
-        curr_token = new BaseToken(string(ch, 1), curr_line, ++curr_pos, UNKNOWN);
-    return curr_token;
-}
-
-bool Scanner::HasNext()
-{
-    return curr_token->GetType() != EOF_;
-}
-
-BaseToken* Scanner::NewLine()
-{
-    if (fin.eof()) return new BaseToken("EOF", curr_line, curr_pos, EOF_);
-    getline(fin, curr_str);
-    return new BaseToken("", ++curr_line, curr_pos = 0, NEWLINE);
-}
-
-BaseToken* Scanner::GetIdentificator(char ch)
-{
-    string lexeme = "";
-    BaseToken token;
-    do 
-    { 
-        lexeme += ch;
-        ch = curr_str [++curr_pos];
-    } while ((('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z') || ch == '_') || isdigit(ch));
-    //TokenType t_token = (key_word[lexeme]) ? KEY_WORD : IDENTIFIER;
-    //string v_token = (key_word[lexeme]) ? token.tokenTypeToString [key_word[lexeme]] : lexeme;
-    //return new TokenVal<string> (lexeme, curr_line, curr_pos, t_token, v_token);
-    if (key_word[lexeme]) return new TokenVal<TokenType> (lexeme, curr_line, curr_pos, key_word[lexeme], key_word[lexeme]);
-    else return new TokenVal <string> (lexeme, curr_line, curr_pos, IDENTIFIER, lexeme);
-}
-
-BaseToken* Scanner::GetNumber(char ch)
-{
-    enum State {DIGIT, AFTER_POINT, AFTER_E, AFTER_OPER};
-    char *ptr_start =  &curr_str[curr_pos], *ptr_end;
-    string lexeme = "";
-    TokenType t_token;
-    State state;    
-    if (ch == '0' && ('x' == curr_str[curr_pos+1] || curr_str[curr_pos+1] == 'X'))
-    {
-        t_token = NUMBER_INT;
-        lexeme = "0x";
-        ch = curr_str[curr_pos+=2];
-        while (('A' <= ch && ch <= 'F') || ('a' <= ch && ch <= 'f') || isdigit(ch))
-        {
-            lexeme += ch;
-            ch = curr_str[++curr_pos];
-        }
-        if (lexeme == "0x")
-            throw Exception(curr_line, curr_pos, "Invalid hexadecimal number.");
-        int num = strtol(ptr_start, &ptr_end, 16);
-        if (LONG_MAX == num || num ==  LONG_MIN) 
-            throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
-        return new TokenVal <int> (lexeme, curr_line, curr_pos, t_token, num);
-    }    
-    else if (ch == '0' && ('.' != curr_str[curr_pos+1]))
-    {
-        t_token = NUMBER_INT;
-        while ('0' <= ch && ch <= '7')
-        {
-            lexeme += ch;
-            ch = curr_str[++curr_pos];
-        }
-        if (isdigit(ch))
-            throw Exception(curr_line, curr_pos, "Invalid octal number.");
-        int num =  strtol(ptr_start, &ptr_end, 8);
-        if (LONG_MAX == num || num ==  LONG_MIN)
-            throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
-        return new TokenVal <int> (lexeme, curr_line, curr_pos, t_token, num);
     }
     else
     {
-        bool loop = true;
-        while (loop)
-        {
-            if (isdigit(ch)) state = DIGIT;
-            else if (ch == '.') state = AFTER_POINT;
-            else if ('e' == ch || ch == 'E') state = AFTER_E;
-            else if ('-' == ch || ch == '+') state = AFTER_OPER;
-            else {loop = false; continue;}
-            
-            switch (state)
-            {
-                case DIGIT:
-                    t_token = NUMBER_INT;
-                    do
-                    {
-                        lexeme += ch; 
-                        ch = curr_str[++curr_pos];
-                    } while (isdigit(ch));
-                    break;
-                case AFTER_POINT:
-                    t_token = NUMBER_FLOAT;
-                    //if (!isdigit(curr_str[curr_pos+1])) throw Exception(curr_line, curr_pos, "More than one symbol \".\" in the number.");
-                    do 
-                    {
-                        lexeme += ch; 
-                        ch = curr_str[++curr_pos];
-                    } while (isdigit(ch));
-                    if (ch == '.') throw Exception(curr_line, curr_pos, "More than one symbol \".\" in the number.");
-                    break;
-                case AFTER_E:
-                    t_token = NUMBER_FLOAT;
-                    lexeme += ch;
-                    ch = curr_str[++curr_pos];
-                    if (isdigit(ch))
-                    {
-                        do
-                        {
-                            lexeme += ch; 
-                            ch = curr_str[++curr_pos];
-                        } while (isdigit(ch));
-                        loop = false;
-                    }
-                    else if ('-' != ch && ch != '+')
-                        throw Exception(curr_line, curr_pos, "Invalid symbol \""+string(1, ch)+"\" in the real number.");
-                    break;
-                case AFTER_OPER:
-                    if ('e' != curr_str[curr_pos-1] && curr_str[curr_pos-1] != 'E')
-                    {
-                        loop = false;
-                        break;
-                    }
-                    if (!isdigit(curr_str[curr_pos+1])) 
-                        throw Exception(curr_line, curr_pos, "Invalid symbol \""+string(1, ch)+"\" in the real number.");
-                    do
-                    {
-                        lexeme += ch; 
-                        ch = curr_str[++curr_pos];
-                    } while (isdigit(ch));
-                    break;
-                default: throw Exception(curr_line, curr_pos, "Invalid number.");
-            }
-        }
-        double num = strtod(ptr_start, &ptr_end);
-        if (+HUGE_VAL == num || num == -HUGE_VAL)
-            throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
-        return new TokenVal <double> (lexeme, curr_line, curr_pos, t_token, num);
+        GetCh();
+        curr_token = new TokenVal <char> (ChToStr(ch), curr_line, curr_pos, UNKNOWN, ch);
     }
+    if (!curr_token) Next();
+    return curr_token;
 }
 
-BaseToken* Scanner::GetSeparator(char curr_ch)
+void Scanner::GetWhiteSpace()
 {
-    BaseToken token;
-    return new TokenVal <TokenType> (string(1, curr_ch), curr_line, curr_pos++, separator[curr_ch], separator[curr_ch]);
+    while (GetComment() || GetSpace()) {}
 }
 
-BaseToken* Scanner::GetOperation(char curr_ch) 
+bool Scanner::GetSpace()
 {
-    BaseToken token;
-    string oper = string(1, curr_ch);
-    char n_ch = curr_str[++curr_pos];
-    if (!isspace(n_ch) && n_ch != '\0') 
-        if (operation[oper+n_ch])
-        {
-            oper += n_ch;
-            ++curr_pos;
-        }
-        return new TokenVal <TokenType> (oper, curr_line, curr_pos, operation[oper], operation[oper]);
-}
-
-BaseToken* Scanner::GetComment()
-{
-    char ch = curr_str[++curr_pos];
-    if (ch == '*')
+    bool result = false;
+    while (fin.good() && isspace(fin.peek()))
     {
-        do 
-        { 
-            if (ch == '\0') 
-            {
-                if (NewLine()->GetType() == EOF_) 
-                    throw Exception(curr_line, curr_pos, "Unfinished comment.");
-                ch = curr_str[curr_pos];
-                continue;
-            }
-            ch = curr_str[++curr_pos];
-        } while (ch != '*' || (curr_str[curr_pos+1] != '/'));
-        curr_pos += 2;
-        return new BaseToken("", curr_line, curr_pos, COMMENT);
+        GetCh();
+        result = true;
     }
-    else if (ch == '/') return NewLine();
-    else return GetOperation(curr_str[--curr_pos]);
+    return result;
+}
+
+bool Scanner::GetComment()
+{
+    bool result = false;
+    if (fin.eof() || (fin.good() && fin.peek() != '/'))
+    {
+        return result;
+    }
+    GetCh();
+    if (fin.peek() == '*')
+    {
+        do
+        {
+            GetCh();
+            while (fin.good() && fin.peek() != '*')
+            {
+                GetCh();
+            }
+            GetCh();
+        } while (fin.good() && fin.peek() != '/');
+        if (fin.eof())
+        {
+            throw Exception(curr_line, curr_pos, "Unfinished comment.");
+            //cerr << "Unfinished comment." << endl;
+            //return NULL;
+        }
+        GetCh();
+        result = true;
+    }
+    else if (fin.peek() == '/')
+    {
+        char ch;
+        while (fin.good() && (ch = fin.peek()) != '\n' && ch != EOF)
+        {
+            GetCh();
+        }
+        GetCh();
+        result = true;
+    }
+    else
+    {
+        UnGetCh();
+    }
+    return result;
+}
+
+BaseToken* Scanner::GetIdentificator()
+{
+    string lexeme = "";
+    for (char ch = fin.peek(); isalpha(ch) || isdigit(ch) || ch == '_'; ch = fin.peek())
+    {
+        lexeme += GetCh();
+    }
+    if (keywords[lexeme])
+    {
+        return new TokenVal <string> (lexeme, curr_line, curr_pos, KEYWORD, lexeme);
+    }
+    return new TokenVal <string> (lexeme, curr_line, curr_pos, IDENTIFIER, lexeme);
+}
+
+BaseToken* Scanner::GetNumber()
+{
+    int num, flag = 0;
+    string lexeme = "";
+    char ch = fin.peek();
+    BaseToken* result = NULL;
+
+    if (ch == '0')
+    {
+        lexeme += GetCh();
+        ch = fin.peek();
+
+        //hexadecimal
+        if (ch == 'x' || ch == 'X')
+        {
+            lexeme += GetCh();
+            for (char c = fin.peek();
+                 isdigit(c) || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
+                 c = fin.peek())
+            {
+                lexeme += GetCh();
+            }
+            flag = 1;
+            if (lexeme == "0x" || lexeme == "0X")
+            {
+                throw Exception(curr_line, curr_pos, "Invalid hexadecimal number.");
+                //cerr << "[" + lexeme + "] Invalid hexadecimal number." << endl;
+                //return NULL;
+            }
+        }
+
+        //octal
+        else
+        {
+            for (char c = fin.peek(); '0' <= c && c <= '7'; c = fin.peek())
+            {
+                lexeme += GetCh();
+            }
+            flag = 2;
+            if (isdigit(fin.peek()))
+            {
+                throw Exception(curr_line, curr_pos, "Invalid octal number.");
+            }
+        }
+    }
+
+    //decimal
+    else
+    {
+        for (char c = fin.peek(); isdigit(c); c = fin.peek())
+        {
+            lexeme += GetCh();
+        }
+        ch = fin.peek();
+    }
+
+    if (ch == '.' || ch == 'e' || ch == 'E')
+    {
+        return GetFloatNumber(lexeme);
+    }
+
+    char* ptr_start = &lexeme[0], *ptr_end;
+    switch (flag)
+    {
+    case 0:
+        num = strtol(ptr_start, &ptr_end, 10);
+        break;
+    case 1:
+        num = strtol(ptr_start, &ptr_end, 16);
+        break;
+    case 2:
+        num = strtol(ptr_start, &ptr_end, 8);
+        break;
+    }
+
+    return new TokenVal <int> (lexeme, curr_line, curr_pos, CONSTANT, num);
+}
+
+BaseToken* Scanner::GetFloatNumber(string lexeme)
+{
+    char ch, *ptr_start, *ptr_end;
+    if (fin.peek() == '.')
+    {
+        lexeme += GetCh();
+        for (char c = fin.peek(); isdigit(c); c = fin.peek())
+        {
+            lexeme += GetCh();
+        }
+    }
+
+    if ((ch = fin.peek()) == 'E' || ch == 'e')
+    {
+        lexeme += GetCh();
+
+        if ((ch = fin.peek()) == '+' || ch == '-')
+        {
+            lexeme += GetCh();
+        }
+        int len = lexeme.length();
+        for (char c = fin.peek(); isdigit(c); c = fin.peek())
+        {
+            lexeme += GetCh();
+        }
+
+        if (len == lexeme.length())
+        {
+            throw Exception(curr_line, curr_pos, "Invalid floating constant.");
+            //cerr << "[" + lexeme +"] Invalid floating constant." << endl;
+            //return NULL;
+        }
+    }
+    ptr_start = &lexeme[0];
+    float num = float(strtod(ptr_start, &ptr_end));
+    if (+HUGE_VAL == num || num == -HUGE_VAL)
+    {
+        throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
+        //cerr << "[" + lexeme + "] Overflow or underflow occurred." << endl;
+        //return NULL;
+    }
+    return new TokenVal <float> (lexeme, curr_line, curr_pos, CONSTANT, num);
+}
+
+BaseToken* Scanner::GetOperator()
+{
+    string oper = string(1, GetCh());
+    char ch = fin.peek();
+    if (oper == "." && isdigit(ch))
+    {
+        UnGetCh();
+        return GetFloatNumber("");
+    }
+    if (operators[oper+ch])
+    {
+        oper += GetCh();
+        ch = fin.peek();
+        if (operators[oper+ch])
+        {
+            oper += GetCh();
+        }
+    }
+    return new TokenVal <string> (oper, curr_line, curr_pos, OPERATOR, oper);
 }
 
 BaseToken* Scanner::GetChar()
 {
-    string lexeme = "";
-    string text = "'";
-    char ch;
-    text += (ch = curr_str[++curr_pos]);
-    if (ch == '\0') 
-        throw Exception(curr_line, curr_pos, "New line in character constant.");
-    if (ch == '\'') 
-        throw Exception(curr_line, curr_pos, "Empty character constant.");
+    GetCh();
+    string value, lexeme = "\'";
+    char ch = fin.peek();
+
+    //escape-sequence
     if (ch == '\\')
     {
-        text += (ch = curr_str[++curr_pos]);
-        if (escape_sequence[ch])
-            lexeme += escape_sequence[ch];
-        else throw Exception(curr_line, curr_pos, "Invalid escape sequence: \""+lexeme+"\"");
+        lexeme += GetCh();
+        ch = fin.peek();
+        if (escape_sequence[ch] != "")
+        {
+            lexeme += GetCh();
+        }
+        if (escape_sequence[ch] == ""
+           || (escape_sequence[ch] != "" && fin.peek() != '\''))
+        {
+            throw Exception(curr_line, curr_pos, "Invalid escape sequence.");
+            //cerr << "[" + lexeme + "] Invalid escape sequence." << endl;
+            //return NULL;
+        }
+        value = escape_sequence[ch];
     }
-    else 
-        lexeme += ch;
-    if (curr_str[++curr_pos] == '\'')
-        return new TokenVal<string> (text+'\'', curr_line, curr_pos++, CHAR, lexeme);
-    else 
-        throw Exception(curr_line, curr_pos, "Too long character constant.");
+    else
+    {
+        if (ch != '\'' && ch != '\\' && ch != '\n' && ch != EOF)
+        {
+            lexeme += GetCh();
+        }
+        else
+        {
+            throw Exception(curr_line, curr_pos, "Invalid character constant.");
+            //cerr << "[" + lexeme + "] Invalid character constant."<< endl;
+            //return NULL;
+        }
+        if (fin.peek() != '\'')
+        {
+            throw Exception(curr_line,
+                            curr_pos,
+                            "Invalid character constant (There is no closing bracket).");
+            //cerr << "[" + lexeme + "] Too long character constant."<< endl;
+            //return NULL;
+        }
+        value = lexeme.substr(1, 1);
+    }
+    lexeme += "\'";
+    GetCh();
+
+    return new TokenVal <string> (lexeme, curr_line, curr_pos, CONSTANT, value);
 }
 
 BaseToken* Scanner::GetString()
 {
-    string lexeme = "";
-    string text = "\"";
-    char ch;
-    text += (ch = curr_str[++curr_pos]);
-    while (ch != '"')
+    bool escape = false;
+    char ch = GetCh();
+    string lexeme = "\"";
+    string value = "";
+
+    while (fin.good())
     {
-        if (ch == '\\') 
+        for (char c = fin.peek();
+             c != '\"' && c != '\\' && c != '\n' && c != EOF;
+             c = fin.peek())
         {
-            text += (ch = curr_str[++curr_pos]);
-            if (escape_sequence[ch])
-                lexeme += escape_sequence[ch];
-            else 
-                lexeme += '\\';
-            text += (ch = curr_str[++curr_pos]);
-            continue;
+            ch = GetCh();
+            value += ch;
+            lexeme += ch;
         }
-        if (ch == '\0')
+
+        if (fin.peek() == '\\')
         {
-            if (NewLine()->GetType() == EOF_)
-                throw Exception(curr_line, curr_pos, "Unfinished string.");
-            lexeme += '\n';
-            text += '\n';
-            text += (ch = curr_str[curr_pos]);
-            continue;
+            ch = GetCh();
+            lexeme += ch;
+
+            if (escape_sequence[fin.peek()] == "")
+            {
+                throw Exception(curr_line, curr_pos, "Invalid string literal.");
+                //cerr << "[" + lexeme + "] Invalid string literal." << endl;
+                //return NULL;
+            }
+            value += escape_sequence[fin.peek()];
+            lexeme += GetCh();
         }
-        lexeme += ch;
-        text += (ch = curr_str[++curr_pos]);
+        else if (fin.peek() == '"')
+        {
+            GetCh();
+            lexeme += "\"";
+            break;
+        }
+        else
+        {
+            throw Exception(curr_line, curr_pos, "There is no closing bracket.");
+            //cerr << "[" + lexeme + "] There is no closing bracket." << endl;
+            //return NULL;
+        }
     }
-    return new TokenVal<string> (text, curr_line, curr_pos++, STRING, lexeme);
+
+    return new TokenVal<string> (lexeme, curr_line, curr_pos, STRING, value);
 }
 
 void Scanner::InitEscapeSequencesTable()
 {
-    escape_sequence['n'] = '\n';
-    escape_sequence['t'] = '\t';
-    escape_sequence['v'] = '\v';
-    escape_sequence['b'] = '\b';
-    escape_sequence['r'] = '\r';
-    escape_sequence['f'] = '\f';
-    escape_sequence['\''] = '"';
-    escape_sequence['"'] = '\"';
-    escape_sequence['\\'] = '\\';
+    escape_sequence['\''] = "\'";
+    escape_sequence['"'] = "\"";
+    escape_sequence['?'] = "\?";
+    escape_sequence['\\'] = "\\";
+    escape_sequence['a'] = "\a";
+    escape_sequence['b'] = "\b";
+    escape_sequence['f'] = "\f";
+    escape_sequence['n'] = "\n";
+    escape_sequence['r'] = "\r";
+    escape_sequence['t'] = "\t";
+    escape_sequence['v'] = "\v";
 }
 
-void Scanner::InitSeparatorsTable()
+void Scanner::InitOperatorsTable()
 {
-    separator['('] = ROUND_LEFT_BRACKET;
-    separator[')'] = ROUND_RIGHT_BRACKET;
-    separator['['] = SQUARE_LEFT_BRACKET;
-    separator[']'] = SQUARE_RIGHT_BRACKET;
-    separator['{'] = FIGURE_LEFT_BRACKET;
-    separator['}'] = FIGURE_RIGHT_BRACKET;
-    separator[';'] = SEMICOLON;
-    separator[','] = COMMA;
-}
-
-void Scanner::InitOperationsTable()
-{
-    operation["="] =  ASSIGN;
-
-    operation["=="] = EQUAL;
-    operation["!="] = NOT_EQUAL;
-
-    operation[">"] =  GREATER;
-    operation["<"] =  LESS;
-    operation[">="] = GREATER_EQUAL;
-    operation["<="] = LESS_EQUAL;
-
-    operation["+"] =  ADDITION;
-    operation["-"] =  SUBSTRACTION;
-
-    operation["*"] =  MULTIPLICATION;
-    operation["/"] =  DIVISION;
-    operation["%"] =  MODULO;
-
-    operation["+="] = ADD_ASSIGN;
-    operation["-="] = SUB_ASSIGN;
-    operation["*="] = MUL_ASSIGN;
-    operation["/="] = DIV_ASSIGN;
-    operation["%="] = MOD_ASSIGN;
-
-    operation["++"] = INCREASE;
-    operation["--"] = DECREASE;
-
-    operation["!"] =  NOT;
-    operation["&&"] = AND;
-    operation["||"] = OR;
-
-    operation["?"] =  QUESTION;
-    operation[":"] =  COLON;
-
-    operation["&"] =  BIT_AND;
-    operation["|"] =  BIT_OR;
-    operation["^"] =  BIT_XOR;
-    operation["~"] =  BIT_NOT;
-
-    operation[">>"] = BIT_SHIFT_RIGHT;
-    operation["<<"] = BIT_SHIFT_LEFT;
-
-    operation[">>="] = BIT_SHIFT_RIGHT_ASSIGN;
-    operation["<<="] = BIT_SHIFT_LEFT_ASSIGN;
-    operation["&="] = BIT_AND_ASSIGN;
-    operation["|="] = BIT_OR_ASSIGN;
-    operation["^="] = BIT_XOR_ASSIGN;
-
-    operation["->"] = ARROW;
-    operation["."] =  POINT;
+    operators["{"] = FIGURE_LEFT_BRACKET;
+    operators["}"] = FIGURE_RIGHT_BRACKET;
+    operators["("] = ROUND_LEFT_BRACKET;
+    operators[")"] = ROUND_RIGHT_BRACKET;
+    operators["["] = SQUARE_LEFT_BRACKET;
+    operators["]"] = SQUARE_RIGHT_BRACKET;
+    operators["->"] = ARROW;
+    operators[","] = COMMA;
+    operators["."] = POINT;
+    operators[";"] = SEMICOLON;
+    operators["="] = ASSIGN;
+    operators["=="] = EQUAL;
+    operators["!="] = NOT_EQUAL;
+    operators[">"] = GREATER;
+    operators["<"] = LESS;
+    operators[">="] = GREATER_EQUAL;
+    operators["<="] = LESS_EQUAL;
+    operators["+"] = ADDITION;
+    operators["-"] = SUBSTRACTION;
+    operators["*"] = MULTIPLICATION;
+    operators["/"] = DIVISION;
+    operators["%"] = MODULO;
+    operators["+="] = ADD_ASSIGN;
+    operators["-="] = SUB_ASSIGN;
+    operators["*="] = MUL_ASSIGN;
+    operators["/="] = DIV_ASSIGN;
+    operators["%="] = MOD_ASSIGN;
+    //operators["++"] = INCREASE;
+    //operators["--"] = DECREASE;
+    //operators["?"] = QUESTION;
+    //operators[":"] = COLON;
+    operators["!"] = NOT;
+    operators["&&"] = AND;
+    operators["||"] = OR;
+    operators["&"] = BIT_AND;
+    operators["|"] =  BIT_OR;
+    operators["^"] = BIT_XOR;
+    operators["~"] = BIT_NOT;
+    operators[">>"] = BIT_SHIFT_RIGHT;
+    operators["<<"] = BIT_SHIFT_LEFT;
+    operators[">>="] = BIT_SHIFT_RIGHT_ASSIGN;
+    operators["<<="] = BIT_SHIFT_LEFT_ASSIGN;
+    operators["&="] = BIT_AND_ASSIGN;
+    operators["|="] = BIT_OR_ASSIGN;
+    operators["^="] = BIT_XOR_ASSIGN;
 }
 
 void Scanner::InitKeyWordsTable()
 {
-    key_word["const"] = CONST;
-    key_word["int"] = INT;
-    key_word["double"] = DOUBLE;
-    key_word["char"] = CHAR;
+    keywords["int"] = INT;
+    keywords["float"] =FLOAT;
+    keywords["char"] = CHAR;
+    keywords["do"] = DO;
+    keywords["while"] = WHILE;
+    keywords["if"] = IF;
+    keywords["else"] = ELSE;
+    keywords["for"] = FOR;
+    keywords["break"] = BREAK;
+    keywords["continue"] = CONTINUE;
+    keywords["return"] = RETURN;
+    keywords["struct"] = STRUCT;
+}
 
-    key_word["do"] = DO;
-    key_word["while"] = WHILE;
-    key_word["else"] = ELSE;
-    key_word["if"] = IF;
-    key_word["for"] = FOR;
+char Scanner::GetCh()
+{
+    char ch = fin.get();
+    if (ch == '\n')
+    {
+        curr_line++;
+        curr_pos = 0;
+    }
+    else
+    {
+        curr_pos++;
+    }
+    return ch;
+}
 
-    key_word["break"] = BREAK;
-    key_word["continue"] = CONTINUE;
-    key_word["return"] = RETURN;
-
-    key_word["struct"] = STRUCT;
+void Scanner::UnGetCh()
+{
+    fin.unget();
+    if (--curr_pos < 0)
+    {
+        curr_pos = 0;
+    }
 }
