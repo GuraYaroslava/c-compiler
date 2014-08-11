@@ -54,16 +54,11 @@ TokenType BaseToken::GetType()
 
 void BaseToken::Print(ostream &fout)
 {
-    fout << setw(20) << tokenTypeToString[GetType()] << "\t";
-    fout << setw(10) << GetLine() << "\t";
-    fout << setw(10) << GetPosition() + 1 << "\t";
-    fout << setw(10) << GetText() << "\t";
+    fout << "type: " << tokenTypeToString[GetType()] << "\t\t";
+    fout << "ln: " << GetLine() << "\t\t";
+    fout << "pos: " << GetPosition() << "\t\t";
+    fout << "lx: " << GetText() << "\t\t";
 };
-
-bool BaseToken::IsOperand()
-{
-    return type == NUMBER_INT || type == NUMBER_FLOAT || type == IDENTIFIER;
-}
 
 bool BaseToken::operator == (TokenType type_)
 {
@@ -86,20 +81,18 @@ void BaseToken::InitTokenTypeTable()
     tokenTypeToString[CONSTANT] ="CONSTANT";
     tokenTypeToString[KEYWORD] = "KEYWORD";
     tokenTypeToString[OPERATOR] = "OPERATOR";
-    tokenTypeToString[SEPARATOR] = "SEPARATOR";
     tokenTypeToString[STRING] = "STRING";
     //constants
     tokenTypeToString[NUMBER_INT] = "NUMBER_INT";
     tokenTypeToString[NUMBER_FLOAT] = "NUMBER_FLOAT";
     tokenTypeToString[CHARACTER] = "CHARACTER";
-    //separators
+    //operators
     tokenTypeToString[FIGURE_LEFT_BRACKET] = "FIGURE_LEFT_BRACKET";
     tokenTypeToString[FIGURE_RIGHT_BRACKET] = "FIGURE_RIGHT_BRACKET";
     tokenTypeToString[ROUND_LEFT_BRACKET] = "ROUND_LEFT_BRACKET";
     tokenTypeToString[ROUND_RIGHT_BRACKET] = "ROUND_RIGHT_BRACKET";
     tokenTypeToString[SQUARE_LEFT_BRACKET] = "SQUARE_LEFT_BRACKET";
     tokenTypeToString[SQUARE_RIGHT_BRACKET] = "SQUARE_RIGHT_BRACKET";
-    //operators
     tokenTypeToString[ARROW] = "ARROW";
     tokenTypeToString[COMMA] = "COMMA";
     tokenTypeToString[POINT] = "POINT";

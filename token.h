@@ -18,7 +18,6 @@ enum TokenType
     CONSTANT,
     KEYWORD,
     OPERATOR,
-    SEPARATOR,
     STRING,
 
     //token's separators
@@ -31,7 +30,7 @@ enum TokenType
     NUMBER_INT,
     NUMBER_FLOAT,
 
-    //separators
+    //operators
     FIGURE_LEFT_BRACKET,
     FIGURE_RIGHT_BRACKET,
     ROUND_LEFT_BRACKET,
@@ -39,7 +38,6 @@ enum TokenType
     SQUARE_LEFT_BRACKET,
     SQUARE_RIGHT_BRACKET,
 
-    //operators
     ARROW,
     COMMA,
     POINT,
@@ -119,7 +117,7 @@ protected:
 public:
     BaseToken();
     BaseToken(string, int, int, TokenType);
-    BaseToken(const BaseToken *token);
+    BaseToken(const BaseToken* token);
     ~BaseToken();
 
     map <TokenType, string> tokenTypeToString;
@@ -129,11 +127,11 @@ public:
     int GetPosition();
     TokenType GetType();
 
-    bool IsOperand();
-    void InitTokenTypeTable();
-    virtual void Print(ostream &fout);
     bool operator == (TokenType);
     bool operator != (TokenType);
+
+    void InitTokenTypeTable();
+    virtual void Print(ostream& fout);
 };
 
 template <class Type>
@@ -142,15 +140,16 @@ class TokenVal: public BaseToken
 public:
     Type value;
 
-    TokenVal(string text_, int pos_, int line_, TokenType type_, Type value_): BaseToken(text_, pos_, line_, type_), value(value_) {};
-    //{
-    //    BaseToken(text_, pos_, line_, type_);
-    //    value = value_;
-    //}
-    virtual void Print(ostream &fout)
+    TokenVal(string text_, int pos_, int line_, TokenType type_, Type value_):
+        BaseToken(text_, pos_, line_, type_)
+    {
+        value = value_;
+    }
+
+    virtual void Print(ostream& fout)
     {
         BaseToken::Print(fout);
-        fout << setw(10) << value << endl;
+        fout << "val: " << value << endl << endl;
     }
 };
 
