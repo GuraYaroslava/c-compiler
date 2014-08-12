@@ -12,12 +12,13 @@ BaseToken::BaseToken()
     InitTokenTypeTable();
 }
 
-BaseToken::BaseToken(string text_, int line_, int pos_, TokenType type_)
+BaseToken::BaseToken(string text_, int line_, int pos_, TokenType type_, TokenType subType_)
 {
     text = text_;
     line = line_;
     position = pos_;
     type = type_;
+    subType = subType_;
     InitTokenTypeTable();
 }
 
@@ -27,6 +28,7 @@ BaseToken::BaseToken(const BaseToken* token_)
     line = token_->line;
     position = token_->position;
     type = token_->type;
+    subType = token_->subType;
     InitTokenTypeTable();
 }
 
@@ -50,6 +52,11 @@ int BaseToken::GetPosition()
 TokenType BaseToken::GetType()
 {
     return type;
+}
+
+TokenType BaseToken::GetSubType()
+{
+    return subType;
 }
 
 void BaseToken::Print(ostream &fout)

@@ -12,7 +12,7 @@ Scanner::Scanner(const char* input)
 {
     curr_pos = 0;
     curr_line = 1;
-    curr_token = new BaseToken("BOF", curr_line, curr_pos, BOF_);
+    curr_token = new BaseToken("BOF", curr_line, curr_pos, BOF_, BOF_);
 
     fin.open(input);
 
@@ -44,7 +44,7 @@ BaseToken* Scanner::Next()
     char ch = fin.peek();
     if (fin.eof())
     {
-        curr_token = new BaseToken("EOF", curr_line, ++curr_pos, EOF_);
+        curr_token = new BaseToken("EOF", curr_line, ++curr_pos, EOF_, EOF_);
     }
     else if (isalpha_(ch))
     {
@@ -142,9 +142,9 @@ BaseToken* Scanner::GetIdentificator()
     }
     if (keywords[lexeme])
     {
-        return new TokenVal <string> (lexeme, curr_line, curr_pos, KEYWORD, lexeme);
+        return new TokenVal <string> (lexeme, curr_line, curr_pos, KEYWORD, keywords[lexeme], lexeme);
     }
-    return new TokenVal <string> (lexeme, curr_line, curr_pos, IDENTIFIER, lexeme);
+    return new TokenVal <string> (lexeme, curr_line, curr_pos, IDENTIFIER, IDENTIFIER, lexeme);
 }
 
 BaseToken* Scanner::GetNumber()
@@ -220,7 +220,7 @@ BaseToken* Scanner::GetNumber()
         break;
     }
 
-    return new TokenVal <int> (lexeme, curr_line, curr_pos, CONSTANT, num);
+    return new TokenVal <int> (lexeme, curr_line, curr_pos, CONSTANT, NUMBER_INT, num);
 }
 
 BaseToken* Scanner::GetFloatNumber(string lexeme)
@@ -260,7 +260,7 @@ BaseToken* Scanner::GetFloatNumber(string lexeme)
     {
         throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
     }
-    return new TokenVal <float> (lexeme, curr_line, curr_pos, CONSTANT, num);
+    return new TokenVal <float> (lexeme, curr_line, curr_pos, CONSTANT, NUMBER_FLOAT, num);
 }
 
 BaseToken* Scanner::GetOperator()
@@ -281,7 +281,7 @@ BaseToken* Scanner::GetOperator()
             oper += GetCh();
         }
     }
-    return new TokenVal <string> (oper, curr_line, curr_pos, OPERATOR, oper);
+    return new TokenVal <string> (oper, curr_line, curr_pos, OPERATOR, operators[oper+ch], oper);
 }
 
 BaseToken* Scanner::GetChar()
@@ -325,7 +325,7 @@ BaseToken* Scanner::GetChar()
     lexeme += "\'";
     GetCh();
 
-    return new TokenVal <string> (lexeme, curr_line, curr_pos, CONSTANT, value);
+    return new TokenVal <string> (lexeme, curr_line, curr_pos, CONSTANT, CHARACTER, value);
 }
 
 BaseToken* Scanner::GetString()
@@ -370,7 +370,7 @@ BaseToken* Scanner::GetString()
         }
     }
 
-    return new TokenVal<string> (lexeme, curr_line, curr_pos, STRING, value);
+    return new TokenVal<string> (lexeme, curr_line, curr_pos, STRING, STRING, value);
 }
 
 void Scanner::InitEscapeSequencesTable()

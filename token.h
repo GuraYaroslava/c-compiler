@@ -113,10 +113,11 @@ protected:
     int line;
     int position;
     TokenType type;
+    TokenType subType;
 
 public:
     BaseToken();
-    BaseToken(string, int, int, TokenType);
+    BaseToken(string, int, int, TokenType, TokenType);
     BaseToken(const BaseToken* token);
     ~BaseToken();
 
@@ -126,6 +127,7 @@ public:
     int GetLine();
     int GetPosition();
     TokenType GetType();
+    TokenType GetSubType();
 
     bool operator == (TokenType);
     bool operator != (TokenType);
@@ -140,8 +142,8 @@ class TokenVal: public BaseToken
 public:
     Type value;
 
-    TokenVal(string text_, int pos_, int line_, TokenType type_, Type value_):
-        BaseToken(text_, pos_, line_, type_)
+    TokenVal(string text_, int pos_, int line_, TokenType type_, TokenType subType_, Type value_):
+        BaseToken(text_, pos_, line_, type_, subType_)
     {
         value = value_;
     }
