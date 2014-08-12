@@ -46,11 +46,11 @@ BaseToken* Scanner::Next()
     {
         curr_token = new BaseToken("EOF", curr_line, ++curr_pos, EOF_);
     }
-    else if (isalpha(ch) || ch == '_')
+    else if (isalpha_(ch))
     {
         curr_token = GetIdentificator();
     }
-    else if (isdigit(ch))
+    else if (isdigit_(ch))
     {
         curr_token = GetNumber();
     }
@@ -68,8 +68,7 @@ BaseToken* Scanner::Next()
     }
     else
     {
-        GetCh();
-        curr_token = new TokenVal <char> (ChToStr(ch), curr_line, curr_pos, UNKNOWN, ch);
+        throw Exception(curr_line, curr_pos, "Unknown lexeme.");
     }
     if (!curr_token) Next();
     return curr_token;
@@ -113,8 +112,6 @@ bool Scanner::GetComment()
         if (fin.eof())
         {
             throw Exception(curr_line, curr_pos, "Unfinished comment.");
-            //cerr << "Unfinished comment." << endl;
-            //return NULL;
         }
         GetCh();
         result = true;
@@ -139,7 +136,7 @@ bool Scanner::GetComment()
 BaseToken* Scanner::GetIdentificator()
 {
     string lexeme = "";
-    for (char ch = fin.peek(); isalpha(ch) || isdigit(ch) || ch == '_'; ch = fin.peek())
+    for (char ch = fin.peek(); isalpha_(ch) || isdigit_(ch); ch = fin.peek())
     {
         lexeme += GetCh();
     }
@@ -167,7 +164,7 @@ BaseToken* Scanner::GetNumber()
         {
             lexeme += GetCh();
             for (char c = fin.peek();
-                 isdigit(c) || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
+                 isdigit_(c) || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
                  c = fin.peek())
             {
                 lexeme += GetCh();
@@ -176,8 +173,6 @@ BaseToken* Scanner::GetNumber()
             if (lexeme == "0x" || lexeme == "0X")
             {
                 throw Exception(curr_line, curr_pos, "Invalid hexadecimal number.");
-                //cerr << "[" + lexeme + "] Invalid hexadecimal number." << endl;
-                //return NULL;
             }
         }
 
@@ -189,7 +184,7 @@ BaseToken* Scanner::GetNumber()
                 lexeme += GetCh();
             }
             flag = 2;
-            if (isdigit(fin.peek()))
+            if (isdigit_(fin.peek()))
             {
                 throw Exception(curr_line, curr_pos, "Invalid octal number.");
             }
@@ -199,7 +194,7 @@ BaseToken* Scanner::GetNumber()
     //decimal
     else
     {
-        for (char c = fin.peek(); isdigit(c); c = fin.peek())
+        for (char c = fin.peek(); isdigit_(c); c = fin.peek())
         {
             lexeme += GetCh();
         }
@@ -234,7 +229,7 @@ BaseToken* Scanner::GetFloatNumber(string lexeme)
     if (fin.peek() == '.')
     {
         lexeme += GetCh();
-        for (char c = fin.peek(); isdigit(c); c = fin.peek())
+        for (char c = fin.peek(); isdigit_(c); c = fin.peek())
         {
             lexeme += GetCh();
         }
@@ -249,7 +244,7 @@ BaseToken* Scanner::GetFloatNumber(string lexeme)
             lexeme += GetCh();
         }
         int len = lexeme.length();
-        for (char c = fin.peek(); isdigit(c); c = fin.peek())
+        for (char c = fin.peek(); isdigit_(c); c = fin.peek())
         {
             lexeme += GetCh();
         }
@@ -257,8 +252,6 @@ BaseToken* Scanner::GetFloatNumber(string lexeme)
         if (len == lexeme.length())
         {
             throw Exception(curr_line, curr_pos, "Invalid floating constant.");
-            //cerr << "[" + lexeme +"] Invalid floating constant." << endl;
-            //return NULL;
         }
     }
     ptr_start = &lexeme[0];
@@ -266,8 +259,6 @@ BaseToken* Scanner::GetFloatNumber(string lexeme)
     if (+HUGE_VAL == num || num == -HUGE_VAL)
     {
         throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
-        //cerr << "[" + lexeme + "] Overflow or underflow occurred." << endl;
-        //return NULL;
     }
     return new TokenVal <float> (lexeme, curr_line, curr_pos, CONSTANT, num);
 }
@@ -276,7 +267,7 @@ BaseToken* Scanner::GetOperator()
 {
     string oper = string(1, GetCh());
     char ch = fin.peek();
-    if (oper == "." && isdigit(ch))
+    if (oper == "." && isdigit_(ch))
     {
         UnGetCh();
         return GetFloatNumber("");
@@ -312,8 +303,6 @@ BaseToken* Scanner::GetChar()
            || (escape_sequence[ch] != "" && fin.peek() != '\''))
         {
             throw Exception(curr_line, curr_pos, "Invalid escape sequence.");
-            //cerr << "[" + lexeme + "] Invalid escape sequence." << endl;
-            //return NULL;
         }
         value = escape_sequence[ch];
     }
@@ -326,16 +315,10 @@ BaseToken* Scanner::GetChar()
         else
         {
             throw Exception(curr_line, curr_pos, "Invalid character constant.");
-            //cerr << "[" + lexeme + "] Invalid character constant."<< endl;
-            //return NULL;
         }
         if (fin.peek() != '\'')
         {
-            throw Exception(curr_line,
-                            curr_pos,
-                            "Invalid character constant (There is no closing bracket).");
-            //cerr << "[" + lexeme + "] Too long character constant."<< endl;
-            //return NULL;
+            throw Exception(curr_line, curr_pos, "Invalid character constant.");
         }
         value = lexeme.substr(1, 1);
     }
@@ -371,8 +354,6 @@ BaseToken* Scanner::GetString()
             if (escape_sequence[fin.peek()] == "")
             {
                 throw Exception(curr_line, curr_pos, "Invalid string literal.");
-                //cerr << "[" + lexeme + "] Invalid string literal." << endl;
-                //return NULL;
             }
             value += escape_sequence[fin.peek()];
             lexeme += GetCh();
@@ -385,9 +366,7 @@ BaseToken* Scanner::GetString()
         }
         else
         {
-            throw Exception(curr_line, curr_pos, "There is no closing bracket.");
-            //cerr << "[" + lexeme + "] There is no closing bracket." << endl;
-            //return NULL;
+            throw Exception(curr_line, curr_pos, "Missing closing quote.");
         }
     }
 
