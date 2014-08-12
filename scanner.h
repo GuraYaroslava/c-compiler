@@ -17,7 +17,6 @@ public:
     Scanner(const char*);
     ~Scanner();
 
-    bool HasNext();
     BaseToken* Get();
     BaseToken* Next();
 

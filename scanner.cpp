@@ -27,11 +27,6 @@ Scanner::~Scanner()
     //curr_token = NULL;
 }
 
-bool Scanner::HasNext()
-{
-    return curr_token->GetType() != EOF_;
-}
-
 BaseToken* Scanner::Get()
 {
     return curr_token;
@@ -68,7 +63,7 @@ BaseToken* Scanner::Next()
     }
     else
     {
-        throw Exception(curr_line, curr_pos, "Unknown lexeme.");
+        throw Exception(curr_line, curr_pos, "Unknown lexeme");
     }
     if (!curr_token) Next();
     return curr_token;
@@ -111,7 +106,7 @@ bool Scanner::GetComment()
         } while (fin.good() && fin.peek() != '/');
         if (fin.eof())
         {
-            throw Exception(curr_line, curr_pos, "Unfinished comment.");
+            throw Exception(curr_line, curr_pos, "Unfinished comment");
         }
         GetCh();
         result = true;
@@ -172,7 +167,7 @@ BaseToken* Scanner::GetNumber()
             flag = 1;
             if (lexeme == "0x" || lexeme == "0X")
             {
-                throw Exception(curr_line, curr_pos, "Invalid hexadecimal number.");
+                throw Exception(curr_line, curr_pos, "Invalid hexadecimal number");
             }
         }
 
@@ -186,7 +181,7 @@ BaseToken* Scanner::GetNumber()
             flag = 2;
             if (isdigit_(fin.peek()))
             {
-                throw Exception(curr_line, curr_pos, "Invalid octal number.");
+                throw Exception(curr_line, curr_pos, "Invalid octal number");
             }
         }
     }
@@ -251,14 +246,14 @@ BaseToken* Scanner::GetFloatNumber(string lexeme)
 
         if (len == lexeme.length())
         {
-            throw Exception(curr_line, curr_pos, "Invalid floating constant.");
+            throw Exception(curr_line, curr_pos, "Invalid floating constant");
         }
     }
     ptr_start = &lexeme[0];
     float num = float(strtod(ptr_start, &ptr_end));
     if (+HUGE_VAL == num || num == -HUGE_VAL)
     {
-        throw Exception(curr_line, curr_pos, "Overflow or underflow occurred.");
+        throw Exception(curr_line, curr_pos, "Overflow or underflow occurred");
     }
     return new TokenVal <float> (lexeme, curr_line, curr_pos, CONSTANT, NUMBER_FLOAT, num);
 }
@@ -302,7 +297,7 @@ BaseToken* Scanner::GetChar()
         if (escape_sequence[ch] == ""
            || (escape_sequence[ch] != "" && fin.peek() != '\''))
         {
-            throw Exception(curr_line, curr_pos, "Invalid escape sequence.");
+            throw Exception(curr_line, curr_pos, "Invalid escape sequence");
         }
         value = escape_sequence[ch];
     }
@@ -314,11 +309,11 @@ BaseToken* Scanner::GetChar()
         }
         else
         {
-            throw Exception(curr_line, curr_pos, "Invalid character constant.");
+            throw Exception(curr_line, curr_pos, "Invalid character constant");
         }
         if (fin.peek() != '\'')
         {
-            throw Exception(curr_line, curr_pos, "Invalid character constant.");
+            throw Exception(curr_line, curr_pos, "Invalid character constant");
         }
         value = lexeme.substr(1, 1);
     }
@@ -353,7 +348,7 @@ BaseToken* Scanner::GetString()
 
             if (escape_sequence[fin.peek()] == "")
             {
-                throw Exception(curr_line, curr_pos, "Invalid string literal.");
+                throw Exception(curr_line, curr_pos, "Invalid string literal");
             }
             value += escape_sequence[fin.peek()];
             lexeme += GetCh();
@@ -366,7 +361,7 @@ BaseToken* Scanner::GetString()
         }
         else
         {
-            throw Exception(curr_line, curr_pos, "Missing closing quote.");
+            throw Exception(curr_line, curr_pos, "Missing closing quote");
         }
     }
 
