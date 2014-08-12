@@ -9,7 +9,6 @@ using namespace std;
 enum TokenType
 {
     DEFAULT,
-    UNKNOWN,
     BOF_,
     EOF_,
 

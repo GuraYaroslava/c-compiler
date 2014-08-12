@@ -80,7 +80,6 @@ bool BaseToken::operator != (TokenType type_)
 void BaseToken::InitTokenTypeTable()
 {
     tokenTypeToString[DEFAULT] = "DEFAULT";
-    tokenTypeToString[UNKNOWN] = "UNKNOWN";
     tokenTypeToString[EOF_] = "EOF";
     tokenTypeToString[BOF_] = "BOF";
     //tokens
