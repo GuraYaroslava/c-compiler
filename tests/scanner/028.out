@@ -1,0 +1,117 @@
+type: STRING		ln: 1		pos: 3		lx: "s"		val: s
+
+type: STRING		ln: 2		pos: 6		lx: "abcd"		val: abcd
+
+type: STRING		ln: 3		pos: 8		lx: "ab\tcd"		val: ab	cd
+
+type: STRING		ln: 4		pos: 8		lx: "ab\vcd"		val: abcd
+
+type: STRING		ln: 5		pos: 8		lx: "ab\ncd"		val: ab
+cd
+
+type: STRING		ln: 6		pos: 9		lx: "ab\\ncd"		val: ab\ncd
+
+type: STRING		ln: 7		pos: 6		lx: "a//b"		val: a//b
+
+type: STRING		ln: 8		pos: 3		lx: "'"		val: '
+
+type: STRING		ln: 10		pos: 5		lx: "foo"		val: foo
+
+type: IDENTIFIER		ln: 10		pos: 8		lx: abc		val: abc
+
+type: STRING		ln: 11		pos: 5		lx: "foo"		val: foo
+
+type: IDENTIFIER		ln: 11		pos: 9		lx: _abc		val: _abc
+
+type: STRING		ln: 12		pos: 2		lx: ""		val: 
+
+type: IDENTIFIER		ln: 12		pos: 4		lx: _w		val: _w
+
+type: STRING		ln: 13		pos: 3		lx: "a"		val: a
+
+type: IDENTIFIER		ln: 13		pos: 5		lx: _w		val: _w
+
+type: STRING		ln: 15		pos: 5		lx: "foo"		val: foo
+
+type: STRING		ln: 15		pos: 11		lx: "bar"		val: bar
+
+type: STRING		ln: 15		pos: 17		lx: "baz"		val: baz
+
+type: IDENTIFIER		ln: 16		pos: 2		lx: u7		val: u7
+
+type: STRING		ln: 16		pos: 7		lx: "foo"		val: foo
+
+type: IDENTIFIER		ln: 16		pos: 10		lx: u8		val: u8
+
+type: STRING		ln: 16		pos: 15		lx: "bar"		val: bar
+
+type: IDENTIFIER		ln: 16		pos: 18		lx: u9		val: u9
+
+type: STRING		ln: 16		pos: 23		lx: "baz"		val: baz
+
+type: IDENTIFIER		ln: 18		pos: 1		lx: r		val: r
+
+type: STRING		ln: 18		pos: 6		lx: "abc"		val: abc
+
+type: IDENTIFIER		ln: 18		pos: 8		lx: u		val: u
+
+type: STRING		ln: 18		pos: 13		lx: "abc"		val: abc
+
+type: IDENTIFIER		ln: 18		pos: 15		lx: t		val: t
+
+type: STRING		ln: 18		pos: 20		lx: "abc"		val: abc
+
+type: IDENTIFIER		ln: 19		pos: 1		lx: r		val: r
+
+type: STRING		ln: 19		pos: 6		lx: "abc"		val: abc
+
+type: IDENTIFIER		ln: 19		pos: 7		lx: u		val: u
+
+type: STRING		ln: 19		pos: 12		lx: "abc"		val: abc
+
+type: IDENTIFIER		ln: 19		pos: 13		lx: t		val: t
+
+type: STRING		ln: 19		pos: 18		lx: "abc"		val: abc
+
+type: IDENTIFIER		ln: 21		pos: 1		lx: U		val: U
+
+type: STRING		ln: 21		pos: 6		lx: "ewe"		val: ewe
+
+type: IDENTIFIER		ln: 21		pos: 8		lx: L		val: L
+
+type: STRING		ln: 21		pos: 13		lx: "moo"		val: moo
+
+type: IDENTIFIER		ln: 23		pos: 1		lx: Q		val: Q
+
+type: STRING		ln: 23		pos: 8		lx: "(abc)"		val: (abc)
+
+type: IDENTIFIER		ln: 23		pos: 10		lx: R		val: R
+
+type: STRING		ln: 23		pos: 17		lx: "(abc)"		val: (abc)
+
+type: IDENTIFIER		ln: 23		pos: 19		lx: T		val: T
+
+type: STRING		ln: 23		pos: 26		lx: "(abc)"		val: (abc)
+
+type: IDENTIFIER		ln: 25		pos: 6		lx: months		val: months
+
+type: OPERATOR		ln: 25		pos: 8		lx: =		val: =
+
+type: STRING		ln: 25		pos: 138		lx: "يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر"		val: يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر
+
+type: OPERATOR		ln: 25		pos: 139		lx: .		val: .
+
+type: IDENTIFIER		ln: 25		pos: 144		lx: split		val: split
+
+type: OPERATOR		ln: 25		pos: 145		lx: (		val: (
+
+type: STRING		ln: 25		pos: 148		lx: "_"		val: _
+
+type: OPERATOR		ln: 25		pos: 149		lx: )		val: )
+
+type: OPERATOR		ln: 25		pos: 150		lx: ,		val: ,
+
+type: STRING		ln: 27		pos: 15		lx: "ПЂрќ„ћ"		val: ПЂрќ„ћ
+
+type: STRING		ln: 29		pos: 10		lx: "ab Ђ cd"		val: ab Ђ cd
+

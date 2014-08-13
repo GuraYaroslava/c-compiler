@@ -1,0 +1,146 @@
+type: CONSTANT		ln: 1		pos: 1		lx: 1		val: 1
+
+type: CONSTANT		ln: 1		pos: 5		lx: 210		val: 210
+
+type: CONSTANT		ln: 1		pos: 8		lx: 02		val: 2
+
+type: CONSTANT		ln: 1		pos: 12		lx: 077		val: 63
+
+type: CONSTANT		ln: 1		pos: 22		lx: 3.4984984		val: 3.4985
+
+type: CONSTANT		ln: 3		pos: 1		lx: 0		val: 0
+
+type: CONSTANT		ln: 3		pos: 5		lx: 0x0		val: 0
+
+type: CONSTANT		ln: 3		pos: 8		lx: 00		val: 0
+
+type: CONSTANT		ln: 3		pos: 36		lx: 000000000000000000000000000		val: 0
+
+type: CONSTANT		ln: 5		pos: 3		lx: 0x0		val: 0
+
+type: CONSTANT		ln: 5		pos: 7		lx: 0X2		val: 2
+
+type: CONSTANT		ln: 5		pos: 12		lx: 0x3f		val: 63
+
+type: CONSTANT		ln: 5		pos: 16		lx: 0XA		val: 10
+
+type: CONSTANT		ln: 5		pos: 23		lx: 0xffff		val: 65535
+
+type: CONSTANT		ln: 7		pos: 3		lx: 0.0		val: 0
+
+type: CONSTANT		ln: 7		pos: 6		lx: 0.		val: 0
+
+type: CONSTANT		ln: 7		pos: 9		lx: .0		val: 0
+
+type: CONSTANT		ln: 7		pos: 13		lx: 0e0		val: 0
+
+type: CONSTANT		ln: 7		pos: 18		lx: 0e+0		val: 0
+
+type: CONSTANT		ln: 7		pos: 23		lx: 0e-0		val: 0
+
+type: CONSTANT		ln: 7		pos: 29		lx: 0.0e0		val: 0
+
+type: CONSTANT		ln: 8		pos: 6		lx: 0.0e+0		val: 0
+
+type: CONSTANT		ln: 8		pos: 13		lx: 0.0e-0		val: 0
+
+type: CONSTANT		ln: 8		pos: 18		lx: .0e0		val: 0
+
+type: CONSTANT		ln: 8		pos: 24		lx: .0e+0		val: 0
+
+type: CONSTANT		ln: 8		pos: 30		lx: .0e-0		val: 0
+
+type: CONSTANT		ln: 10		pos: 3		lx: 1.0		val: 1
+
+type: CONSTANT		ln: 10		pos: 6		lx: 1.		val: 1
+
+type: CONSTANT		ln: 10		pos: 9		lx: .1		val: 0.1
+
+type: CONSTANT		ln: 10		pos: 13		lx: 1E0		val: 1
+
+type: CONSTANT		ln: 10		pos: 18		lx: 1E+0		val: 1
+
+type: CONSTANT		ln: 10		pos: 23		lx: 1E-0		val: 1
+
+type: CONSTANT		ln: 11		pos: 5		lx: 1.0E0		val: 1
+
+type: CONSTANT		ln: 11		pos: 12		lx: 1.0E+0		val: 1
+
+type: CONSTANT		ln: 11		pos: 19		lx: 1.0E-0		val: 1
+
+type: CONSTANT		ln: 11		pos: 24		lx: .1e0		val: 0.1
+
+type: CONSTANT		ln: 11		pos: 30		lx: .1e+0		val: 0.1
+
+type: CONSTANT		ln: 11		pos: 36		lx: .1e-0		val: 0.1
+
+type: CONSTANT		ln: 13		pos: 7		lx: 123.456		val: 123.456
+
+type: CONSTANT		ln: 13		pos: 12		lx: 123.		val: 123
+
+type: CONSTANT		ln: 13		pos: 17		lx: .456		val: 0.456
+
+type: CONSTANT		ln: 15		pos: 1		lx: 1		val: 1
+
+type: IDENTIFIER		ln: 15		pos: 3		lx: _e		val: _e
+
+type: OPERATOR		ln: 15		pos: 4		lx: +		val: +
+
+type: CONSTANT		ln: 16		pos: 1		lx: 1		val: 1
+
+type: IDENTIFIER		ln: 16		pos: 3		lx: _e		val: _e
+
+type: OPERATOR		ln: 16		pos: 4		lx: +		val: +
+
+type: CONSTANT		ln: 16		pos: 5		lx: 1		val: 1
+
+type: CONSTANT		ln: 17		pos: 3		lx: 1.0		val: 1
+
+type: IDENTIFIER		ln: 17		pos: 5		lx: _e		val: _e
+
+type: OPERATOR		ln: 17		pos: 6		lx: +		val: +
+
+type: CONSTANT		ln: 17		pos: 7		lx: 1		val: 1
+
+type: CONSTANT		ln: 19		pos: 5		lx: 65.43		val: 65.43
+
+type: IDENTIFIER		ln: 19		pos: 7		lx: e		val: e
+
+type: OPERATOR		ln: 19		pos: 8		lx: -		val: -
+
+type: CONSTANT		ln: 19		pos: 10		lx: 21		val: 21
+
+type: CONSTANT		ln: 20		pos: 2		lx: 5.		val: 5
+
+type: OPERATOR		ln: 20		pos: 3		lx: -		val: -
+
+type: OPERATOR		ln: 20		pos: 4		lx: -		val: -
+
+type: CONSTANT		ln: 22		pos: 2		lx: 0.		val: 0
+
+type: OPERATOR		ln: 22		pos: 3		lx: .		val: .
+
+type: OPERATOR		ln: 22		pos: 4		lx: .		val: .
+
+type: CONSTANT		ln: 22		pos: 6		lx: .1		val: 0.1
+
+type: CONSTANT		ln: 23		pos: 2		lx: 0.		val: 0
+
+type: OPERATOR		ln: 23		pos: 3		lx: .		val: .
+
+type: OPERATOR		ln: 23		pos: 4		lx: .		val: .
+
+type: IDENTIFIER		ln: 23		pos: 5		lx: e		val: e
+
+type: OPERATOR		ln: 23		pos: 6		lx: +		val: +
+
+type: CONSTANT		ln: 24		pos: 7		lx: 0.24512		val: 0.24512
+
+type: OPERATOR		ln: 24		pos: 8		lx: .		val: .
+
+type: OPERATOR		ln: 24		pos: 9		lx: .		val: .
+
+type: IDENTIFIER		ln: 24		pos: 10		lx: E		val: E
+
+type: OPERATOR		ln: 24		pos: 11		lx: -		val: -
+

@@ -1,0 +1,10 @@
+type: OPERATOR		ln: 1		pos: 1		lx: /		val: /
+
+type: IDENTIFIER		ln: 1		pos: 3		lx: j		val: j
+
+type: OPERATOR		ln: 1		pos: 4		lx: (		val: (
+
+type: OPERATOR		ln: 1		pos: 5		lx: )		val: )
+
+type: OPERATOR		ln: 1		pos: 6		lx: ;		val: ;
+

@@ -1,0 +1,28 @@
+type: IDENTIFIER		ln: 3		pos: 1		lx: a		val: a
+
+type: IDENTIFIER		ln: 14		pos: 1		lx: b		val: b
+
+type: IDENTIFIER		ln: 18		pos: 1		lx: c		val: c
+
+type: IDENTIFIER		ln: 22		pos: 1		lx: d		val: d
+
+type: IDENTIFIER		ln: 26		pos: 8		lx: l		val: l
+
+type: OPERATOR		ln: 26		pos: 9		lx: (		val: (
+
+type: OPERATOR		ln: 26		pos: 10		lx: )		val: )
+
+type: OPERATOR		ln: 26		pos: 11		lx: ;		val: ;
+
+type: IDENTIFIER		ln: 28		pos: 1		lx: f		val: f
+
+type: OPERATOR		ln: 28		pos: 3		lx: =		val: =
+
+type: IDENTIFIER		ln: 28		pos: 5		lx: g		val: g
+
+type: OPERATOR		ln: 28		pos: 10		lx: /		val: /
+
+type: IDENTIFIER		ln: 28		pos: 11		lx: h		val: h
+
+type: OPERATOR		ln: 28		pos: 12		lx: ;		val: ;
+

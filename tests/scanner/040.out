@@ -1,0 +1,8 @@
+type: IDENTIFIER		ln: 1		pos: 3		lx: foo		val: foo
+
+type: CONSTANT		ln: 1		pos: 9		lx: 1.0e2		val: 100
+
+type: OPERATOR		ln: 1		pos: 12		lx: *=		val: *=
+
+type: STRING		ln: 1		pos: 18		lx: "bar"		val: bar
+

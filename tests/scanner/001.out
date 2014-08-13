@@ -1,0 +1,60 @@
+type: IDENTIFIER		ln: 1		pos: 1		lx: a		val: a
+
+type: IDENTIFIER		ln: 2		pos: 2		lx: ab		val: ab
+
+type: IDENTIFIER		ln: 3		pos: 2		lx: a5		val: a5
+
+type: IDENTIFIER		ln: 4		pos: 3		lx: ab5		val: ab5
+
+type: IDENTIFIER		ln: 5		pos: 3		lx: a5b		val: a5b
+
+type: IDENTIFIER		ln: 7		pos: 1		lx: _		val: _
+
+type: IDENTIFIER		ln: 8		pos: 2		lx: a_		val: a_
+
+type: IDENTIFIER		ln: 9		pos: 2		lx: _a		val: _a
+
+type: IDENTIFIER		ln: 10		pos: 2		lx: _5		val: _5
+
+type: IDENTIFIER		ln: 11		pos: 3		lx: a_b		val: a_b
+
+type: IDENTIFIER		ln: 13		pos: 5		lx: _a_0_		val: _a_0_
+
+type: KEYWORD		ln: 15		pos: 3		lx: int		val: int
+
+type: KEYWORD		ln: 15		pos: 9		lx: float		val: float
+
+type: KEYWORD		ln: 15		pos: 14		lx: char		val: char
+
+type: KEYWORD		ln: 16		pos: 2		lx: do		val: do
+
+type: KEYWORD		ln: 16		pos: 8		lx: while		val: while
+
+type: KEYWORD		ln: 17		pos: 2		lx: if		val: if
+
+type: KEYWORD		ln: 17		pos: 7		lx: else		val: else
+
+type: KEYWORD		ln: 18		pos: 3		lx: for		val: for
+
+type: KEYWORD		ln: 19		pos: 5		lx: break		val: break
+
+type: KEYWORD		ln: 20		pos: 8		lx: continue		val: continue
+
+type: KEYWORD		ln: 21		pos: 6		lx: return		val: return
+
+type: KEYWORD		ln: 22		pos: 6		lx: struct		val: struct
+
+type: IDENTIFIER		ln: 24		pos: 4		lx: _int		val: _int
+
+type: IDENTIFIER		ln: 24		pos: 11		lx: float_		val: float_
+
+type: IDENTIFIER		ln: 24		pos: 17		lx: char5		val: char5
+
+type: IDENTIFIER		ln: 25		pos: 8		lx: do_while		val: do_while
+
+type: IDENTIFIER		ln: 25		pos: 16		lx: dowhile		val: dowhile
+
+type: IDENTIFIER		ln: 27		pos: 2		lx: OR		val: OR
+
+type: IDENTIFIER		ln: 28		pos: 3		lx: AND		val: AND
+

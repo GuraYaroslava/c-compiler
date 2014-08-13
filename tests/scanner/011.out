@@ -1,0 +1,88 @@
+type: OPERATOR		ln: 1		pos: 1		lx: {		val: {
+
+type: OPERATOR		ln: 1		pos: 2		lx: }		val: }
+
+type: OPERATOR		ln: 1		pos: 3		lx: (		val: (
+
+type: OPERATOR		ln: 1		pos: 4		lx: )		val: )
+
+type: OPERATOR		ln: 1		pos: 5		lx: [		val: [
+
+type: OPERATOR		ln: 1		pos: 6		lx: ]		val: ]
+
+type: OPERATOR		ln: 2		pos: 2		lx: ->		val: ->
+
+type: OPERATOR		ln: 2		pos: 4		lx: ,		val: ,
+
+type: OPERATOR		ln: 2		pos: 6		lx: .		val: .
+
+type: OPERATOR		ln: 2		pos: 8		lx: ;		val: ;
+
+type: OPERATOR		ln: 3		pos: 1		lx: =		val: =
+
+type: OPERATOR		ln: 3		pos: 4		lx: ==		val: ==
+
+type: OPERATOR		ln: 3		pos: 7		lx: !=		val: !=
+
+type: OPERATOR		ln: 4		pos: 2		lx: ==		val: ==
+
+type: OPERATOR		ln: 4		pos: 3		lx: =		val: =
+
+type: OPERATOR		ln: 5		pos: 1		lx: >		val: >
+
+type: OPERATOR		ln: 5		pos: 3		lx: <		val: <
+
+type: OPERATOR		ln: 6		pos: 2		lx: >=		val: >=
+
+type: OPERATOR		ln: 6		pos: 5		lx: <=		val: <=
+
+type: OPERATOR		ln: 7		pos: 1		lx: +		val: +
+
+type: OPERATOR		ln: 7		pos: 3		lx: -		val: -
+
+type: OPERATOR		ln: 7		pos: 5		lx: /		val: /
+
+type: OPERATOR		ln: 7		pos: 7		lx: %		val: %
+
+type: OPERATOR		ln: 8		pos: 2		lx: +=		val: +=
+
+type: OPERATOR		ln: 8		pos: 5		lx: -=		val: -=
+
+type: OPERATOR		ln: 8		pos: 8		lx: *=		val: *=
+
+type: OPERATOR		ln: 8		pos: 11		lx: /=		val: /=
+
+type: OPERATOR		ln: 9		pos: 1		lx: !		val: !
+
+type: OPERATOR		ln: 9		pos: 4		lx: &&		val: &&
+
+type: OPERATOR		ln: 9		pos: 7		lx: ||		val: ||
+
+type: OPERATOR		ln: 9		pos: 9		lx: &		val: &
+
+type: OPERATOR		ln: 9		pos: 11		lx: |		val: |
+
+type: OPERATOR		ln: 9		pos: 13		lx: ^		val: ^
+
+type: OPERATOR		ln: 9		pos: 15		lx: ~		val: ~
+
+type: OPERATOR		ln: 9		pos: 18		lx: >>		val: >>
+
+type: OPERATOR		ln: 9		pos: 21		lx: <<		val: <<
+
+type: OPERATOR		ln: 9		pos: 25		lx: >>=		val: >>=
+
+type: OPERATOR		ln: 9		pos: 29		lx: <<=		val: <<=
+
+type: OPERATOR		ln: 9		pos: 32		lx: &=		val: &=
+
+type: OPERATOR		ln: 9		pos: 35		lx: |=		val: |=
+
+type: OPERATOR		ln: 9		pos: 38		lx: ^=		val: ^=
+
+type: OPERATOR		ln: 11		pos: 1		lx: .		val: .
+
+type: OPERATOR		ln: 11		pos: 2		lx: .		val: .
+
+type: OPERATOR		ln: 11		pos: 3		lx: .		val: .
+

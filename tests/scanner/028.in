@@ -1,0 +1,29 @@
+"s"
+"abcd"
+"ab\tcd"
+"ab\vcd"
+"ab\ncd"
+"ab\\ncd"
+"a//b"
+"'"
+
+"foo"abc
+"foo"_abc
+""_w
+"a"_w
+
+"foo" "bar" "baz"
+u7"foo" u8"bar" u9"baz"
+
+r"abc" u"abc" t"abc"
+r"abc"u"abc"t"abc"
+
+U"ewe" L"moo"
+
+Q"(abc)" R"(abc)" T"(abc)"
+
+months = "يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر".split("_"),
+
+"ПЂрќ„ћ"
+
+"ab Ђ cd"

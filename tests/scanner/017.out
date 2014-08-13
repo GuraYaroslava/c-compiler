@@ -1,0 +1,46 @@
+type: CONSTANT		ln: 1		pos: 3		lx: 'c'		val: c
+
+type: CONSTANT		ln: 1		pos: 7		lx: '1'		val: 1
+
+type: CONSTANT		ln: 1		pos: 11		lx: '?'		val: ?
+
+type: CONSTANT		ln: 1		pos: 15		lx: 'f'		val: f
+
+type: CONSTANT		ln: 2		pos: 3		lx: 'a'		val: a
+
+type: CONSTANT		ln: 2		pos: 7		lx: '\t'		val: 	
+
+type: CONSTANT		ln: 2		pos: 11		lx: '\n'		val: 
+
+
+type: CONSTANT		ln: 2		pos: 14		lx: 'a'		val: a
+
+type: IDENTIFIER		ln: 3		pos: 1		lx: a		val: a
+
+type: CONSTANT		ln: 3		pos: 4		lx: 'a'		val: a
+
+type: IDENTIFIER		ln: 3		pos: 5		lx: a		val: a
+
+type: CONSTANT		ln: 5		pos: 4		lx: '\''		val: '
+
+type: CONSTANT		ln: 5		pos: 12		lx: '\"'		val: "
+
+type: CONSTANT		ln: 5		pos: 20		lx: '\?'		val: ?
+
+type: CONSTANT		ln: 5		pos: 28		lx: '\\'		val: \
+
+type: CONSTANT		ln: 6		pos: 4		lx: '\a'		val: 
+
+type: CONSTANT		ln: 6		pos: 12		lx: '\b'		val: 
+
+type: CONSTANT		ln: 6		pos: 20		lx: '\f'		val: 
+
+type: CONSTANT		ln: 6		pos: 28		lx: '\n'		val: 
+
+
+type: CONSTANT		ln: 7		pos: 4		lx: '\r'		val: 
+
+type: CONSTANT		ln: 7		pos: 12		lx: '\t'		val: 	
+
+type: CONSTANT		ln: 7		pos: 20		lx: '\v'		val: 
+
