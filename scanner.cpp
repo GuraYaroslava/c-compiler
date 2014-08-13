@@ -21,11 +21,7 @@ Scanner::Scanner(const char* input)
     InitEscapeSequencesTable();
 }
 
-Scanner::~Scanner()
-{
-    //delete curr_token;
-    //curr_token = NULL;
-}
+Scanner::~Scanner() {}
 
 BaseToken* Scanner::Get()
 {
@@ -65,7 +61,12 @@ BaseToken* Scanner::Next()
     {
         throw Exception(curr_line, curr_pos, "Unknown lexeme");
     }
-    if (!curr_token) Next();
+
+    if (!curr_token)
+    {
+        Next();
+    }
+
     return curr_token;
 }
 
@@ -276,7 +277,7 @@ BaseToken* Scanner::GetOperator()
             oper += GetCh();
         }
     }
-    return new TokenVal <string> (oper, curr_line, curr_pos, OPERATOR, operators[oper+ch], oper);
+    return new TokenVal <string> (oper, curr_line, curr_pos, OPERATOR, operators[oper], oper);
 }
 
 BaseToken* Scanner::GetChar()
