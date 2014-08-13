@@ -1,15 +1,18 @@
 #pragma once
 
-#include "scanner.h"
+#include "lexer.h"
 #include "node.h"
 
 class SimpleParser
 {
-public:
-    Scanner scanner;
+private:
+    Lexer lexer;
 
+public:
     SimpleParser(const char*);
     ~SimpleParser();
+
+    bool Eof();
 
     Node* ParseExpr();
     Node* ParseTerm();

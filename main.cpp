@@ -54,8 +54,14 @@ int main(int argc, char* argv[])
         else if (!strcmp(argv[1], "-sp"))
         {
             SimpleParser parser(argv[2]);
-            Node* root = parser.ParseExpr();
-            parser.PrintTree(root, 5, 0, fout);
+            int counter = 1;
+            while (!parser.Eof())
+            {
+                fout << "tree " << counter++ << ":" << endl;
+                Node* root = parser.ParseExpr();
+                parser.PrintTree(root, 5, 0, fout);
+                fout << endl;
+            }
         }
         //parsing of expressions
         else if (!strcmp(argv[1], "-p"))
