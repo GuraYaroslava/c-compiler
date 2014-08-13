@@ -7,30 +7,8 @@ using namespace std;
 #include "statement.h"
 #include "scanner.h"
 #include "symbol.h"
-#include "token.h"
+#include "lexer.h"
 #include "node.h"
-
-class Parser;
-
-class Lexer
-{
-private:
-    Scanner scanner;
-    BaseToken* prep;
-    BaseToken* last;
-
-public:
-    Lexer(const char*);
-    ~Lexer();
-
-    BaseToken* Get();
-    BaseToken* Peek();
-    void UnGet();
-    int GetPos();
-    int GetLine();
-
-    friend Parser;
-};
 
 class Parser
 {
@@ -39,8 +17,10 @@ public:
     SymType* curr_type;
     TokenType curr_stmt;
     SymTableStack* stack;
+
     vector <BaseToken*> dcl;
     vector <Statement*> stmt;
+
     map<TokenType, bool> unary_oper;
     map<TokenType, int> priority_table;
     map<TokenType, bool> right_assoc_oper;
@@ -48,6 +28,7 @@ public:
 public:
     Parser(const char*);
     ~Parser();
+
     Lexer lexer;
 
     SyntaxNode* ParseExpression(int);
@@ -67,7 +48,7 @@ public:
     SymType* ParseType();
     SymType* ParseTypeStruct();
     void ParseTypeArray();
-        
+
     string GetRandomName();
     void Init();
 

@@ -96,7 +96,7 @@ SyntaxNode* Parser::ParseFactor()
             Error("Missing close bracket. [ParseFactor]");
         return expr;
     }    
-    if (t_token == KEYWORD || t_token == IDENTIFIER || t_token == NUMBER_INT ||
+    /*if (t_token == KEYWORD || t_token == IDENTIFIER || t_token == NUMBER_INT ||
         t_token == NUMBER_FLOAT || t_token == STRING || t_token == CHAR)
     {
         // А что делать со стрингами и зарезервированным словом? 
@@ -119,7 +119,7 @@ SyntaxNode* Parser::ParseFactor()
         }
         dynamic_cast <NodeVar*> (res)->symbol = s;
         return res;
-    }
+    }*/
     return NULL;
 };
 
@@ -209,7 +209,7 @@ void Parser::ParseTypeArray()
 
 SymType* Parser::ParseTypeStruct()
 {
-    BaseToken* name = NULL;
+    /*BaseToken* name = NULL;
     lexer.Get();
     if (*lexer.Peek() == IDENTIFIER)
     {
@@ -232,12 +232,13 @@ SymType* Parser::ParseTypeStruct()
     if (!block->statements.empty()) //в объвлении структуры нельзя инициализировать поля
         Error("Noooooooooo!");
     //if (*lexer.Peek() == SEMICOLON) stack->Pop();
-    return type;
+    return type;*/
+    return NULL;
 }
 
 Symbol* Parser::Translator(int end) // end - на каком месте закончили разбирать массив токинов
 {
-    SymType* type = new SymType(dcl[end--]);
+    /*SymType* type = new SymType(dcl[end--]);
     Symbol* symbol = type, *struct_type = NULL;
     int i, n;
     for (i=end; i>-1 && *dcl[i] != COMMA && *dcl[i] != ROUND_LEFT_BRACKET; i--)
@@ -289,7 +290,8 @@ Symbol* Parser::Translator(int end) // end - на каком месте закончили разбирать 
         }
     }
     begin = i;
-    return symbol;
+    return symbol;*/
+    return NULL;
 }
 
 void Parser::ParseDeclarator()
@@ -308,7 +310,7 @@ void Parser::ParseDeclarator()
 
 void Parser::ParseDirectDeclarator()
 {
-    if (*lexer.Peek() == ROUND_LEFT_BRACKET)
+    /*if (*lexer.Peek() == ROUND_LEFT_BRACKET)
     {
         lexer.Get();
         ParseDeclarator();
@@ -355,7 +357,7 @@ void Parser::ParseDirectDeclarator()
              *lexer.Peek() == ASSIGN)//если объявление + инициализация (реализуем только скаляр)
         return;
     else 
-        Error("Invalid declaration. [ParseDirectDeclarator]");//например, зарезервированные слова под типы нельзя использовать в качестве идентификатора
+        Error("Invalid declaration. [ParseDirectDeclarator]");//например, зарезервированные слова под типы нельзя использовать в качестве идентификатора*/
 }
 
 Statement* Parser::GetStmtAssignment()
@@ -373,7 +375,7 @@ Statement* Parser::GetStmtAssignment()
 
 Statement* Parser::ParseDeclaration()
 {
-    Symbol* s = NULL;
+    /*Symbol* s = NULL;
     curr_type = ParseType();
     ParseDeclarator();
     if (*curr_type->type == STRUCT) 
@@ -398,7 +400,7 @@ Statement* Parser::ParseDeclaration()
             Error("It's not a function declaration.");
         f->body = ParseBlock();
         return NULL;
-    }
+    }*/
     return NULL;
 }
 
@@ -585,55 +587,15 @@ void Parser::PrintSymbols(ostream &out)
     }
 }
 
-Lexer::Lexer(const char* fin): scanner(fin), prep(NULL), last(NULL) {}
-Lexer::~Lexer() 
-{
-    delete prep;
-    delete last;
-    prep = NULL;
-    last = NULL;
-}
-
-BaseToken* Lexer::Get()
-{
-    last = prep ? prep : scanner.Next();
-    prep = 0;
-    return last;
-}
-
-void Lexer::UnGet()
-{
-    if (!last) return;
-    prep = last;
-    last = 0;
-}
-
-BaseToken* Lexer::Peek()
-{
-    BaseToken* token = Get();
-    UnGet();
-    return token;
-}
-
-int Lexer::GetPos()
-{
-    return scanner.curr_pos;
-}
-
-int Lexer::GetLine()
-{
-    return scanner.curr_line;
-}
-
 Parser::Parser(const char *fin): lexer(fin), curr_type(NULL), curr_stmt(DEFAULT), dcl(NULL), begin(0)
 {
-    Init(); 
-    srand(time(NULL));
+    /*Init();
+    srand(time(NULL));*/
     stack = new SymTableStack();
-    stack->Push(new SymTable());
+    /*stack->Push(new SymTable());
     stack->Add(new  SymTypeInteger(new BaseToken("int", 0, 0, INT)));
     stack->Add(new  SymTypeDouble(new BaseToken("double", 0, 0, FLOAT)));
-    stack->Add(new  SymTypeChar(new BaseToken("char", 0, 0, CHAR)));
+    stack->Add(new  SymTypeChar(new BaseToken("char", 0, 0, CHAR)));*/
 }
 Parser::~Parser() {}
 
