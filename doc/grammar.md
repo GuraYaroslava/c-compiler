@@ -246,8 +246,6 @@ The characters `//` start a comment, which terminates with the next new-line cha
                        | <postfix-expression> `(` [<argument-expression-list>] `)`
                        | <postfix-expression> `.` <identifier>
                        | <postfix-expression> `->` <identifier>
-                       | <postfix-expression> `++`
-                       | <postfix-expression> `--`
 ```
 
 ```
@@ -259,8 +257,6 @@ The characters `//` start a comment, which terminates with the next new-line cha
 
 ```
 <unary-expression> ::= <postfix-expression>
-                    | `++` <unary-expression>
-                    | `--` <unary-expression>
                     | <unary-operator> <unary-expression>
 ```
 
