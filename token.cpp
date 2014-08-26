@@ -1,6 +1,3 @@
-#include <string>
-#include <iomanip>
-#include <sstream>
 #include "token.h"
 
 BaseToken::BaseToken()
@@ -9,6 +6,7 @@ BaseToken::BaseToken()
     line = 1;
     position = 1;
     type = BOF_;
+    subType = BOF_;
     InitTokenTypeTable();
 }
 
@@ -79,7 +77,6 @@ bool BaseToken::operator != (TokenType type_)
 
 void BaseToken::InitTokenTypeTable()
 {
-    tokenTypeToString[DEFAULT] = "DEFAULT";
     tokenTypeToString[EOF_] = "EOF";
     tokenTypeToString[BOF_] = "BOF";
     //tokens

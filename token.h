@@ -8,7 +8,6 @@ using namespace std;
 
 enum TokenType
 {
-    DEFAULT,
     BOF_,
     EOF_,
 
@@ -138,9 +137,10 @@ public:
 template <class Type>
 class TokenVal: public BaseToken
 {
-public:
+private:
     Type value;
 
+public:
     TokenVal(string text_, int pos_, int line_, TokenType type_, TokenType subType_, Type value_):
         BaseToken(text_, pos_, line_, type_, subType_)
     {
