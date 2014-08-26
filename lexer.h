@@ -2,8 +2,6 @@
 
 #include "scanner.h"
 
-class Parser;
-
 class Lexer
 {
 private:
@@ -21,6 +19,4 @@ public:
     BaseToken* Peek();
     BaseToken* Get();
     void UnGet();
-
-    friend Parser;
 };
