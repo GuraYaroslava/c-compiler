@@ -1,22 +1,18 @@
 #pragma once
 
 #include <vector>
-//#include "symbol.h"
 #include "token.h"
 
-class Parser;
-class Symbol;
-class SymType;
-class SymFunc;
-class SymVar;
-
+// for simple parser ----------------------------------------------------------
 class Node
 {
-public:
+private:
     Node* left;
     Node* right;
     BaseToken* token;
 
+public:
+    friend class SimpleParser;
     Node(Node*, Node*, BaseToken*);
     ~Node();
 };
@@ -24,15 +20,15 @@ public:
 //-----------------------------------------------------------------------------
 class SyntaxNode
 {
-public:
+protected:
     BaseToken* token;
 
 public:
+    friend class Parser;
     SyntaxNode(BaseToken*);
     ~SyntaxNode();
 
     virtual void Print(int, int, ostream&);
-    virtual SymType* GetType();
 };
 
 //-----------------------------------------------------------------------------
@@ -43,38 +39,10 @@ private:
     SyntaxNode* right;
 
 public:
-    NodeBinaryOp();
+    friend class SyntaxNode;
     NodeBinaryOp(SyntaxNode*, BaseToken*, SyntaxNode*);
     NodeBinaryOp(NodeBinaryOp*);
     ~NodeBinaryOp();
-
-    virtual void Print(int, int, ostream&);
-    virtual SymType* GetType();
-};
-
-//-----------------------------------------------------------------------------
-class NodeRecordAccess: public NodeBinaryOp
-{
-private:
-    SymVar *symbol;
-
-public:
-    NodeRecordAccess();
-    NodeRecordAccess(SyntaxNode*, BaseToken*, SyntaxNode*);
-    ~NodeRecordAccess();
-
-    virtual void Print(int, int, ostream&);
-    SymType* GetType();
-    friend Parser;
-};
-
-//-----------------------------------------------------------------------------
-class NodeAssignOp: public NodeBinaryOp
-{
-public:
-    NodeAssignOp();
-    NodeAssignOp(SyntaxNode*, BaseToken*, SyntaxNode*);
-    ~NodeAssignOp();
 
     virtual void Print(int, int, ostream&);
 };
@@ -88,45 +56,45 @@ private:
 public:
     NodeUnaryOp(BaseToken*, SyntaxNode*);
     NodeUnaryOp(NodeUnaryOp*);
-    NodeUnaryOp();
     ~NodeUnaryOp();
 
     void Print(int, int, ostream&);
-    SymType* GetType();
 };
 
 //-----------------------------------------------------------------------------
-class NodeCall: public SyntaxNode  
+class NodeCall: public SyntaxNode
 {
 private:
-    SymFunc* symbol;
-    SyntaxNode* name;
     vector<SyntaxNode*> args;
 
 public:
-    NodeCall(SyntaxNode*, BaseToken*);
-    NodeCall();
+    NodeCall(BaseToken*);
     ~NodeCall();
 
     void AddArg(SyntaxNode*);
-    void PrintArgs(int, int, ostream&);
     virtual void Print(int, int, ostream&);
-    SymType* GetType();
-    friend Parser;
+};
+
+//-----------------------------------------------------------------------------
+class NodeArr: public SyntaxNode
+{
+private:
+    SyntaxNode* index;
+
+public:
+    NodeArr(BaseToken*, SyntaxNode*);
+    NodeArr(BaseToken*);
+    ~NodeArr();
+
+    virtual void Print(int, int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
 class NodeVar: public SyntaxNode
 {
-private:
-    Symbol* symbol;
-
 public:
     NodeVar(BaseToken*);
-    NodeVar();
     ~NodeVar();
 
     virtual void Print(int, int, ostream&);
-    SymType* GetType();
-    friend Parser;
 };
