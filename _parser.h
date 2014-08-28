@@ -1,62 +1,38 @@
 #pragma once
 
-#include <map>
-#include <string>
-using namespace std;
-
-#include "statement.h"
 #include "scanner.h"
-#include "symbol.h"
 #include "lexer.h"
 #include "node.h"
 
 class Parser
 {
-public:
-    int begin;
-    SymType* curr_type;
-    TokenType curr_stmt;
-    SymTableStack* stack;
+private:
+    Lexer lexer;
 
-    vector <BaseToken*> dcl;
-    vector <Statement*> stmt;
-
+    map<TokenType, int> precedences;
     map<TokenType, bool> unary_oper;
-    map<TokenType, int> priority_table;
     map<TokenType, bool> right_assoc_oper;
 
 public:
     Parser(const char*);
     ~Parser();
 
-    Lexer lexer;
-
-    SyntaxNode* ParseExpression(int);
-    SyntaxNode* ParseFactor();
-    void ParseFuncCall(SyntaxNode*&, BaseToken*&);
-
-    void Parse(vector <Statement*>&);
-    Statement* ParseStatement();
-    Statement* GetStmtAssignment();
-    StmtBlock* ParseBlock();
-        
-    Statement* ParseDeclaration();
-    void ParseDeclarator();
-    void ParseDirectDeclarator();
-    Symbol* Translator(int end);
-
-    SymType* ParseType();
-    SymType* ParseTypeStruct();
-    void ParseTypeArray();
-
-    string GetRandomName();
     void Init();
+
+    bool Eof();
+
+    BaseToken* GetUnary();
+
+    SyntaxNode* ParseExpression(int precedence = 0);
+    SyntaxNode* ParsePrimaryExpression();
+    //SyntaxNode* ParsePostfixExpression();
+
+    void ParseFuncCall(SyntaxNode*&);
+    void ParseArrIndex(SyntaxNode*&);
+    void ParseMemberSelection(SyntaxNode*&, BaseToken*);
 
     void Error(const char*);
     void Error(const string);
 
     void PrintTree(SyntaxNode*, int, int, ostream&);
-    void PrintSymbols(ostream&);
-
-    friend NodeVar;
 };
