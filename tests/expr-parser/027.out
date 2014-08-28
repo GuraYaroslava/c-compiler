@@ -1,10 +1,10 @@
 tree 1:
-    a
+         a
 + <
-    b
+         b
 
 tree 2:
-    a
+         a
 + <
-    b
+         b
 

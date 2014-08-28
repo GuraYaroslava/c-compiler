@@ -1,11 +1,11 @@
 tree 1:
-              a
+                             a
+                   + <
+                             b
          + <
-              b
-    + <
-         c
+                   c
 + <
-    d
+         d
 
 tree 2:
 [Ln: 1, Col: 13] Error: expected an expression

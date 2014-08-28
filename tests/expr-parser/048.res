@@ -1,8 +1,11 @@
 tree 1:
-funtion: +
+funtion: 
+                   a
+         + <
+                   b
 args: 
-    a
-+ <
-    b
+                   a
+         + <
+                   b
 
 

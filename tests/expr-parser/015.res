@@ -1,5 +1,5 @@
 tree 1:
-    a
+         a
 +
 
 tree 2:

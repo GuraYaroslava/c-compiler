@@ -1,13 +1,13 @@
 tree 1:
-                   a
-              + <
-                 bbb
+                                       a
+                             + <
+                                     bbb
+                   + <
+                           ccc
          + <
-            ccc
-    + <
-              d
-         + <
-              g
+                             d
+                   + <
+                             g
 + <
-    e
+         e
 
