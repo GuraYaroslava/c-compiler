@@ -17,5 +17,6 @@ public:
     Node* ParseExpr();
     Node* ParseTerm();
     Node* ParseFactor();
+
     void PrintTree(Node*, int, int, ostream&);
 };

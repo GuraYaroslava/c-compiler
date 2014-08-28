@@ -1,6 +1,3 @@
-#include <ostream>
-#include <iomanip>
-
 #include "simple_parser.h"
 #include "exception.h"
 #include "scanner.h"
@@ -24,7 +21,7 @@ Node* SimpleParser::ParseExpr()
         Node* right = ParseTerm();
         if (right == NULL || right->token->GetType() == EOF_)
         {
-            throw Exception(lexer.GetLine(), lexer.GetPos(), "Expected an expression");
+            throw Exception(lexer.GetLine(), lexer.GetPos(), "expected an expression");
         }
 
         left = new Node(left, right, token);
@@ -48,15 +45,14 @@ Node* SimpleParser::ParseTerm()
     {
         lexer.Get();
         Node* right = ParseFactor();
-		if (right == NULL || right->token->GetType() == EOF_)
+        if (right == NULL || right->token->GetType() == EOF_)
         {
-            throw Exception(lexer.GetLine(), lexer.GetPos(), "Expected an expression");
+            throw Exception(lexer.GetLine(), lexer.GetPos(), "expected an expression");
         }
 
         left = new Node(left, right, token);
         token = lexer.Peek();
         subType = token->GetSubType();
-        //return new Node(left, ParseFactor(), token);
     }
 
     return left;
@@ -81,7 +77,7 @@ Node* SimpleParser::ParseFactor()
             return expr;
         }
 
-        throw Exception(lexer.GetLine(), lexer.GetPos(), "Expected a `)`");
+        throw Exception(lexer.GetLine(), lexer.GetPos(), "expected a `)`");
     }
 
     if (type == IDENTIFIER || type == CONSTANT || type == STRING)
@@ -90,7 +86,7 @@ Node* SimpleParser::ParseFactor()
         return new Node(NULL, NULL, token);
     }
 
-    throw Exception(lexer.GetLine(), lexer.GetPos(), "Expected an expression");
+    throw Exception(lexer.GetLine(), lexer.GetPos(), "expected an expression");
 };
 
 void SimpleParser::PrintTree(Node* node, int width, int indent, ostream& out)
