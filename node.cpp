@@ -72,8 +72,8 @@ void NodeUnaryOp::Print(int width, int indent, ostream& out)
 NodeUnaryOp::~NodeUnaryOp() {}
 
 //-----------------------------------------------------------------------------
-NodeCall::NodeCall(BaseToken* name_):
-    SyntaxNode(name_), args(NULL) {}
+NodeCall::NodeCall(SyntaxNode* name_):
+    SyntaxNode(NULL), name(name_), args(NULL) {}
 
 NodeCall::~NodeCall() {}
 
@@ -84,32 +84,32 @@ void NodeCall::AddArg(SyntaxNode* arg_)
 
 void NodeCall::Print(int width, int indent, ostream& out)
 {
-    out << setw(width) << "funtion: ";
-    SyntaxNode::Print(width, indent, out);
+    out << setw(indent) << "funtion: " << endl;
+    name->Print(width, indent+width, out);
 
     if (args.size() > 0)
     {
-        out << "args: " << endl;
+        out << setw(indent) << "args: " << endl;
     }
     for (int i = 0, size = args.size(); i < size; ++i)
     {
-        args[i]->Print(width, indent, out);
+        args[i]->Print(width, indent+width, out);
     }
     out << endl;
 }
 
 //-----------------------------------------------------------------------------
-NodeArr::NodeArr(BaseToken* name_, SyntaxNode* index_):
-    SyntaxNode(name_), index(index_) {}
+NodeArr::NodeArr(SyntaxNode* name_, SyntaxNode* index_):
+    SyntaxNode(NULL), name(name_), index(index_) {}
 
 NodeArr::~NodeArr() {}
 
 void NodeArr::Print(int width, int indent, ostream& out)
 {
-    out << setw(width) << "array: ";
-    SyntaxNode::Print(width, indent, out);
-    out << "index: ";
-    index->Print(width, indent, out);
+    out << setw(indent) << "array: " << endl;
+    name->Print(width, indent+width, out);
+    out << setw(indent) << "index: " << endl;
+    index->Print(width, indent+width, out);
 }
 
 //-----------------------------------------------------------------------------

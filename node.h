@@ -65,10 +65,11 @@ public:
 class NodeCall: public SyntaxNode
 {
 private:
+    SyntaxNode* name;
     vector<SyntaxNode*> args;
 
 public:
-    NodeCall(BaseToken*);
+    NodeCall(SyntaxNode*);
     ~NodeCall();
 
     void AddArg(SyntaxNode*);
@@ -79,10 +80,11 @@ public:
 class NodeArr: public SyntaxNode
 {
 private:
+    SyntaxNode* name;
     SyntaxNode* index;
 
 public:
-    NodeArr(BaseToken*, SyntaxNode*);
+    NodeArr(SyntaxNode*, SyntaxNode*);
     NodeArr(BaseToken*);
     ~NodeArr();
 
