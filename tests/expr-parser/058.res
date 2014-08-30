@@ -1,15 +1,2 @@
 tree 1:
-                                                           1
-                                                 + <
-                                                           2
-                                       + <
-                                                 3
-                             + <
-                                       4
-                   + <
-                             5
-         + <
-                   6
-+ <
-         7
-
+[Ln: 1, Col: 29] Error: expected an expression
