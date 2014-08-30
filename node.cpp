@@ -15,6 +15,11 @@ SyntaxNode::SyntaxNode(BaseToken* token_): token(token_) {}
 
 SyntaxNode::~SyntaxNode() {}
 
+SymType* SyntaxNode::GetType()
+{
+    return NULL;
+}
+
 void SyntaxNode::Print(int width, int indent, ostream& out)
 {
     out << setw(indent);

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+
+#include "symbol.h"
 #include "token.h"
 
 // for simple parser ----------------------------------------------------------
@@ -28,6 +30,7 @@ public:
     SyntaxNode(BaseToken*);
     ~SyntaxNode();
 
+    virtual SymType* GetType();
     virtual void Print(int, int, ostream&);
 };
 
