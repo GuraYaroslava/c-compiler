@@ -1,9 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+
 #include "exception.h"
 #include "simple_parser.h"
 #include "_parser.h"
+
 using namespace std;
 
 void openFile(char* name1, char* name2)
@@ -36,12 +38,17 @@ int main(int argc, char* argv[])
 
     openFile(argv[2], argv[3]);
     ofstream fout(argv[3]);
+    //ofstream fout("out.out");
 
     try
     {
         //lexical analysis
         if (!strcmp(argv[1], "-s"))
         {
+            //char p[100];
+            //cin.getline(p, 100);
+            //Scanner scanner(p);
+
             Scanner scanner(argv[2]);
             for (BaseToken* token = scanner.Next();
                  token->GetType() != EOF_;
@@ -54,6 +61,12 @@ int main(int argc, char* argv[])
         else if (!strcmp(argv[1], "-sp"))
         {
             SimpleParser parser(argv[2]);
+
+            //char p[100];
+            //cin.getline(p, 100);
+            //Scanner scanner(p);
+            //SimpleParser parser(p);
+
             int counter = 1;
             while (!parser.Eof())
             {
@@ -67,18 +80,32 @@ int main(int argc, char* argv[])
         else if (!strcmp(argv[1], "-p"))
         {
             Parser parser(argv[2]);
-            SyntaxNode* root = parser.ParseExpression(0);
-            parser.PrintTree(root, 10, 0, fout);
+
+            //char p[100];
+            //cin.getline(p, 100);
+            //Scanner scanner(p);
+            //Parser parser(p);
+
+            int counter = 1;
+
+            while (!parser.Eof())
+            {
+                fout << "tree " << counter++ << ":" << endl;
+                SyntaxNode* root = parser.ParseExpression();
+                parser.PrintTree(root, 10, 0, fout);
+                fout << endl;
+
+            }
         }
         //parsing of declarations
         else if (!strcmp(argv[1], "-d"))
         {
-            Parser parser(argv[2]);
-            while (*parser.lexer.Peek() != EOF_)
-            {
-                parser.Parse(parser.stmt);
-            }
-            parser.PrintSymbols(cout);
+            //Parser parser(argv[2]);
+            //while (!parser.Eof())
+            //{
+            //    parser.Parse(parser.stmt);
+            //}
+            //parser.PrintSymbols(cout);
         }
     }
     catch (Exception exp)
