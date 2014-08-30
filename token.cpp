@@ -65,14 +65,14 @@ void BaseToken::Print(ostream &fout)
     fout << "lx: " << GetText() << "\t\t";
 };
 
-bool BaseToken::operator == (TokenType type_)
+bool BaseToken::operator == (TokenType subType_)
 {
-    return type == type_;
+    return subType == subType_ || type == subType_;
 }
 
-bool BaseToken::operator != (TokenType type_)
+bool BaseToken::operator != (TokenType subType_)
 {
-    return type != type_;
+    return subType != subType_;
 }
 
 void BaseToken::InitTokenTypeTable()

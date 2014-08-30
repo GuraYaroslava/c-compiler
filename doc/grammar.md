@@ -388,8 +388,7 @@ The characters `//` start a comment, which terminates with the next new-line cha
 ## Type Specifiers
 
 ```
-<type-specifier> ::= `void`
-                   | `char`
+<type-specifier> ::= `char`
                    | `int`
                    | `float`
                    | <struct-specifier>
