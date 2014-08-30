@@ -13,20 +13,18 @@ Node* SimpleParser::ParseExpr()
     if (left == NULL) return NULL;
 
     BaseToken* token = lexer.Peek();
-    TokenType subType = token->GetSubType();
 
-    while (subType == SUBSTRACTION || subType == ADDITION)
+    while (*token == SUBSTRACTION || *token == ADDITION)
     {
         lexer.Get();
         Node* right = ParseTerm();
-        if (right == NULL || right->token->GetType() == EOF_)
+        if (right == NULL || *right->token == EOF_)
         {
             throw Exception(lexer.GetLine(), lexer.GetPos(), "expected an expression");
         }
 
         left = new Node(left, right, token);
         token = lexer.Peek();
-        subType = token->GetSubType();
     }
 
     return left;
@@ -39,20 +37,18 @@ Node* SimpleParser::ParseTerm()
     if (left == NULL) return NULL;
 
     BaseToken* token = lexer.Peek();
-    TokenType subType = token->GetSubType();
 
-    while (subType == MULTIPLICATION || subType == DIVISION)
+    while (*token == MULTIPLICATION || *token == DIVISION)
     {
         lexer.Get();
         Node* right = ParseFactor();
-        if (right == NULL || right->token->GetType() == EOF_)
+        if (right == NULL || *right->token == EOF_)
         {
             throw Exception(lexer.GetLine(), lexer.GetPos(), "expected an expression");
         }
 
         left = new Node(left, right, token);
         token = lexer.Peek();
-        subType = token->GetSubType();
     }
 
     return left;
@@ -61,17 +57,15 @@ Node* SimpleParser::ParseTerm()
 Node* SimpleParser::ParseFactor()
 {
     BaseToken* token = lexer.Peek();
-    TokenType type = token->GetType();
-    TokenType subType = token->GetSubType();
 
-    if (type == EOF_) return NULL;
+    if (*token == EOF_) return NULL;
 
-    if (subType == ROUND_LEFT_BRACKET)
+    if (*token == ROUND_LEFT_BRACKET)
     {
         lexer.Get();
         Node* expr = ParseExpr();
         BaseToken* token = lexer.Peek();
-        if (token->GetSubType() == ROUND_RIGHT_BRACKET)
+        if (*token == ROUND_RIGHT_BRACKET)
         {
             lexer.Get();
             return expr;
@@ -80,7 +74,7 @@ Node* SimpleParser::ParseFactor()
         throw Exception(lexer.GetLine(), lexer.GetPos(), "expected a `)`");
     }
 
-    if (type == IDENTIFIER || type == CONSTANT || type == STRING)
+    if (*token == IDENTIFIER || *token == CONSTANT || *token == STRING)
     {
         lexer.Get();
         return new Node(NULL, NULL, token);
@@ -106,5 +100,5 @@ void SimpleParser::PrintTree(Node* node, int width, int indent, ostream& out)
 
 bool SimpleParser::Eof()
 {
-    return lexer.Peek()->GetType() == EOF_ ? true : false;
+    return *lexer.Peek() == EOF_ ? true : false;
 }
