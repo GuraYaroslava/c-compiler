@@ -14,6 +14,27 @@ Parser::Parser(const char* fin): lexer(fin)
 
 Parser::~Parser() {}
 
+void Parser::Parse(ostream& out)
+{
+    BaseToken* token = lexer.Peek();
+    while (*token != EOF_)
+    {
+        if (*token == INT
+            || *token == FLOAT
+            || *token == CHAR
+            || *token == STRUCT
+            || dynamic_cast <SymType*> (stack.Find(token->GetText())))
+        {
+            ParseDeclaration();
+        }
+        else
+        {
+            SyntaxNode* tree = ParseExpression();
+            PrintTree(tree, 5, 5, out);
+        }
+    }
+}
+
 SyntaxNode* Parser::ParseExpression(int precedence)
 {
     if (precedence == UNARY)
@@ -117,10 +138,6 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     return result;
 }
 
-//SyntaxNode* Parser::ParsePostfixExpression()
-//{
-//}
-
 void Parser::ParseFuncCall(SyntaxNode*& node)
 {
     node = new NodeCall(node);
@@ -204,6 +221,17 @@ bool Parser::Eof()
 
 void Parser::Init()
 {
+    SymTypeScalar* intType = new SymTypeScalar(new BaseToken("", 0, 0, KEYWORD, INT));
+    SymTypeScalar* floatType = new SymTypeScalar(new BaseToken("", 0, 0, KEYWORD, FLOAT));
+    SymTypeScalar* charType = new SymTypeScalar(new BaseToken("", 0, 0, KEYWORD, CHAR));
+
+    SymTable* predefined = new SymTable();
+    predefined->Add(intType);
+    predefined->Add(floatType);
+    predefined->Add(charType);
+    stack.Push(predefined);
+    stack.Push(new SymTable());
+
     precedences[BOF_] = INF;
     precedences[EOF_] = INF;
 
