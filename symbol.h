@@ -1,91 +1,39 @@
 #pragma once
 
-#include <iostream>
+#include <map>
 #include <vector>
+#include <string>
+
 #include "token.h"
+#include "statement.h"
 
-class Parser;
-class Symbol;
+using namespace std;
+
 class SymType;
-class StmtBlock;
-class SymTypeRecord;
-class SymTypePointer;
-
-class SymTable
-{
-public:
-    vector <Symbol*> symbols;
-    map <string, int> index;
-
-public:
-    SymTable();
-    Symbol* Find(const string&);
-    void Add(Symbol*);
-    void Print(ostream&);
-};
-
-class SymTableStack
-{
-public:
-    vector <SymTable*> tables;
-
-public:
-    SymTableStack();
-    Symbol *Find(const string&);
-    Symbol *Top();
-    void Add(Symbol*);
-    void Push(SymTable*);
-    void Pop();
-};
-
-class Symbol
-{
-protected:
-    BaseToken* name;
-
-public:
-    Symbol(BaseToken*);
-    Symbol(SymType*);
-    ~Symbol();
-
-    virtual void SymPrint(ostream&);
-    virtual SymType* GetType();
-    bool operator == (Symbol*);
-
-    friend SymTypeRecord;
-    friend SymTypePointer;
-    friend SymTable;
-    friend Parser;
-};
 
 //-----------------------------------------------------------------------------
-class SymFunc: public Symbol
+class Symbol
 {
 public:
-    SymType* type;
-    SymTable* args;
-    StmtBlock* body;
+    BaseToken* name;
 
-public:
-    SymFunc(BaseToken*, SymType*, SymTable*);
-    ~SymFunc();
+    Symbol(BaseToken*);
+    ~Symbol();
 
-    void SymPrint(ostream&);
-    SymType* GetType();
+    virtual SymType* GetType();
+
+    virtual void SymPrint(ostream&);
 };
 
 //-----------------------------------------------------------------------------
 class SymType: public Symbol
 {
 public:
-    BaseToken* type;
-
-public:
     SymType(BaseToken*);
-    SymType(SymType*);
-    void SymPrint(ostream&);
-    bool operator == (SymType*);
-    bool operator != (SymType*);
+    ~SymType();
+
+    virtual bool operator == (SymType*);
+    virtual bool operator != (SymType*);
 };
 
 //-----------------------------------------------------------------------------
@@ -93,66 +41,62 @@ class SymTypeScalar: public SymType
 {
 public:
     SymTypeScalar(BaseToken*);
+    ~SymTypeScalar();
+
+    void SymPrint(ostream&);
 };
-
-class SymTypeChar: public SymTypeScalar
-{
-public:
-    SymTypeChar(BaseToken*);
-};
-
-class SymTypeInteger: public SymTypeScalar
-{
-public:
-    SymTypeInteger(BaseToken*);
-}; 
-
-class SymTypeDouble: public SymTypeScalar
-{
-public:
-    SymTypeDouble(BaseToken*);
-}; 
 
 //-----------------------------------------------------------------------------
 class SymTypeArray: public SymType
 {
 private:
-    SymType* elemType;
-    vector <int> sizes;
+    int size;
+    SymType* type;
 
 public:
-    SymTypeArray(SymType*);
+    SymTypeArray(int, SymType*);
     ~SymTypeArray();
 
-    void AddLevel(int);
     void SymPrint(ostream&);
 };
 
-class SymTypeRecord: public SymType
+//-----------------------------------------------------------------------------
+class SymTypeStruct: public SymType
 {
 private:
     SymTable* fields;
 
 public:
-    SymTypeRecord(Symbol*);
-    SymTypeRecord(BaseToken*, SymTable*);
-    SymTypeRecord(SymType*, SymTable*);
-    ~SymTypeRecord();
+    SymTypeStruct(BaseToken*, SymTable*);
+    ~SymTypeStruct();
 
     void SymPrint(ostream&);
-    friend SymTable;
-    friend Parser;
 };
 
+//-----------------------------------------------------------------------------
 class SymTypePointer: public SymType
 {
-public:
+private:
     Symbol* refType;
 
 public:
     SymTypePointer(SymType*);
-    SymTypePointer(Symbol*);
     ~SymTypePointer();
+
+    void SymPrint(ostream&);
+};
+
+//-----------------------------------------------------------------------------
+class SymTypeFunc: public SymType
+{
+private:
+    SymType* type;
+    SymTable* params;
+    StmtBlock* body;
+
+public:
+    SymTypeFunc(SymType*, SymTable*, StmtBlock*);
+    ~SymTypeFunc();
 
     void SymPrint(ostream&);
 };
@@ -160,43 +104,54 @@ public:
 //-----------------------------------------------------------------------------
 class SymVar: public Symbol
 {
-private:
+protected:
     SymType* type;
 
 public:
     SymVar(BaseToken*, SymType*);
+    SymVar(BaseToken*);
     ~SymVar();
 
-    virtual void SymPrint(ostream&);
     SymType* GetType();
-};
+    void SetType(SymType*);
 
-class SymVarConst: public SymVar
-{
-public:
-    SymVarConst(BaseToken*, SymType*);
-    ~SymVarConst();
-};
-
-class SymVarParam: public SymVar
-{
-public:
-    SymVarParam(BaseToken*, SymType*);
-    ~SymVarParam();
     void SymPrint(ostream&);
 };
 
-// когда их создавать, кто знает?
-class SymVarLocal: public SymVar
+//-----------------------------------------------------------------------------
+class SymTable
 {
 public:
-    SymVarLocal(BaseToken*, SymType*);
-    ~SymVarLocal();
+    vector <Symbol*> symbols;
+
+    map <string, int> GetIndexByName;
+
+    SymTable();
+    ~SymTable();
+
+    Symbol* Find(const string&);
+
+    void Add(Symbol*);
+
+    void Print(ostream&);
 };
 
-class SymVarGlobal: public SymVar
+//-----------------------------------------------------------------------------
+class SymTableStack
 {
 public:
-    SymVarGlobal(BaseToken*, SymType*);
-    ~SymVarGlobal();
+    vector <SymTable*> tables;
+
+    SymTableStack();
+    ~SymTableStack();
+
+    Symbol* Find(const string&);
+
+    void Add(Symbol*);
+
+    void Push(SymTable*);
+
+    void Pop();
+
+    Symbol* Top();
 };
