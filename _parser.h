@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scanner.h"
+#include "symbol.h"
 #include "lexer.h"
 #include "node.h"
 
@@ -8,6 +9,7 @@ class Parser
 {
 private:
     Lexer lexer;
+    SymTableStack stack;
 
     map<TokenType, int> precedences;
     map<TokenType, bool> unary_oper;
@@ -23,10 +25,15 @@ public:
 
     BaseToken* GetUnary();
 
+    void Parse(ostream&);
+
+    void ParseDeclaration();
+    SymType* ParseTypeSpecifier();
+    SymType* ParseStructSpecifier();
+    Symbol* ParseDeclarator();
+
     SyntaxNode* ParseExpression(int precedence = 0);
     SyntaxNode* ParsePrimaryExpression();
-    //SyntaxNode* ParsePostfixExpression();
-
     void ParseFuncCall(SyntaxNode*&);
     void ParseArrIndex(SyntaxNode*&);
     void ParseMemberSelection(SyntaxNode*&, BaseToken*);
