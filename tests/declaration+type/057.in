@@ -1,0 +1,5 @@
+float a[10];
+
+char* p;
+
+p - a;

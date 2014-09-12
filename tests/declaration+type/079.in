@@ -1,0 +1,1 @@
+struct st1 { struct st2 { } st3; } st4;

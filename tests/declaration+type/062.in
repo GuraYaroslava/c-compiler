@@ -1,0 +1,5 @@
+char* p;
+
+char a[10];
+
+a = p;

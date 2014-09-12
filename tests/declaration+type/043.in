@@ -1,0 +1,3 @@
+char* p = "qwerty";
+
+p + 'a';

@@ -1,0 +1,5 @@
+char* p = "qwerty";
+
+int a[10];
+
+p + a;

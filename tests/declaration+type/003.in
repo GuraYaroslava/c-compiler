@@ -1,0 +1,11 @@
+int a = 'c';
+
+int b = 1.1;
+
+float c = 1;
+
+float d = 'A';
+
+char e = 1.;
+
+char f = 5;
