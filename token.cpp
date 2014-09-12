@@ -10,6 +10,16 @@ BaseToken::BaseToken()
     InitTokenTypeTable();
 }
 
+BaseToken::BaseToken(TokenType type_, TokenType subType_)
+{
+    text = "";
+    line = 0;
+    position = 0;
+    type = type_;
+    subType = subType_;
+    InitTokenTypeTable();
+}
+
 BaseToken::BaseToken(string text_, int line_, int pos_, TokenType type_, TokenType subType_)
 {
     text = text_;
@@ -137,7 +147,6 @@ void BaseToken::InitTokenTypeTable()
     tokenTypeToString[INT] = "INT";
     tokenTypeToString[FLOAT] = "FLOAT";
     tokenTypeToString[CHAR] = "CHAR";
-    //tokenTypeToString[VOID] = "VOID";
     tokenTypeToString[DO] = "DO";
     tokenTypeToString[WHILE] = "WHILE";
     tokenTypeToString[IF] = "IF";

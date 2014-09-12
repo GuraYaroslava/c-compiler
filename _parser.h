@@ -9,7 +9,8 @@ class Parser
 {
 private:
     Lexer lexer;
-    SymTableStack stack;
+    SymTableStack symStack;
+    vector <SyntaxNode*> nodeStack;
 
     map<TokenType, int> precedences;
     map<TokenType, bool> unary_oper;
@@ -29,8 +30,13 @@ public:
 
     void ParseDeclaration();
     SymType* ParseTypeSpecifier();
-    SymType* ParseStructSpecifier();
-    Symbol* ParseDeclarator();
+
+    void ParseStructDeclaration();
+    SymTypeStruct* ParseStructSpecifier();
+
+    SymVar* ParseDeclarator(SymType*, bool parseParams = false);
+
+    void ParseParameterList();
 
     SyntaxNode* ParseExpression(int precedence = 0);
     SyntaxNode* ParsePrimaryExpression();
@@ -42,4 +48,6 @@ public:
     void Error(const string);
 
     void PrintTree(SyntaxNode*, int, int, ostream&);
+    void PrintNodeTrees(int, int, ostream&);
+    void PrintSymTables(ostream&);
 };

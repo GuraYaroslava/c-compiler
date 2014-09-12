@@ -1,13 +1,12 @@
 #include "symbol.h"
 
-//-----------------------------------------------------------------------------
-Symbol::Symbol(BaseToken* name_): name(name_) {} // name of variable
+Symbol::Symbol(BaseToken* name_): name(name_) {}
 
 Symbol::~Symbol() {}
 
 void Symbol::SymPrint(ostream& out)
 {
-    out << name->GetText();
+    out << "`" << name->GetText() << "`";
 }
 
 SymType* Symbol::GetType()
@@ -16,17 +15,92 @@ SymType* Symbol::GetType()
 }
 
 //-----------------------------------------------------------------------------
-SymType::SymType(BaseToken* name): Symbol(name) {} // name of type
+SymType::SymType(BaseToken* name): Symbol(name) {}
 
 SymType::~SymType() {}
 
-//-----------------------------------------------------------------------------
-SymTypeScalar::SymTypeScalar(BaseToken* name): SymType(name) {} // name of type
+bool SymType::IsModifiableLvalue()
+{
+    return false;
+}
+
+bool SymType::CanConvertTo(SymType*)
+{
+    return false;
+}
+
+bool SymType::operator == (SymType* type_)
+{
+    return name == type_->name;
+}
+
+bool SymType::operator != (SymType* type_)
+{
+    return name != type_->name;
+}
 
 //-----------------------------------------------------------------------------
-SymTypeArray::SymTypeArray(int size_, SymType* type_): SymType(NULL), type(type_), size(size_) {}
+SymTypeScalar::SymTypeScalar(BaseToken* name): SymType(name) {}
+
+SymTypeScalar::~SymTypeScalar() {}
+
+bool SymTypeScalar::IsModifiableLvalue()
+{
+    return false;
+}
+
+bool SymTypeScalar::CanConvertTo(SymType* to)
+{
+    if (dynamic_cast<SymTypePointer*>(to)
+        || dynamic_cast<SymTypeArray*>(to)
+        || dynamic_cast<SymTypeFunc*>(to))
+    {
+        return false;
+    }
+    //return this->name->GetSubType() <= to->name->GetSubType() ? true : false;
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+SymTypeArray::SymTypeArray(int size_, SymType* type_):
+    SymType(NULL),
+    type(type_),
+    size(size_)
+    {}
 
 SymTypeArray::~SymTypeArray() {}
+
+bool SymTypeArray::IsModifiableLvalue()
+{
+    return false;
+}
+
+bool SymTypeArray::CanConvertTo(SymType* to)
+{
+    //if (to == intType)
+    //{
+    //    return true;
+    //}
+
+    SymTypePointer* p = dynamic_cast<SymTypePointer*>(to);
+    if (p && *p->refType == type)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool SymTypeArray::operator == (SymType* type_)
+{
+    SymTypeArray* arr = dynamic_cast<SymTypeArray*>(type_);
+    if (arr && *arr->type == type && arr->size == size)
+    {
+        return true;
+    }
+
+    return false;
+}
 
 void SymTypeArray::SymPrint(ostream &out)
 {
@@ -37,6 +111,54 @@ void SymTypeArray::SymPrint(ostream &out)
 //-----------------------------------------------------------------------------
 SymTypePointer::SymTypePointer(SymType* type_): SymType(NULL), refType(type_) {}
 
+SymTypePointer::~SymTypePointer() {}
+
+bool SymTypePointer::IsModifiableLvalue()
+{
+    return true;
+}
+
+bool SymTypePointer::CanConvertTo(SymType* to)
+{
+    //if (to == intType)
+    //{
+    //    return true;
+    //}
+
+    SymTypePointer* pointer = dynamic_cast<SymTypePointer*>(to);
+    if (pointer && *refType == pointer->refType)
+    {
+        return true;
+    }
+
+    SymTypeArray* arr = dynamic_cast<SymTypeArray*>(to);
+    if (arr && *refType == arr->type)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool SymTypePointer::operator == (SymType* type)
+{
+    SymTypePointer* pointer = dynamic_cast<SymTypePointer*>(type);
+    if (!pointer)
+    {
+        return false;
+    }
+
+    SymType* type1 = refType;
+    SymType* type2 = pointer->refType;
+
+    if (type1 != type2)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void SymTypePointer::SymPrint(ostream& out)
 {
     out << "pointer to ";
@@ -45,15 +167,37 @@ void SymTypePointer::SymPrint(ostream& out)
 
 //-----------------------------------------------------------------------------
 SymTypeStruct::SymTypeStruct(BaseToken* name_, SymTable* fields_):
-    SymType(name_), // name of type
+    SymType(name_),
     fields(fields_)
     {}
+
+SymTypeStruct::~SymTypeStruct() {}
+
+bool SymTypeStruct::IsModifiableLvalue()
+{
+    return false;
+}
+
+bool SymTypeStruct::CanConvertTo(SymType* to)
+{
+    SymTypeStruct* st = dynamic_cast<SymTypeStruct*>(to);
+    if (!st || fields != st->fields)
+    {
+        return false;
+    }
+
+    return true;
+}
 
 void SymTypeStruct::SymPrint(ostream& out)
 {
     out << "struct ";
     Symbol::SymPrint(out);
-    fields->Print(out);
+    if (fields->GetSize() > 0)
+    {
+        out << endl << "fields:" << endl;
+        fields->Print(out);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -61,9 +205,38 @@ SymTypeFunc::SymTypeFunc(SymType* type_, SymTable* params_, StmtBlock* body_):
     SymType(NULL),
     type(type_),
     params(params_),
-    body(body_) {};
+    body(body_)
+    {};
+
+SymTypeFunc::SymTypeFunc(SymType* type_):
+    SymType(NULL),
+    type(type_),
+    params(new SymTable()),
+    body(NULL)
+    {};
 
 SymTypeFunc::~SymTypeFunc() {}
+
+bool SymTypeFunc::IsModifiableLvalue()
+{
+    return false;
+}
+
+bool SymTypeFunc::operator == (SymType* type)
+{
+    SymTypeFunc* func = dynamic_cast<SymTypeFunc*>(type);
+    if (!func)
+    {
+        return false;
+    }
+
+    return *params == func->params && *type == func->type;
+}
+
+bool SymTypeFunc::CanConvertTo(SymType* to)
+{
+    return *this == to;
+}
 
 void SymTypeFunc::SymPrint(ostream& out)
 {
@@ -103,7 +276,7 @@ SymType* SymVar::GetType()
 
 void SymVar::SetType(SymType* type_)
 {
-	type = type_;
+    type = type_;
 }
 
 void SymVar::SymPrint(ostream& out)
@@ -111,9 +284,8 @@ void SymVar::SymPrint(ostream& out)
     out << "variable ";
     Symbol::SymPrint(out);
 
-    out << "type of ";
+    out << " type of ";
     type->SymPrint(out);
-    out << endl;
 };
 
 //-----------------------------------------------------------------------------
@@ -129,12 +301,35 @@ Symbol* SymTable::Find(const string& name)
 void SymTable::Add(Symbol* symbol)
 {
     symbols.push_back(symbol);
-    GetIndexByName[symbol->name->GetText()] = symbols.size() - 1;
+    GetIndexByName[symbol->name->GetText()] = symbols.size()-1;
+}
+
+int SymTable::GetSize()
+{
+    return symbols.size();
+}
+
+bool SymTable::operator == (SymTable* table)
+{
+    if (GetSize() != table->GetSize())
+    {
+        return false;
+    }
+
+    for (int i = 0; i < GetSize(); ++i)
+    {
+        if (*dynamic_cast<SymVar*>(symbols[i])->type != dynamic_cast<SymVar*>(table->symbols[i])->type)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void SymTable::Print(ostream& out)
 {
-    for (int i = 0; i < symbols.size(); ++i)
+    for (int i = 0, size = symbols.size(); i < size; ++i)
     {
         symbols[i]->SymPrint(out);
         out << endl;
@@ -144,7 +339,9 @@ void SymTable::Print(ostream& out)
 //-----------------------------------------------------------------------------
 SymTableStack::SymTableStack(): tables(NULL) {}
 
-void SymTableStack::Push(SymTable *table)
+SymTableStack::~SymTableStack() {}
+
+void SymTableStack::Push(SymTable* table)
 {
     tables.push_back(table);
 }
@@ -154,20 +351,22 @@ void SymTableStack::Pop()
     tables.pop_back();
 }
 
-Symbol *SymTableStack::Find(const string &name)
+Symbol* SymTableStack::Find(const string& name)
 {
     Symbol *symbol = 0;
     for (int i = tables.size() - 1; i >= 0 && !symbol; --i)
+    {
         symbol = tables[i]->Find(name);
+    }
     return symbol;
 }
 
-void SymTableStack::Add(Symbol *symbol)
+void SymTableStack::Add(Symbol* symbol)
 {
     tables.back()->Add(symbol);
 }
 
-Symbol *SymTableStack::Top() 
+Symbol* SymTableStack::Top()
 {
     SymTable *tbl = tables.back();
     int size = tbl->symbols.size();

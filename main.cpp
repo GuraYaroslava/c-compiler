@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
 
             //char p[100];
             //cin.getline(p, 100);
-            //Scanner scanner(p);
             //SimpleParser parser(p);
 
             int counter = 1;
@@ -83,7 +82,6 @@ int main(int argc, char* argv[])
 
             //char p[100];
             //cin.getline(p, 100);
-            //Scanner scanner(p);
             //Parser parser(p);
 
             int counter = 1;
@@ -100,12 +98,12 @@ int main(int argc, char* argv[])
         //parsing of declarations
         else if (!strcmp(argv[1], "-d"))
         {
-            //Parser parser(argv[2]);
-            //while (!parser.Eof())
-            //{
-            //    parser.Parse(parser.stmt);
-            //}
-            //parser.PrintSymbols(cout);
+            //char p[100];
+            //cin.getline(p, 100);
+            //Parser parser(p);
+
+            Parser parser(argv[2]);
+            parser.Parse(fout);
         }
     }
     catch (Exception exp)

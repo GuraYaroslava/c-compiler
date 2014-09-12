@@ -23,16 +23,23 @@ void Parser::Parse(ostream& out)
             || *token == FLOAT
             || *token == CHAR
             || *token == STRUCT
-            || dynamic_cast <SymType*> (stack.Find(token->GetText())))
+            || dynamic_cast<SymType*>(symStack.Find(token->GetText())))
         {
             ParseDeclaration();
         }
         else
         {
             SyntaxNode* tree = ParseExpression();
-            PrintTree(tree, 5, 5, out);
+            nodeStack.push_back(tree);
         }
+        if (*lexer.Peek() == SEMICOLON)
+        {
+            lexer.Get();
+        }
+        token = lexer.Peek();
     }
+    PrintSymTables(out);
+    PrintNodeTrees(5, 5, out);
 }
 
 SyntaxNode* Parser::ParseExpression(int precedence)
@@ -43,7 +50,10 @@ SyntaxNode* Parser::ParseExpression(int precedence)
         if (oper)
         {
             SyntaxNode* expr = ParseExpression(precedence);
-            return new NodeUnaryOp(oper, expr);
+            SyntaxNode* node = new NodeUnaryOp(oper, expr);
+            // type check
+            node->GetType();
+            return node;
         }
     }
 
@@ -85,15 +95,11 @@ SyntaxNode* Parser::ParseExpression(int precedence)
         else
         {
             SyntaxNode* right = ParseExpression(precedence + (right_assoc_oper[subType] == true ? 0 : 1));
-            //if (right == NULL)
-            //{
-            //    left = new NodeVar(left->token);
-            //}
-            //else
-            //{
-                left = new NodeBinaryOp(left, oper, right);
-            //}
+            left = new NodeBinaryOp(left, oper, right);
         }
+
+        // type check
+        left->GetType();
 
         oper = lexer.Peek();
         type = oper->GetType();
@@ -112,22 +118,44 @@ SyntaxNode* Parser::ParsePrimaryExpression()
         return NULL;
     }
 
-    TokenType type = token->GetType();
-    TokenType subType = token->GetSubType();
-    if (type == IDENTIFIER || type == CONSTANT || type == STRING)
+    if (*token == IDENTIFIER || *token == CONSTANT || *token == STRING)
     {
-        result = new NodeVar(token);
+        Symbol* symbol = symStack.Find(token->GetText());
+        if (*token == IDENTIFIER)
+        {
+            if (!symbol)
+            {
+                Error("identifier is undefined");
+            }
+            result = new NodeVar(symbol);
+        }
+        else if (*token == NUMBER_INT)
+        {
+            result = new NodeVar(new SymVar(token, intType));
+        }
+        else if (*token == NUMBER_FLOAT)
+        {
+            result = new NodeVar(new SymVar(token, floatType));
+        }
+        else if (*token == CHARACTER)
+        {
+            result = new NodeVar(new SymVar(token, charType));
+        }
+        else if (*token == STRING)
+        {
+            result = new NodeVar(new SymVar(token, stringType));
+        }
     }
-    else if (type == OPERATOR && subType == ROUND_LEFT_BRACKET)
+    else if (*token == OPERATOR && *token == ROUND_LEFT_BRACKET)
     {
         result = ParseExpression();
-        if (lexer.Peek()->GetSubType() != ROUND_RIGHT_BRACKET)
+        if (*lexer.Peek() != ROUND_RIGHT_BRACKET)
         {
             Error("expected a `)`");
         }
         lexer.Get();
     }
-    else if (type == KEYWORD)
+    else if (*token == KEYWORD)
     {
         Error("what are you doing here?");
     }
@@ -140,22 +168,27 @@ SyntaxNode* Parser::ParsePrimaryExpression()
 
 void Parser::ParseFuncCall(SyntaxNode*& node)
 {
-    node = new NodeCall(node);
-    while (lexer.Peek()->GetSubType() != ROUND_RIGHT_BRACKET)
+    SymTypeFunc* type = dynamic_cast<SymTypeFunc*>(node->GetType());
+    if (!type /*&& !dynamic_cast<SymTypePointer*>(type)*/)
+    {
+        Error("expression must have (pointer-to-) function type");
+    }
+    node = new NodeCall(type, node);
+    while (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
         SyntaxNode* arg = ParseExpression(precedences[COMMA]+1);
 
-        if (lexer.Peek()->GetSubType() == EOF_)
+        if (*lexer.Peek() == EOF_)
         {
             Error("expected a `)`");
         }
 
-        if (lexer.Peek()->GetSubType() == COMMA)
+        if (*lexer.Peek() == COMMA)
         {
             lexer.Get();
         }
 
-        dynamic_cast <NodeCall*> (node)->AddArg(arg);
+        dynamic_cast<NodeCall*>(node)->AddArg(arg);
     }
 
     lexer.Get();
@@ -163,15 +196,15 @@ void Parser::ParseFuncCall(SyntaxNode*& node)
 
 void Parser::ParseArrIndex(SyntaxNode*& node)
 {
-    if (lexer.Peek()->GetSubType() == SQUARE_RIGHT_BRACKET)
+    if (*lexer.Peek() == SQUARE_RIGHT_BRACKET)
     {
-        Error("incomplete type is not allowed");
+        Error("unknown size");
     }
 
     SyntaxNode* index = ParseExpression();
     node = new NodeArr(node, index);
 
-    if (lexer.Peek()->GetSubType() != SQUARE_RIGHT_BRACKET)
+    if (*lexer.Peek() != SQUARE_RIGHT_BRACKET)
     {
         Error("expected a `]`");
     }
@@ -181,12 +214,46 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
 
 void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
 {
-    if (lexer.Peek()->GetSubType() != IDENTIFIER)
+    if (*lexer.Peek() != IDENTIFIER)
     {
         Error("expected a member name");
     }
 
-    node = new NodeBinaryOp(node, oper, ParseExpression());
+    SymTypeStruct* st = NULL;
+    SymType* type = node->GetType();
+    if (dynamic_cast<SymTypePointer*>(type))
+    {
+        st = dynamic_cast<SymTypeStruct*>(dynamic_cast<SymTypePointer*>(type)->refType);
+        if (!st)
+        {
+            Error("expression must have pointer-to-struct type");
+        }
+    }
+    else
+    {
+        st = dynamic_cast<SymTypeStruct*>(type);
+        if (!st)
+        {
+            Error("expression must have struct type");
+        }
+    }
+
+    SyntaxNode* field = ParseExpression();
+    if (!st->fields->Find(field->token->GetText()))
+    {
+        Error("struct has no this member");
+    }
+    node = new NodeBinaryOp(node, oper, field);
+}
+
+void Parser::PrintNodeTrees(int width, int indent, ostream& out)
+{
+    for (int i = 0, size = nodeStack.size(); i < size; ++i)
+    {
+        out << "tree " << i << ":" << endl;
+        nodeStack[i]->Print(width, indent, out);
+        out << endl;
+    }
 }
 
 void Parser::PrintTree(SyntaxNode* node, int width, int indent, ostream& out)
@@ -207,7 +274,7 @@ void Parser::Error(const string msg)
 BaseToken* Parser::GetUnary()
 {
     BaseToken* oper = lexer.Peek();
-    if (oper && oper->GetType() == OPERATOR && unary_oper[oper->GetSubType()])
+    if (oper && *oper == OPERATOR && unary_oper[oper->GetSubType()])
     {
         return lexer.Get();
     }
@@ -216,28 +283,37 @@ BaseToken* Parser::GetUnary()
 
 bool Parser::Eof()
 {
-    return lexer.Peek()->GetType() == EOF_ ? true : false;
+    return *lexer.Peek() == EOF_ ? true : false;
+}
+
+void Parser::PrintSymTables(ostream& out)
+{
+    for (int i = 0, size = symStack.tables.size(); i < size; ++i)
+    {
+        if (symStack.tables[i]->GetSize() > 0)
+        {
+            out << "table " << i << ":" << endl;
+        }
+        else
+        {
+            continue;
+        }
+        symStack.tables[i]->Print(out);
+        out << endl;
+    }
 }
 
 void Parser::Init()
 {
-    SymTypeScalar* intType = new SymTypeScalar(new BaseToken("", 0, 0, KEYWORD, INT));
-    SymTypeScalar* floatType = new SymTypeScalar(new BaseToken("", 0, 0, KEYWORD, FLOAT));
-    SymTypeScalar* charType = new SymTypeScalar(new BaseToken("", 0, 0, KEYWORD, CHAR));
-
     SymTable* predefined = new SymTable();
     predefined->Add(intType);
     predefined->Add(floatType);
     predefined->Add(charType);
-    stack.Push(predefined);
-    stack.Push(new SymTable());
+    symStack.Push(predefined);
+    symStack.Push(new SymTable());
 
     precedences[BOF_] = INF;
     precedences[EOF_] = INF;
-
-    //precedences[IDENTIFIER] = 14;
-    //precedences[CONSTANT] = 14;
-    //precedences[STRING] = 14;
 
     precedences[COMMA] = 1;
 

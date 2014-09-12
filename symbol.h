@@ -1,17 +1,21 @@
 #pragma once
 
-#include <map>
 #include <vector>
-#include <string>
 
 #include "token.h"
-#include "statement.h"
+//#include "statement.h" // вот тут короче сучка - ошибка сидела... зацикливающееся подключение модулей
 
-using namespace std;
+class SymTypeScalar;
+class SymTypePointer;
 
-class SymType;
+extern SymTypeScalar* intType;
+extern SymTypeScalar* floatType;
+extern SymTypeScalar* charType;
+extern SymTypePointer* stringType;
 
 //-----------------------------------------------------------------------------
+class SymType;
+
 class Symbol
 {
 public:
@@ -32,6 +36,9 @@ public:
     SymType(BaseToken*);
     ~SymType();
 
+    virtual bool IsModifiableLvalue();
+    virtual bool CanConvertTo(SymType*);
+
     virtual bool operator == (SymType*);
     virtual bool operator != (SymType*);
 };
@@ -43,32 +50,43 @@ public:
     SymTypeScalar(BaseToken*);
     ~SymTypeScalar();
 
-    void SymPrint(ostream&);
+    bool IsModifiableLvalue();
+    bool CanConvertTo(SymType*);
+
+    //void SymPrint(ostream&);
 };
 
 //-----------------------------------------------------------------------------
 class SymTypeArray: public SymType
 {
-private:
+public:
     int size;
     SymType* type;
 
-public:
     SymTypeArray(int, SymType*);
     ~SymTypeArray();
+
+    bool IsModifiableLvalue();
+    bool CanConvertTo(SymType*);
+
+    bool operator == (SymType*);
 
     void SymPrint(ostream&);
 };
 
 //-----------------------------------------------------------------------------
+class SymTable;
+
 class SymTypeStruct: public SymType
 {
-private:
+public:
     SymTable* fields;
 
-public:
     SymTypeStruct(BaseToken*, SymTable*);
     ~SymTypeStruct();
+
+    bool IsModifiableLvalue();
+    bool CanConvertTo(SymType*);
 
     void SymPrint(ostream&);
 };
@@ -76,27 +94,38 @@ public:
 //-----------------------------------------------------------------------------
 class SymTypePointer: public SymType
 {
-private:
-    Symbol* refType;
-
 public:
+    SymType* refType;
+
     SymTypePointer(SymType*);
     ~SymTypePointer();
+
+    bool IsModifiableLvalue();
+    bool CanConvertTo(SymType*);
+
+    bool operator == (SymType*);
 
     void SymPrint(ostream&);
 };
 
 //-----------------------------------------------------------------------------
+class StmtBlock;
+
 class SymTypeFunc: public SymType
 {
-private:
+public:
     SymType* type;
     SymTable* params;
     StmtBlock* body;
 
-public:
+    SymTypeFunc(SymType*);
     SymTypeFunc(SymType*, SymTable*, StmtBlock*);
     ~SymTypeFunc();
+
+    bool IsModifiableLvalue();
+    bool CanConvertTo(SymType*);
+
+    bool operator == (SymType*);
 
     void SymPrint(ostream&);
 };
@@ -108,6 +137,8 @@ protected:
     SymType* type;
 
 public:
+    friend class SymTable;
+
     SymVar(BaseToken*, SymType*);
     SymVar(BaseToken*);
     ~SymVar();
@@ -133,6 +164,10 @@ public:
 
     void Add(Symbol*);
 
+    int GetSize();
+
+    bool operator == (SymTable*);
+
     void Print(ostream&);
 };
 
@@ -155,3 +190,7 @@ public:
 
     Symbol* Top();
 };
+
+extern SymTypeScalar* intType;
+extern SymTypeScalar* floatType;
+extern SymTypeScalar* charType;

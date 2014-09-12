@@ -1,9 +1,6 @@
 #pragma once
 
-#include <vector>
-
 #include "symbol.h"
-#include "token.h"
 
 // for simple parser ----------------------------------------------------------
 class Node
@@ -27,10 +24,18 @@ protected:
 
 public:
     friend class Parser;
+    friend class NodeCall;
+    friend class NodeBinaryOp;
+    friend SyntaxNode* MakeConversion(SyntaxNode* n, SymType* l, SymType* r);
+
     SyntaxNode(BaseToken*);
     ~SyntaxNode();
 
     virtual SymType* GetType();
+
+    virtual bool IsLvalue();
+    virtual bool IsModifiableLvalue();
+
     virtual void Print(int, int, ostream&);
 };
 
@@ -47,7 +52,12 @@ public:
     NodeBinaryOp(NodeBinaryOp*);
     ~NodeBinaryOp();
 
-    virtual void Print(int, int, ostream&);
+    SymType* GetType();
+
+    bool IsLvalue();
+    bool IsModifiableLvalue();
+
+    void Print(int, int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
@@ -61,6 +71,11 @@ public:
     NodeUnaryOp(NodeUnaryOp*);
     ~NodeUnaryOp();
 
+    SymType* GetType();
+
+    bool IsLvalue();
+    bool IsModifiableLvalue();
+
     void Print(int, int, ostream&);
 };
 
@@ -68,15 +83,21 @@ public:
 class NodeCall: public SyntaxNode
 {
 private:
+    SymTypeFunc* type;
     SyntaxNode* name;
-    vector<SyntaxNode*> args;
+    vector <SyntaxNode*> args;
 
 public:
-    NodeCall(SyntaxNode*);
+    NodeCall(SymTypeFunc*, SyntaxNode*);
     ~NodeCall();
 
+    SymType* GetType();
+
+    bool IsLvalue();
+    bool IsModifiableLvalue();
+
     void AddArg(SyntaxNode*);
-    virtual void Print(int, int, ostream&);
+    void Print(int, int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
@@ -91,15 +112,46 @@ public:
     NodeArr(BaseToken*);
     ~NodeArr();
 
-    virtual void Print(int, int, ostream&);
+    SymType* GetType();
+
+    bool IsLvalue();
+    bool IsModifiableLvalue();
+
+    void Print(int, int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
 class NodeVar: public SyntaxNode
 {
+private:
+    Symbol* symbol;
+
 public:
-    NodeVar(BaseToken*);
+    NodeVar(Symbol*);
     ~NodeVar();
 
-    virtual void Print(int, int, ostream&);
+    SymType* GetType();
+
+    bool IsLvalue();
+    bool IsModifiableLvalue();
+
+    void Print(int, int, ostream&);
+};
+
+//-----------------------------------------------------------------------------
+class NodeDummy: public NodeUnaryOp
+{
+private:
+    SymType* type;
+
+public:
+    NodeDummy(SymType*, SyntaxNode*);
+    ~NodeDummy();
+
+    SymType* GetType();
+
+    //bool IsLvalue();
+    //bool IsModifiableLvalue();
+
+    void Print(int, int, ostream&);
 };

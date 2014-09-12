@@ -4,6 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
+
 using namespace std;
 
 enum TokenType
@@ -86,10 +87,10 @@ enum TokenType
     BIT_OR_ASSIGN,
 
     //keywords
+    CHAR,
     INT,
     FLOAT,
-    CHAR,
-    //VOID,
+
 
     DO,
     WHILE,
@@ -115,6 +116,7 @@ protected:
 
 public:
     BaseToken();
+    BaseToken(TokenType, TokenType);
     BaseToken(string, int, int, TokenType, TokenType);
     BaseToken(const BaseToken* token);
     ~BaseToken();
@@ -131,6 +133,7 @@ public:
     bool operator != (TokenType);
 
     void InitTokenTypeTable();
+
     virtual void Print(ostream& fout);
 };
 
@@ -152,11 +155,11 @@ public:
         BaseToken::Print(fout);
         fout << "val: " << value << endl << endl;
     }
-};
 
-template <class Type>
-Type GetValue(BaseToken *token)
-{
-    Type value_ = dynamic_cast <TokenVal <Type> *> (token)->value;
-    return value_;
-}
+    //template <class Type>
+    Type GetValue(/*BaseToken* token*/)
+    {
+        Type value_ = /*dynamic_cast<TokenVal<Type>*>(token)->*/value;
+        return value_;
+    }
+};
