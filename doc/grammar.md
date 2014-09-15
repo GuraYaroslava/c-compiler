@@ -524,7 +524,6 @@ The characters `//` start a comment, which terminates with the next new-line cha
 
 ```
 <iteration-statment> ::= `while` `(` <expression> `)` <statement>
-                       | `do` <statment> `while` `(` <expression> `)`
                        | `for` `(` [<expression>] `;` [<expression>] `;` [<expression>] `)` <statment>
 ```
 
