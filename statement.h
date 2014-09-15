@@ -1,31 +1,34 @@
 #pragma once
 
 #include "node.h"
-class SymTable;
-class SymFunc;
-class Parser;
 
+using namespace std;
+
+//-----------------------------------------------------------------------------
 class Statement
 {
 public:
     Statement();
     ~Statement();
 
-    virtual void StmtPrint(ostream &out/*, int*/);
+    virtual void StmtPrint(ostream &out, int);
 };
 
-class StmtAssignment: public Statement
+//-----------------------------------------------------------------------------
+class StmtExpr: public Statement
 {
 private:
-    SyntaxNode* left;
-    SyntaxNode* right;
+    SyntaxNode* expr;
 
 public:
-    StmtAssignment(SyntaxNode*, SyntaxNode*);
-    ~StmtAssignment();
+    StmtExpr(SyntaxNode*);
+    ~StmtExpr();
 
-    void StmtPrint(ostream &out/*, int*/);
+    void StmtPrint(ostream& out, int);
 };
+
+//-----------------------------------------------------------------------------
+class SymTable;
 
 class StmtBlock: public Statement
 {
@@ -37,36 +40,27 @@ public:
     StmtBlock();
     ~StmtBlock();
 
-    void StmtPrint(ostream &out/*, int*/);
-    friend Parser;
-    friend SymFunc;
+    void AddStatement(Statement*);
+    void StmtPrint(ostream& out, int);
+    friend class Parser;
 };
 
-class StmtExpr: public Statement
-{
-private:
-    SyntaxNode* expr;
-
-public:
-    StmtExpr(SyntaxNode*);
-    ~StmtExpr();
-    void StmtPrint(ostream &out/*, /*int*/);
-};
-
+//-----------------------------------------------------------------------------
 class StmtIf: public Statement
 {
 private:
     SyntaxNode* condition;
-    Statement* if_body;
-    Statement* else_body;
+    Statement* bodyIf;
+    Statement* bodyElse;
 
 public:
     StmtIf(SyntaxNode*,  Statement*, Statement*);
     ~StmtIf();
 
-    void StmtPrint(ostream &out/*, /*int*/);
+    void StmtPrint(ostream& out, int);
 };
 
+//-----------------------------------------------------------------------------
 class StmtFor: public Statement
 {
 private:
@@ -80,9 +74,10 @@ public:
     StmtFor(StmtExpr*, StmtExpr*, StmtExpr*, Statement*);
     ~StmtFor();
 
-    void StmtPrint(ostream &out/*, int*/);
+    void StmtPrint(ostream& out, int);
 };
 
+//-----------------------------------------------------------------------------
 class StmtWhile: public Statement
 {
 private:
@@ -93,9 +88,10 @@ public:
     StmtWhile(SyntaxNode*, Statement*);
     ~StmtWhile();
 
-    void StmtPrint(ostream &out/*, /*int*/);
+    void StmtPrint(ostream& out, int);
 };
 
+//-----------------------------------------------------------------------------
 class StmtJump: public Statement
 {
 public:
@@ -103,24 +99,27 @@ public:
     ~StmtJump();
 };
 
+//-----------------------------------------------------------------------------
 class StmtBreak: public StmtJump
 {
 public:
     StmtBreak();
     ~StmtBreak();
 
-    void StmtPrint(ostream &out/*, /*int*/);
+    void StmtPrint(ostream& out, int);
 };
 
+//-----------------------------------------------------------------------------
 class StmtContinue: public StmtJump
 {
 public:
     StmtContinue();
     ~StmtContinue();
 
-    void StmtPrint(ostream &out/*, int*/);
+    void StmtPrint(ostream& out, int);
 };
 
+//-----------------------------------------------------------------------------
 class StmtReturn: public StmtJump
 {
 private:
@@ -130,5 +129,5 @@ public:
     StmtReturn(SyntaxNode*);
     ~StmtReturn();
 
-    void StmtPrint(ostream &out/*, /*int*/);
+    void StmtPrint(ostream& out, int);
 };

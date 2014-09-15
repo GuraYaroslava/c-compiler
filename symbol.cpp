@@ -238,6 +238,7 @@ bool SymTypeFunc::CanConvertTo(SymType* to)
     return *this == to;
 }
 
+
 void SymTypeFunc::SymPrint(ostream& out)
 {
     out << "function(";
@@ -366,9 +367,10 @@ void SymTableStack::Add(Symbol* symbol)
     tables.back()->Add(symbol);
 }
 
-Symbol* SymTableStack::Top()
-{
-    SymTable *tbl = tables.back();
-    int size = tbl->symbols.size();
-    return tbl->symbols[size-1];
-}
+//SymTable* SymTableStack::Top()
+//{
+    //SymTable* tbl = tables.back();
+    //int size = tbl->symbols.size();
+    //return tbl->symbols[size-1];
+    //return tables.size() > 0 ? tables.back() : 0;
+//}

@@ -7,39 +7,31 @@
 
 const int INF = numeric_limits<int>::max();
 
-Parser::Parser(const char* fin): lexer(fin)
+Parser::Parser(const char* fin): lexer(fin), inLoop(false), parseFunc(false)
 {
     Init();
 }
 
 Parser::~Parser() {}
 
-void Parser::Parse(ostream& out)
+void Parser::Parse()
 {
     BaseToken* token = lexer.Peek();
-    while (*token != EOF_)
+
+    if (*token == STRUCT
+        || dynamic_cast<SymType*>(symStack.Find(token->GetText())))
     {
-        if (*token == INT
-            || *token == FLOAT
-            || *token == CHAR
-            || *token == STRUCT
-            || dynamic_cast<SymType*>(symStack.Find(token->GetText())))
-        {
-            ParseDeclaration();
-        }
-        else
-        {
-            SyntaxNode* tree = ParseExpression();
-            nodeStack.push_back(tree);
-        }
-        if (*lexer.Peek() == SEMICOLON)
-        {
-            lexer.Get();
-        }
-        token = lexer.Peek();
+        ParseDeclaration();
     }
-    PrintSymTables(out);
-    PrintNodeTrees(5, 5, out);
+    else
+    {
+        Statement* stmt = ParseStatement();
+        stmtStack.push_back(stmt);
+    }
+    if (*lexer.Peek() == SEMICOLON)
+    {
+        lexer.Get();
+    }
 }
 
 SyntaxNode* Parser::ParseExpression(int precedence)
@@ -51,6 +43,7 @@ SyntaxNode* Parser::ParseExpression(int precedence)
         {
             SyntaxNode* expr = ParseExpression(precedence);
             SyntaxNode* node = new NodeUnaryOp(oper, expr);
+
             // type check
             node->GetType();
             return node;
@@ -65,7 +58,6 @@ SyntaxNode* Parser::ParseExpression(int precedence)
     SyntaxNode* left = ParseExpression(precedence+1);
     if (!left)
     {
-        cout << "LEFT IS NULL" << endl;
         return NULL;
     }
 
@@ -111,12 +103,14 @@ SyntaxNode* Parser::ParseExpression(int precedence)
 
 SyntaxNode* Parser::ParsePrimaryExpression()
 {
-    SyntaxNode* result = NULL;
-    BaseToken* token = lexer.Get();
-    if (token->GetSubType() == SEMICOLON)
+    if (*lexer.Peek() == SEMICOLON
+        || *lexer.Peek() == KEYWORD)
     {
         return NULL;
     }
+
+    SyntaxNode* result = NULL;
+    BaseToken* token = lexer.Get();
 
     if (*token == IDENTIFIER || *token == CONSTANT || *token == STRING)
     {
@@ -149,15 +143,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     else if (*token == OPERATOR && *token == ROUND_LEFT_BRACKET)
     {
         result = ParseExpression();
-        if (*lexer.Peek() != ROUND_RIGHT_BRACKET)
-        {
-            Error("expected a `)`");
-        }
-        lexer.Get();
-    }
-    else if (*token == KEYWORD)
-    {
-        Error("what are you doing here?");
+        Expected(lexer.Get()->GetSubType(), ROUND_RIGHT_BRACKET);
     }
     else
     {
@@ -169,7 +155,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
 void Parser::ParseFuncCall(SyntaxNode*& node)
 {
     SymTypeFunc* type = dynamic_cast<SymTypeFunc*>(node->GetType());
-    if (!type /*&& !dynamic_cast<SymTypePointer*>(type)*/)
+    if (!type)
     {
         Error("expression must have (pointer-to-) function type");
     }
@@ -204,20 +190,12 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
     SyntaxNode* index = ParseExpression();
     node = new NodeArr(node, index);
 
-    if (*lexer.Peek() != SQUARE_RIGHT_BRACKET)
-    {
-        Error("expected a `]`");
-    }
-
-    lexer.Get();
+    Expected(lexer.Get()->GetSubType(), SQUARE_RIGHT_BRACKET);
 }
 
 void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
 {
-    if (*lexer.Peek() != IDENTIFIER)
-    {
-        Error("expected a member name");
-    }
+    Expected(lexer.Peek()->GetSubType(), IDENTIFIER);
 
     SymTypeStruct* st = NULL;
     SymType* type = node->GetType();
@@ -246,6 +224,16 @@ void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
     node = new NodeBinaryOp(node, oper, field);
 }
 
+void Parser::PrintStmtTrees(int width, int indent, ostream& out)
+{
+    for (int i = 0, size = stmtStack.size(); i < size; ++i)
+    {
+        out << "stmt " << i << ":" << endl;
+        stmtStack[i]->StmtPrint(out, indent);
+        out << endl;
+    }
+}
+
 void Parser::PrintNodeTrees(int width, int indent, ostream& out)
 {
     for (int i = 0, size = nodeStack.size(); i < size; ++i)
@@ -269,6 +257,15 @@ void Parser::Error(const char* msg)
 void Parser::Error(const string msg)
 {
     throw Exception(lexer.GetLine(), lexer.GetPos(), msg);
+}
+
+void Parser::Expected(TokenType actual, TokenType expected)
+{
+    BaseToken* t = new BaseToken();
+    if (actual != expected)
+    {
+        Error("expected a " + t->tokenTypeToString[expected]);
+    }
 }
 
 BaseToken* Parser::GetUnary()

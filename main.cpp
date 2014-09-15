@@ -103,7 +103,14 @@ int main(int argc, char* argv[])
             //Parser parser(p);
 
             Parser parser(argv[2]);
-            parser.Parse(fout);
+
+            while (!parser.Eof())
+            {
+                parser.Parse();
+            }
+
+            parser.PrintSymTables(fout);
+            parser.PrintStmtTrees(5, 5, fout);
         }
     }
     catch (Exception exp)

@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "token.h"
-//#include "statement.h" // вот тут короче сучка - ошибка сидела... зацикливающееся подключение модулей
 
 class SymTypeScalar;
 class SymTypePointer;
@@ -188,7 +187,7 @@ public:
 
     void Pop();
 
-    Symbol* Top();
+    //SymTable* Top();
 };
 
 extern SymTypeScalar* intType;

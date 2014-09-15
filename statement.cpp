@@ -1,124 +1,146 @@
 #include "statement.h"
 #include "symbol.h"
 
+//-----------------------------------------------------------------------------
 Statement::Statement() {}
 
 Statement::~Statement() {}
 
-void Statement::StmtPrint(ostream &out/*, int indent*/) {};
+void Statement::StmtPrint(ostream& out, int indent) {};
+
+//-----------------------------------------------------------------------------
+StmtExpr::StmtExpr(SyntaxNode* node): Statement(), expr(node) {}
+
+void StmtExpr::StmtPrint(ostream &out, int indent)
+{
+    out << "exprassion:" << endl;
+    if (!expr)
+    {
+        out << "empty expresstion"<< endl;
+        return;
+    }
+    expr->Print(indent, indent, out);
+    out << endl;
+}
 
 //-----------------------------------------------------------------------------
 StmtBlock::StmtBlock(): Statement(), statements(NULL), locals(new SymTable()) {}
 
-void StmtBlock::StmtPrint(ostream &out/*, int indent*/)
+void StmtBlock::AddStatement(Statement* stmt)
 {
-    out << "Block_begin" << endl;
+    statements.push_back(stmt);
+}
+
+void StmtBlock::StmtPrint(ostream& out, int indent)
+{
+    out << "{" << endl;
     if (!locals->symbols.empty())
     {
-        out << "Locals_begin" << endl;
         locals->Print(out);
-        out << "Locals_end" << endl;
     }
     if (!statements.empty())
     {
-        for (int i=0; i<statements.size(); i++)
-            statements[i]->StmtPrint(out);
+        for (int i = 0; i < statements.size(); ++i)
+        {
+            statements[i]->StmtPrint(out, indent*2);
+        }
     }
-    out << "Block_end" << endl;
-}
-
-StmtAssignment::StmtAssignment(SyntaxNode *_left, SyntaxNode *_right):
-    Statement(),
-    left(_left),
-    right(_right) {}
-
-void StmtAssignment::StmtPrint(ostream &out/*, int indent*/) 
-{
-    out << "Assignment:" << endl;
-    left->Print(10, 5, out);
-    out << "=" << endl;
-    right->Print(10, 5, out);
-    out << endl;
+    out << "}" << endl;
 }
 
 //-----------------------------------------------------------------------------
-StmtExpr::StmtExpr(SyntaxNode *root): Statement(), expr(root) {}
-
-void StmtExpr::StmtPrint(ostream &out/*, int indent*/) 
-{
-    out << "Exprassion:" << endl;
-    if (!expr) {out << "empty expresstion"<< endl; return;}
-    expr->Print(10, 0, out);
-    out << endl;
-}
-
-//-----------------------------------------------------------------------------
-StmtIf::StmtIf(SyntaxNode *_conditioin,  Statement *_if_body,  Statement *_else_body):
+StmtIf::StmtIf(SyntaxNode* conditioin_, Statement* bodyIf_, Statement* bodyElse_):
     Statement(),
-    condition(_conditioin),
-    if_body(_if_body),
-    else_body(_else_body) {}
+    condition(conditioin_),
+    bodyIf(bodyIf_),
+    bodyElse(bodyElse_)
+    {}
 
-void StmtIf::StmtPrint(ostream &out)
+void StmtIf::StmtPrint(ostream& out, int indent)
 {
-    out << "If_begin" << endl;
-    out << "Condition:" << endl;
-    condition->Print(10, 5, out);
-    out << "Body (if):" << endl;
-    if_body->StmtPrint(out);
-    if (else_body) 
+    out << "if" << endl;
+    condition->Print(indent, indent, out);
+
+    out << "then" << endl;
+    bodyIf->StmtPrint(out, indent);
+
+    if (bodyElse)
     {
-        out << "Body (else):" << endl;
-        else_body->StmtPrint(out);
+        out << "else" << endl;
+        bodyElse->StmtPrint(out, indent);
     }
-    out << "If_end" << endl;
 }
 
 //-----------------------------------------------------------------------------
-StmtFor::StmtFor(SyntaxNode *_expr1, SyntaxNode *_expr2, SyntaxNode *_expr3, Statement *_body):
+StmtFor::StmtFor(SyntaxNode* expr1_,
+                 SyntaxNode* expr2_,
+                 SyntaxNode* expr3_,
+                 Statement* body_):
     Statement(),
-    expr1(new StmtExpr(_expr1)),
-    expr2(new StmtExpr(_expr2)),
-    expr3(new StmtExpr(_expr3)),
-    body(_body)  {}
+    expr1(new StmtExpr(expr1_)),
+    expr2(new StmtExpr(expr2_)),
+    expr3(new StmtExpr(expr3_)),
+    body(body_)
+    {}
 
-StmtFor::StmtFor(StmtExpr *_expr1, StmtExpr *_expr2, StmtExpr *_expr3, Statement *_body):
+StmtFor::StmtFor(StmtExpr* expr1_,
+                 StmtExpr* expr2_,
+                 StmtExpr* expr3_,
+                 Statement* body_):
     Statement(),
-    expr1(_expr1),
-    expr2(_expr2),
-    expr3(_expr3),
-    body(_body) {}
+    expr1(expr1_),
+    expr2(expr2_),
+    expr3(expr3_),
+    body(body_)
+    {}
 
-void StmtFor::StmtPrint(ostream &out/*, int indent*/)
+void StmtFor::StmtPrint(ostream& out, int indent)
 {
-    out << "For_begin" << endl;
+    out << "for" << endl;
+
     out << "#1 ";
-    expr1->StmtPrint(out);
+    expr1->StmtPrint(out, indent);
+
     out << "#2 ";
-    expr2->StmtPrint(out);
+    expr2->StmtPrint(out, indent);
+
     out << "#3 ";
-    expr3->StmtPrint(out);
-    out << "Body:" << endl;
-    if (!body) out << "Empty." << endl;
-    else body->StmtPrint(out);
-    out << "For_end" << endl;
+    expr3->StmtPrint(out, indent);
+
+    out << "body: ";
+    if (!body)
+    {
+        out << "empty" << endl;
+    }
+    else
+    {
+        out << endl;
+        body->StmtPrint(out, indent);
+    }
 }
 
 //-----------------------------------------------------------------------------
-StmtWhile::StmtWhile(SyntaxNode *_condition, Statement *_body):
+StmtWhile::StmtWhile(SyntaxNode* condition_, Statement* body_):
     Statement(),
-    condition(_condition),
-    body(_body) {}
+    condition(condition_),
+    body(body_)
+    {}
 
-void StmtWhile::StmtPrint(ostream &out/*, int indent*/) 
+void StmtWhile::StmtPrint(ostream& out, int indent)
 {
-    out << "While_begin" << endl;
-    out << "Condition:" << endl;
-    condition->Print(10, 5, out);
-    out << "Body:" << endl;
-    if (!body) out << "Empty." << endl;
-    else body->StmtPrint(out);
-    out << "While_end" << endl;
+    out << "while" << endl;
+    condition->Print(indent, indent, out);
+
+    out << "body:";
+    if (!body)
+    {
+        out << "empty" << endl;
+    }
+    else
+    {
+        out << endl;
+        body->StmtPrint(out, indent);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -127,24 +149,27 @@ StmtJump::StmtJump(): Statement() {}
 //-----------------------------------------------------------------------------
 StmtContinue::StmtContinue(): StmtJump() {}
 
-void StmtContinue::StmtPrint(ostream &out/*, int indent*/)
+void StmtContinue::StmtPrint(ostream& out, int indent)
 {
-    out << "contionue" << endl;
+    out << "continue" << endl;
 }
 
 //-----------------------------------------------------------------------------
 StmtBreak::StmtBreak(): StmtJump() {}
 
-void StmtBreak::StmtPrint(ostream &out/*, int indent*/)
+void StmtBreak::StmtPrint(ostream& out, int indent)
 {
     out << "break" << endl;
 }
 
 //-----------------------------------------------------------------------------
-StmtReturn::StmtReturn(SyntaxNode *_arg): StmtJump(), arg(_arg) {}
+StmtReturn::StmtReturn(SyntaxNode* arg_): StmtJump(), arg(arg_) {}
 
-void StmtReturn::StmtPrint(ostream &out/*, int indent*/) 
+void StmtReturn::StmtPrint(ostream& out, int indent)
 {
     out << "return" << endl;
-    if (arg) arg->Print(10, 5, out);
+    if (arg)
+    {
+        arg->Print(indent, indent, out);
+    }
 }

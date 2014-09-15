@@ -1,7 +1,6 @@
 #pragma once
 
-#include "scanner.h"
-#include "symbol.h"
+#include "statement.h"
 #include "lexer.h"
 #include "node.h"
 
@@ -11,6 +10,7 @@ private:
     Lexer lexer;
     SymTableStack symStack;
     vector <SyntaxNode*> nodeStack;
+    vector <Statement*> stmtStack;
 
     map<TokenType, int> precedences;
     map<TokenType, bool> unary_oper;
@@ -26,7 +26,7 @@ public:
 
     BaseToken* GetUnary();
 
-    void Parse(ostream&);
+    void Parse();
 
     void ParseDeclaration();
     SymType* ParseTypeSpecifier();
@@ -38,6 +38,16 @@ public:
 
     void ParseParameterList();
 
+    Statement* ParseStatement();
+    //StmtExpr* ParseExpr();
+    StmtBlock* ParseBlock();
+    StmtIf* ParseIf();
+    StmtFor* ParseFor();
+    StmtWhile* ParseWhile();
+    StmtJump* ParseJump();
+
+    SyntaxNode* GetCondition();
+
     SyntaxNode* ParseExpression(int precedence = 0);
     SyntaxNode* ParsePrimaryExpression();
     void ParseFuncCall(SyntaxNode*&);
@@ -46,8 +56,13 @@ public:
 
     void Error(const char*);
     void Error(const string);
+    void Expected(TokenType, TokenType);
 
     void PrintTree(SyntaxNode*, int, int, ostream&);
+    void PrintStmtTrees(int, int, ostream&);
     void PrintNodeTrees(int, int, ostream&);
     void PrintSymTables(ostream&);
+
+    bool inLoop;
+    bool parseFunc;
 };

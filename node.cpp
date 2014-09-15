@@ -480,7 +480,7 @@ bool NodeVar::IsLvalue()
     {
         throw Exception(token->GetLine(),
                         token->GetPosition(),
-                        "WTF -> NODE VAR HAVE NOT SCALAR TYPE");
+                        "NODE VAR HAVE NOT SCALAR TYPE");
     }
 
     if (type->name->GetSubType() == IDENTIFIER)

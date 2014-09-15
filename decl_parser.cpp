@@ -32,16 +32,19 @@ void Parser::ParseDeclaration()
             node->GetType();
         }
 
-        if (*lexer.Peek() == SEMICOLON)
+        if (*lexer.Peek() == SEMICOLON )
         {
             lexer.Get();
             break;
         }
 
-        if (*lexer.Peek() != COMMA)
+        if (parseFunc)
         {
-            Error("expected a `,`");
+            parseFunc = false;
+            break;
         }
+
+        Expected(lexer.Peek()->GetSubType(), COMMA);
 
         lexer.Get();
         symbol = ParseDeclarator(type);
@@ -83,12 +86,8 @@ SymTypeStruct* Parser::ParseStructSpecifier()
     //---------------------------------------------------------------------------
     result->fields = new SymTable();
     symStack.Push(result->fields);
-
-    if (*lexer.Get() != FIGURE_LEFT_BRACKET)
-    {
-        Error("expected either a definition or a tag name");
-    }
-
+    //expected either a definition or a tag name
+    Expected(lexer.Get()->GetSubType(), FIGURE_LEFT_BRACKET);
     ParseStructDeclaration();
     symStack.Pop();
     //---------------------------------------------------------------------------
@@ -106,10 +105,6 @@ void Parser::ParseStructDeclaration()
     }
 
     SymType* type = ParseTypeSpecifier();
-    //if (*lexer.Peek() != IDENTIFIER)
-    //{
-    //    Error("declaration does not declare anything");
-    //}
     Symbol* declarator = ParseDeclarator(type);
 
     while (true)
@@ -147,7 +142,6 @@ void Parser::ParseStructDeclaration()
 SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
 {
     SymVar* result = NULL;
-    //SymType* type = NULL;
 
     //pointer
     while (*lexer.Peek() == MULTIPLICATION)
@@ -161,10 +155,7 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
     {
         lexer.Get();
         result =  ParseDeclarator(type);
-        if (*lexer.Peek() != ROUND_RIGHT_BRACKET)
-        {
-            Error("expected a `)`");
-        }
+        Expected(lexer.Peek()->GetSubType(), ROUND_RIGHT_BRACKET);
         lexer.Get();
         return result;
     }
@@ -208,10 +199,7 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
         {
             Error("expression must have a constant value");
         }
-        if (*lexer.Get() != SQUARE_RIGHT_BRACKET)
-        {
-            Error("exepcted a `]`");
-        }
+        Expected(lexer.Get()->GetSubType(), SQUARE_RIGHT_BRACKET);
         int size = dynamic_cast<TokenVal <int> *>(index->token)->GetValue();
         result->SetType(new SymTypeArray(size, type));
     }
@@ -219,10 +207,15 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
     {
         lexer.Get();
         SymTypeFunc* t = new SymTypeFunc(type);
-        result->SetType(t);
         symStack.Push(t->params);
         ParseParameterList();
         symStack.Pop();
+        if (*lexer.Peek() == FIGURE_LEFT_BRACKET)
+        {
+            t->body = ParseBlock();
+            parseFunc = true;
+        }
+        result->SetType(t);
     }
 
     return result;
