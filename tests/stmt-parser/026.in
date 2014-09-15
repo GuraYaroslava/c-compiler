@@ -12,10 +12,11 @@ int main()
   }
 }
 
+
   int m = 10;
   while (1==1)
   {
-    int i, n;
+    int i;
     for (i = 0; i < m; i += 1)
     {
       break;
