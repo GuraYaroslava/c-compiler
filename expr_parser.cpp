@@ -117,10 +117,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
         Symbol* symbol = symStack.Find(token->GetText());
         if (*token == IDENTIFIER)
         {
-            if (!symbol)
-            {
-                Error("identifier is undefined");
-            }
+            Expected(symbol != NULL, "identifier is undefined");
             result = new NodeVar(symbol);
         }
         else if (*token == NUMBER_INT)
@@ -155,19 +152,12 @@ SyntaxNode* Parser::ParsePrimaryExpression()
 void Parser::ParseFuncCall(SyntaxNode*& node)
 {
     SymTypeFunc* type = dynamic_cast<SymTypeFunc*>(node->GetType());
-    if (!type)
-    {
-        Error("expression must have (pointer-to-) function type");
-    }
+    Expected(type != NULL, "expression must have (pointer-to-) function type");
     node = new NodeCall(type, node);
     while (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
         SyntaxNode* arg = ParseExpression(precedences[COMMA]+1);
-
-        if (*lexer.Peek() == EOF_)
-        {
-            Error("expected a `)`");
-        }
+        Expected(*lexer.Peek() != EOF_, "expected a `)`");
 
         if (*lexer.Peek() == COMMA)
         {
@@ -182,10 +172,7 @@ void Parser::ParseFuncCall(SyntaxNode*& node)
 
 void Parser::ParseArrIndex(SyntaxNode*& node)
 {
-    if (*lexer.Peek() == SQUARE_RIGHT_BRACKET)
-    {
-        Error("unknown size");
-    }
+    Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
     SyntaxNode* index = ParseExpression();
     node = new NodeArr(node, index);
@@ -202,25 +189,16 @@ void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
     if (dynamic_cast<SymTypePointer*>(type))
     {
         st = dynamic_cast<SymTypeStruct*>(dynamic_cast<SymTypePointer*>(type)->refType);
-        if (!st)
-        {
-            Error("expression must have pointer-to-struct type");
-        }
+        Expected(st != NULL, "expression must have pointer-to-struct type");
     }
     else
     {
         st = dynamic_cast<SymTypeStruct*>(type);
-        if (!st)
-        {
-            Error("expression must have struct type");
-        }
+        Expected(st != NULL, "expression must have struct type");
     }
 
     SyntaxNode* field = ParseExpression();
-    if (!st->fields->Find(field->token->GetText()))
-    {
-        Error("struct has no this member");
-    }
+    Expected(st->fields->Find(field->token->GetText()) != NULL, "struct has no this member");
     node = new NodeBinaryOp(node, oper, field);
 }
 
@@ -265,6 +243,15 @@ void Parser::Expected(TokenType actual, TokenType expected)
     if (actual != expected)
     {
         Error("expected a " + t->tokenTypeToString[expected]);
+    }
+}
+
+void Parser::Expected(bool actual, const char* msg)
+{
+    bool expected = true;
+    if (actual != expected)
+    {
+        Error(msg);
     }
 }
 

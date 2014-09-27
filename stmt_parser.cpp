@@ -90,34 +90,21 @@ StmtFor* Parser::ParseFor()
 {
     inLoop = true;
     lexer.Get();
-    Expected(lexer.Get()->GetSubType(), ROUND_LEFT_BRACKET);
-    //if (*lexer.Get() != ROUND_LEFT_BRACKET)
-    //{
-    //    Error("expected a `(`");
-    //}
-    SyntaxNode* expr1 = ParseExpression();// !!!
-    Expected(lexer.Get()->GetSubType(), SEMICOLON);
-    //if (*lexer.Get() != SEMICOLON)
-    //{
-    //    Error("expected a `;`");
-    //}
+    Expected(*lexer.Get() == ROUND_LEFT_BRACKET, "expected a `(`");
+    SyntaxNode* expr1 = ParseExpression();
+
+    Expected(*lexer.Get() == SEMICOLON, "expected a `;`");
     SyntaxNode* expr2 = ParseExpression();
-    Expected(lexer.Get()->GetSubType(), SEMICOLON);
-    //if (*lexer.Get() != SEMICOLON)
-    //{
-    //    Error("expected a `;`");
-    //}
+
+    Expected(*lexer.Get() == SEMICOLON, "expected a `;`");
     SyntaxNode* expr3 = NULL;
 
     if (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
         expr3 = ParseExpression();
     }
-    Expected(lexer.Get()->GetSubType(), ROUND_RIGHT_BRACKET);
-    //if (*lexer.Get() != ROUND_RIGHT_BRACKET)
-    //{
-    //    Error("expected a `)`");
-    //}
+    Expected(*lexer.Get() == ROUND_RIGHT_BRACKET, "expected a `)`");
+
     Statement* body = ParseStatement();
     inLoop = false;
     return new StmtFor(expr1, expr2, expr3, body);
@@ -140,18 +127,12 @@ StmtJump* Parser::ParseJump()
     switch (token->GetSubType())
     {
     case CONTINUE:
-        if (!inLoop)
-        {
-            Error("continue statement not within a loop");
-        }
+        Expected(inLoop, "continue statement not within a loop");
         result = new StmtContinue();
         break;
 
     case BREAK:
-        if (!inLoop)
-        {
-            Error("break statement not within a loop");
-        }
+        Expected(inLoop, "break statement not within a loop");
         result = new StmtBreak();
         break;
 
@@ -166,23 +147,14 @@ StmtJump* Parser::ParseJump()
 
 SyntaxNode* Parser::GetCondition()
 {
-    Expected(lexer.Get()->GetSubType(), ROUND_LEFT_BRACKET);
-    //if (*lexer.Get() != ROUND_LEFT_BRACKET)
-    //{
-    //    Error("expected a `(`");
-    //}
-
+    Expected(*lexer.Get() == ROUND_LEFT_BRACKET, "expected a `(`");
     if (*lexer.Peek() == ROUND_RIGHT_BRACKET)
     {
         Error("expected an expression");
     }
 
     SyntaxNode* condition = ParseExpression();
-    Expected(lexer.Get()->GetSubType(), ROUND_RIGHT_BRACKET);
-    //if (*lexer.Get() != ROUND_RIGHT_BRACKET)
-    //{
-    //    Error("expected a `)`");
-    //}
+    Expected(*lexer.Get() == ROUND_RIGHT_BRACKET, "expected a `)`");
 
     return condition;
 }

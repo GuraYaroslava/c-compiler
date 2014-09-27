@@ -57,6 +57,7 @@ public:
     void Error(const char*);
     void Error(const string);
     void Expected(TokenType, TokenType);
+    void Expected(bool, const char*);
 
     void PrintTree(SyntaxNode*, int, int, ostream&);
     void PrintStmtTrees(int, int, ostream&);

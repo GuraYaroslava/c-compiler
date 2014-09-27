@@ -111,10 +111,7 @@ void Parser::ParseStructDeclaration()
     {
         symStack.Add(declarator);
 
-        if (*lexer.Peek() == ASSIGN)
-        {
-            Error("data member initializer is not allowed");
-        }
+        Expected(*lexer.Peek() != ASSIGN, "data member initializer is not allowed");
 
         if (*lexer.Peek() == COMMA)
         {
@@ -184,22 +181,16 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
     if (*token == SQUARE_LEFT_BRACKET)
     {
         lexer.Get();
-        if (*lexer.Peek() == SQUARE_RIGHT_BRACKET)
-        {
-            Error("unknown size");
-        }
+        Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
         SyntaxNode* index = ParseExpression();
         SymType* indexType = index->GetType();
-        if (indexType != intType || !indexType->CanConvertTo(intType))
-        {
-            Error("expression must be an integral constant expression");
-        }
-        if (*index->token == IDENTIFIER)
-        {
-            Error("expression must have a constant value");
-        }
+        Expected(indexType == intType && indexType->CanConvertTo(intType),
+                 "expression must be an integral constant expression");
+        Expected(*index->token != IDENTIFIER, "expression must have a constant value");
+
         Expected(lexer.Get()->GetSubType(), SQUARE_RIGHT_BRACKET);
+
         int size = dynamic_cast<TokenVal <int> *>(index->token)->GetValue();
         result->SetType(new SymTypeArray(size, type));
     }
@@ -229,10 +220,7 @@ void Parser::ParseParameterList()
         SymType* type = ParseTypeSpecifier();
         Symbol* param = ParseDeclarator(type, true);
 
-        if (*lexer.Peek() == EOF_)
-        {
-            Error("expected a `)`");
-        }
+        Expected(*lexer.Peek() != EOF_, "expected a `)`");
 
         if (*lexer.Peek() == COMMA)
         {
