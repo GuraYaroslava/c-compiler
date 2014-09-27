@@ -9,5 +9,6 @@ public:
     int line, pos;
     string msg;
     Exception(int, int, string);
+    Exception(string);
     string GetException();
 };
