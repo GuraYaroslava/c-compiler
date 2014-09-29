@@ -4,6 +4,9 @@
 #include "token.h"
 using namespace std;
 
+class AsmArgString;
+AsmArgString* GenAsmString(const string&);
+
 typedef enum
 {
     //cmdREAL4,
@@ -33,6 +36,7 @@ typedef enum
     cmdRET,
     cmdNEG,
     cmdCDQ,
+
     cmdINVOKE,
 
     cmdSHR,
@@ -71,6 +75,8 @@ typedef enum
     cmdSAHF,
 } AsmCmdName;
 
+string AsmCmdNameToString(AsmCmdName);
+
 typedef enum
 {
     EAX,
@@ -88,36 +94,61 @@ typedef enum
 //-----------------------------------------------------------------------------
 class AsmCmd
 {
+public:
+    virtual string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmCode;
+
+class AsmCmd0: public AsmCmd
+{
 protected:
-    AsmCmdType opcode;
+    AsmCmdName opcode;
 
 public:
-    AsmCmd(AsmCmdType);
-    ~AsmCmd();
+    AsmCmd0(AsmCmdName);
+    ~AsmCmd0();
+
+    string Generate();
 };
 
 //-----------------------------------------------------------------------------
 class AsmArg;
 
-class AsmCmd1: public AsmCmd
+class AsmCmd1: public AsmCmd0, public AsmCmd
 {
 private:
     AsmArg* arg;
 
 public:
-    AsmCmd1(AsmCmdType, AsmArg*);
+    AsmCmd1(AsmCmdName, AsmArg*);
     ~AsmCmd1();
+
+    string Generate();
 };
 
 //-----------------------------------------------------------------------------
-class AsmCmd2: public AsmCmd
+class AsmCmd2: public AsmCmd0, public AsmCmd
 {
 private:
     AsmArg *arg1, *arg2;
 
 public:
-    AsmCmd2(AsmCmdType, AsmArg*, AsmArg*);
+    AsmCmd2(AsmCmdName, AsmArg*, AsmArg*);
     ~AsmCmd2();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmRowCmd: public AsmCmd
+{
+private:
+    string str;
+public:
+    AsmRowCmd(string);
+    ~AsmRowCmd();
 };
 
 //-----------------------------------------------------------------------------
@@ -126,6 +157,9 @@ class AsmArgRegister;
 class AsmArg
 {
 public:
+    AsmArg();
+    ~AsmArg();
+
     virtual string Generate();
 
     virtual bool operator == (int) const;
@@ -170,7 +204,7 @@ private:
     AsmRegName reg;
 
 protected:
-    string GetRegName() const;
+    string RegNameToString() const;
 
 public:
     AsmArgRegister(AsmRegName);
@@ -227,28 +261,159 @@ public:
 };
 
 //-----------------------------------------------------------------------------
+class AsmArgDup: public AsmArg
+{
+private:
+    int size;
+
+public:
+    AsmArgDup(int);
+    ~AsmArgDup();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmArgLabel: public AsmArg
+{
+private:
+    string name;
+
+public:
+    AsmArgLabel(string);
+    ~AsmArgLabel();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmLabel: public AsmCmd
+{
+private:
+    AsmArgLabel* label;
+
+public:
+    friend class AsmCode;
+
+    AsmLabel(string);
+    AsmLabel(AsmArgLabel*);
+    ~AsmLabel();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmArgString: public AsmArg
+{
+private:
+    string val;
+
+public:
+    AsmArgString(string);
+    ~AsmArgString();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmArgFloat: public AsmArg
+{
+private:
+    float val;
+
+public:
+    AsmArgFloat(float);
+    ~AsmArgFloat();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmArgInt: public AsmArg
+{
+private:
+    int val;
+
+public:
+    AsmArgInt(int);
+    ~AsmArgInt();
+
+   string Generate();
+};
+
+//-----------------------------------------------------------------------------
+class AsmCmdPrint: public AsmCmd0
+{
+private:
+    AsmArgMemory* format;
+
+public:
+    AsmCmdPrint(AsmArgMemory*);
+    ~AsmCmdPrint();
+
+    string Generate();
+};
+
+//-----------------------------------------------------------------------------
 class AsmCode
 {
 private:
     vector <AsmCmd*> cmds;
 
 public:
+    friend class Generator;
+
     AsmCode();
     ~AsmCode();
 
+    void AddCmd(string);
+
     void AddCmd(AsmCmd*);
+
+    //cmd
+    void AddCmd(AsmCmdName);
+
+    //cmd arg
+    void AddCmd(AsmCmdName, AsmArg*);
+
+    //cmd arg1, arg2
+    void AddCmd(AsmCmdName, AsmArg*, AsmArg*);
+
+    //invoke crt_printf addr format
+    void AddCmd(AsmArgMemory*);
+
+    //cmd label
+    void AddCmd(AsmCmdName, AsmLabel*);
+
+    //label:
+    void AddCmd(AsmLabel*);
+
+    //???
+    void AddCmd(AsmCmdName, AsmRegName, int);
+
+    //cmd register
+    void AddCmd(AsmCmdName, AsmRegName);
+
+    //cmd register, register
+    void AddCmd(AsmCmdName, AsmRegName, AsmRegName);
+
+    //end label:
+    void AddCmd(AsmArgLabel*);
 };
 
 //-----------------------------------------------------------------------------
-//class Generator
-//{
-//private:
-//    string filename;
-//    AsmCode data;
-//    AsmCode code;
-//
-//public:
-//    friend class Parser;
-//    CodeGenerator(const string& file): filename(file) {}
-//    void generate();
-//};
+class Generator
+{
+private:
+    string filename;
+    AsmCode data;
+    AsmCode code;
+
+public:
+    friend class Parser;
+
+    Generator(const string&);
+    ~Generator();
+
+    void Generate();
+};

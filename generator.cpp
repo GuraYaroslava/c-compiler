@@ -1,28 +1,64 @@
+#include <fstream>
+
 #include "generator.h"
+#include "exception.h"
+
+string AsmCmd::Generate()
+{
+    return "";
+}
 
 //-----------------------------------------------------------------------------
-AsmCmd::AsmCmd(AsmCmdType opcode_): opcode(opcode_) {}
+AsmRowCmd::AsmRowCmd(string str_): str(str_) {}
 
-AsmCmd::~AsmCmd() {}
+AsmRowCmd::~AsmRowCmd() {}
 
 //-----------------------------------------------------------------------------
-AsmCmd1::AsmCmd1(AsmCmdType opcode, AsmArg* arg_): AsmCmd(opcode), arg(arg_) {}
+AsmCmd0::AsmCmd0(AsmCmdName opcode_): opcode(opcode_) {}
+
+AsmCmd0::~AsmCmd0() {}
+
+string AsmCmd0::Generate()
+{
+    return AsmCmdNameToString(opcode);
+}
+
+//-----------------------------------------------------------------------------
+AsmCmd1::AsmCmd1(AsmCmdName opcode, AsmArg* arg_): AsmCmd0(opcode), arg(arg_) {}
 
 AsmCmd1::~AsmCmd1() {}
 
+string AsmCmd1::Generate()
+{
+    return AsmCmdNameToString(opcode)
+        + (dynamic_cast<AsmArgImmediate*>(arg) && opcode != cmdRET ? " dword ptr " : " ")
+        + arg->Generate();
+}
+
 //-----------------------------------------------------------------------------
-AsmCmd2::AsmCmd2(AsmCmdType opcode, AsmArg* arg1_, AsmArg* arg2_):
-    AsmCmd(opcode),
+AsmCmd2::AsmCmd2(AsmCmdName opcode, AsmArg* arg1_, AsmArg* arg2_):
+    AsmCmd0(opcode),
     arg1(arg1_),
     arg2(arg2_)
     {}
 
 AsmCmd2::~AsmCmd2() {}
 
+string AsmCmd2::Generate()
+{
+    return opcode > cmdDQ
+        ? AsmCmdNameToString(opcode) + " " + arg1->Generate() + ", " + arg2->Generate()
+        : arg1->Generate() + " " + AsmCmdNameToString(opcode) + " " + arg2->Generate();
+}
+
 //-----------------------------------------------------------------------------
+AsmArg::AsmArg() {}
+
+AsmArg::~AsmArg() {}
+
 string AsmArg::Generate()
 {
-    return NULL;
+    return "0";
 }
 
 bool AsmArg::operator == (int) const
@@ -81,7 +117,7 @@ bool AsmArg::IsMemoryLocation() const
 }
 
 //-----------------------------------------------------------------------------
-AsmArgImmediate::AsmArgImmediate(int value_): value(value_) {}
+AsmArgImmediate::AsmArgImmediate(int value_): AsmArg(), value(value_) {}
 
 AsmArgImmediate::~AsmArgImmediate() {}
 
@@ -101,16 +137,16 @@ bool AsmArgImmediate::IsImmediate() const
 }
 
 //-----------------------------------------------------------------------------
-AsmArgRegister::AsmArgRegister(AsmRegName reg_): reg(reg_) {}
+AsmArgRegister::AsmArgRegister(AsmRegName reg_): AsmArg(), reg(reg_) {}
 
 AsmArgRegister::~AsmArgRegister() {}
 
 string AsmArgRegister::Generate()
 {
-    return GetRegName();
+    return RegNameToString();
 }
 
-string AsmArgRegister::GetRegName() const
+string AsmArgRegister::RegNameToString() const
 {
     switch (reg)
     {
@@ -165,7 +201,7 @@ AsmArgIndirect::~AsmArgIndirect() {}
 
 string AsmArgIndirect::Generate()
 {
-    return "";
+    return "dword ptr [" + RegNameToString() + " + " + to_string((long double)offset) + "]";
 }
 
 bool AsmArgIndirect::operator == (AsmArg* arg) const
@@ -224,11 +260,310 @@ void AsmArgMemory::ClearOffset()
 }
 
 //-----------------------------------------------------------------------------
+AsmArgDup::AsmArgDup(int size_): size(size_) {}
+
+AsmArgDup::~AsmArgDup() {}
+
+string AsmArgDup::Generate()
+{
+    return to_string((long double)size) + " dup(0)";
+}
+
+//-----------------------------------------------------------------------------
+AsmLabel::AsmLabel(string label_): label(new AsmArgLabel(label_)) {}
+
+AsmLabel::AsmLabel(AsmArgLabel* label_): label(label_) {}
+
+AsmLabel::~AsmLabel() {}
+
+string AsmLabel::Generate()
+{
+    return label->Generate() + ":";
+}
+
+//-----------------------------------------------------------------------------
+AsmArgLabel::AsmArgLabel(string name_): name(name_) {}
+
+AsmArgLabel::~AsmArgLabel() {}
+
+string AsmArgLabel::Generate()
+{
+    return name;
+}
+
+//-----------------------------------------------------------------------------
+AsmArgString::AsmArgString(string val_): val(val_) {}
+
+AsmArgString::~AsmArgString() {}
+
+string AsmArgString::Generate()
+{
+    return val;
+}
+
+//-----------------------------------------------------------------------------
+AsmArgFloat::AsmArgFloat(float val_): val(val_) {}
+
+AsmArgFloat::~AsmArgFloat() {}
+
+string AsmArgFloat::Generate()
+{
+    return to_string((long double)val);
+}
+
+//-----------------------------------------------------------------------------
+AsmArgInt::AsmArgInt(int val_): val(val_) {}
+
+AsmArgInt::~AsmArgInt() {}
+
+string AsmArgInt::Generate()
+{
+    return to_string((long double)val);
+}
+
+//-----------------------------------------------------------------------------
+AsmCmdPrint::AsmCmdPrint(AsmArgMemory* format_):
+    AsmCmd0(cmdINVOKE),
+    format(format_)
+    {}
+
+AsmCmdPrint::~AsmCmdPrint() {}
+
+string AsmCmdPrint::Generate()
+{
+    return AsmCmdNameToString(opcode) + " crt_printf, addr " + format->Generate();
+}
+
+//-----------------------------------------------------------------------------
 AsmCode::AsmCode() {}
 
 AsmCode::~AsmCode() {}
 
-void AsmCode::AddCmd(AsmCmd* cmd)
+void AsmCode::AddCmd(string row)
 {
 
+}
+
+void AsmCode::AddCmd(AsmCmd* cmd)
+{
+    cmds.push_back(cmd);
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd)
+{
+    cmds.push_back(new AsmCmd0(cmd));
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmArg* arg)
+{
+    cmds.push_back(new AsmCmd1(cmd, arg));
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmArg* arg1, AsmArg* arg2)
+{
+    cmds.push_back(new AsmCmd2(cmd, arg1, arg2));
+}
+
+void AsmCode::AddCmd(AsmArgMemory* format)
+{
+    cmds.push_back(new AsmCmdPrint(format));
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmLabel* label)
+{
+    cmds.push_back(new AsmCmd1(cmd, label->label));
+}
+
+void AsmCode::AddCmd(AsmLabel* label)
+{
+    cmds.push_back(label);
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg, int size)
+{
+    cmds.push_back(new AsmCmd2(cmd, new AsmArgRegister(reg), new AsmArgImmediate(size)));
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg)
+{
+    cmds.push_back(new AsmCmd1(cmd, new AsmArgRegister(reg)));
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg1, AsmRegName reg2)
+{
+    cmds.push_back(new AsmCmd2(cmd, new AsmArgRegister(reg1), new AsmArgRegister(reg2)));
+}
+
+void AsmCode::AddCmd(AsmArgLabel* label)
+{
+    cmds.push_back(new AsmLabel(label));
+}
+
+//-----------------------------------------------------------------------------
+Generator::Generator(const string& file): filename(file) {}
+
+Generator::~Generator() {};
+
+void Generator::Generate()
+{
+    ofstream out(filename);
+    if (!out)
+    {
+        throw exception("Cannot open file");
+    }
+
+    out << ".686\n"
+
+           ".model flat, stdcall\n"
+
+           "include c:\\masm32\\include\\msvcrt.inc\n"
+           "includelib c:\\masm32\\lib\\msvcrt.lib\n"
+
+           //"include c:\\masm32\\include\\masm32.inc\n"
+           //"includelib c:\\masm32\\lib\\masm32.lib\n"
+
+           //"include c:\\masm32\\include\\kernel32.inc\n"
+           //"includelib c:\\masm32\\lib\\kernel32.lib\n"
+
+           //"include c:\\masm32\\macros\\macros.asm\n\n"
+
+           "\n.data\n";
+
+    for (int i = 0, size = data.cmds.size(); i < size; ++i)
+    {
+        out << (dynamic_cast<AsmLabel*>(data.cmds[i]) ? "" : "    ") << data.cmds[i]->Generate() << endl;
+    }
+    out << "\n.code\n";
+
+    for (int i = 0, size = code.cmds.size(); i < size; ++i)
+    {
+        out << (dynamic_cast<AsmLabel*>(code.cmds[i]) ? "" : "    ") << code.cmds[i]->Generate() << endl;
+    }
+    //out << "\tprint \"Hello world\"" << endl;
+    //out << "\texit" <<endl;
+    out << "end start";
+}
+
+AsmArgString* GenAsmString(const string& val)
+{
+    string str(val);
+    for (int i = 0; i < str.length() - 2; ++i)
+        if (str.substr(i, 2) == "\\n")
+        {
+            string str1(str.substr(0, i)), str2(str.substr(i + 2));
+            str = str1 + "\", 0dh, 0ah";
+            if (str2.length() > 1)
+                str += ", \"" + str2;
+        }
+    str += ", 0";
+    return new AsmArgString(str);
+}
+
+string AsmCmdNameToString(AsmCmdName opcode)
+{
+    switch (opcode)
+    {
+    case cmdMOV:
+        return "mov";
+    case cmdPUSH:
+        return "push";
+    case cmdPOP:
+        return "pop";
+    case cmdMUL:
+        return "mul";
+    case cmdIMUL:
+        return "imul";
+    case cmdDIV:
+        return "div";
+    case cmdIDIV:
+        return "idiv";
+    case cmdADD:
+        return "add";
+    case cmdSUB:
+        return "sub";
+    //case cmdINC:
+        //return "inc";
+    //case cmdDEC:
+        //return "dec";
+    case cmdRET:
+        return "ret";
+    case cmdDB:
+        return "db";
+    case cmdDD:
+        return "dd";
+    case cmdDQ:
+        return "dq";
+    //case cmdREAL8:
+        //return "real8";
+    //case cmdREAL4:
+        //return "real4";
+    case cmdINVOKE:
+        return "invoke";
+    case cmdXOR:
+        return "xor";
+    case cmdNEG:
+        return "neg";
+    case cmdCDQ:
+        return "cdq";
+    case cmdSHL:
+        return "shl";
+    case cmdSHR:
+        return "shr";
+    case cmdAND:
+        return "and";
+    case cmdOR:
+        return "or";
+    case cmdNOT:
+        return "not";
+    case cmdCALL:
+        return "call";
+    case cmdJMP:
+        return "jmp";
+    case cmdCMP:
+        return "cmp";
+    case cmdJE:
+        return "je";
+    case cmdJNE:
+        return "jne";
+    case cmdSETE:
+        return "sete";
+    case cmdSETNE:
+        return "setne";
+    case cmdSETG:
+        return "setg";
+    case cmdSETGE:
+        return "setge";
+    case cmdSETL:
+        return "setl";
+    case cmdSETLE:
+        return "setle";
+    case cmdFADDP:
+        return "faddp";
+    case cmdFDIVP:
+        return "fdivp";
+    case cmdFMULP:
+        return "fmulp";
+    case cmdFSUBP:
+        return "fsubp";
+    case cmdFLD:
+        return "fld";
+    case cmdFSTP:
+        return "fstp";
+    case cmdFCHS:
+        return "fchs";
+    case cmdFILD:
+        return "fild";
+    case cmdFISTP:
+        return "fistp";
+    case cmdFLD1:
+        return "fld1";
+    case cmdFCOMPP:
+        return "fcompp";
+    case cmdFNSTSW:
+        return "fnstsw";
+    case cmdSAHF:
+        return "sahf";
+    default:
+        throw Exception("invalid cmd");
+    }
 }
