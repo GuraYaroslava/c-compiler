@@ -1,6 +1,8 @@
 #include "node.h"
 #include "exception.h"
 
+static int counter = 0;
+
 SymTypeScalar* intType = new SymTypeScalar(new BaseToken("int", 0, 0, KEYWORD, INT));
 SymTypeScalar* floatType = new SymTypeScalar(new BaseToken("float", 0, 0, KEYWORD, FLOAT));
 SymTypeScalar* charType = new SymTypeScalar(new BaseToken("char", 0, 0, KEYWORD, CHAR));
@@ -52,6 +54,21 @@ void SyntaxNode::Print(int width, int indent, ostream& out)
         out << (dynamic_cast<NodeBinaryOp*>(this)->left && dynamic_cast<NodeBinaryOp*>(this)->right ? " <" : "");
     }
     out << endl;
+}
+
+void SyntaxNode::Generate(AsmCode&)
+{
+
+}
+
+void SyntaxNode::GenerateData(AsmCode&)
+{
+
+}
+
+void SyntaxNode::GenerateLvalue(AsmCode&)
+{
+
 }
 
 //-----------------------------------------------------------------------------
@@ -257,6 +274,101 @@ void NodeBinaryOp::Print(int width, int indent, ostream &out)
     if (right) right->Print(width, indent+width, out);
 }
 
+void NodeBinaryOp::Generate(AsmCode& code)
+{
+    TokenType op = token->GetSubType();
+
+    SymType* leftType = left->GetType();
+    SymType* rightType = right->GetType();
+
+    SymTypePointer* leftTypePointer = dynamic_cast<SymTypePointer*>(leftType);
+    SymTypePointer* rightTypePointer = dynamic_cast<SymTypePointer*>(rightType);
+
+    if (op == ASSIGN)
+    {
+        right->Generate(code);
+        left->GenerateLvalue(code);
+        code.AddCmd(cmdPOP, EAX);
+        int size = right->GetType()->GetByteSize();
+        int steps = size / 4 + (size % 4 != 0);
+        for (int i = 0; i < steps; i++)
+        {
+            code.AddCmd(cmdPOP, EBX);
+            code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), new AsmArgRegister(EBX));
+        }
+        code.AddCmd(cmdMOV, EAX, EBX);
+        code.AddCmd(cmdPUSH, EAX);
+    }
+    else if (op == ADDITION || op == SUBSTRACTION)
+    {
+        if (!leftTypePointer && !rightTypePointer)
+        {
+            if (!leftTypePointer)
+            {
+                swap(left, right);
+                swap(leftTypePointer, rightTypePointer);
+            }
+            left->Generate(code);
+            right->Generate(code);
+            code.AddCmd(cmdPOP, EAX);
+            code.AddCmd(cmdPOP, EBX);
+            code.AddCmd(op == ADDITION ? cmdADD : cmdSUB, EAX, EBX);
+            code.AddCmd(cmdPUSH, EAX);
+        }
+        else if (leftTypePointer || rightTypePointer)
+        {
+            if (op == ADDITION)
+            {
+                if (!leftTypePointer)
+                {
+                    swap(left, right);
+                    swap(leftTypePointer, rightTypePointer);
+                }
+                left->Generate(code);
+                right->Generate(code);
+                code.AddCmd(cmdPOP, EAX);
+                code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+                code.AddCmd(cmdIMUL, EBX, EAX);
+                code.AddCmd(cmdPOP, EBX);
+                code.AddCmd(cmdADD, EAX, EBX);
+                code.AddCmd(cmdPUSH, EAX);
+            }
+            else if (op == SUBSTRACTION)
+            {
+                left->Generate(code);
+                right->Generate(code);
+                if (leftTypePointer && rightTypePointer)
+                {
+                    //расстояние = модуль разности //!!!
+                    code.AddCmd(cmdPOP, EAX);
+                    code.AddCmd(cmdPOP, EBX);
+                    code.AddCmd(cmdSUB, EAX, EBX);
+                    code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+                    code.AddCmd(cmdCDQ);
+                    code.AddCmd(cmdIDIV, EBX);
+                    code.AddCmd(cmdPUSH, EAX);
+                    return;
+                }
+                code.AddCmd(cmdPOP, EAX);
+                code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+                code.AddCmd(cmdIMUL, EBX, EAX);
+                code.AddCmd(cmdPOP, EBX);
+                code.AddCmd(cmdSUB, EAX, EBX);
+                code.AddCmd(cmdPUSH, EAX);
+            }
+        }
+    }
+	else if (op == MULTIPLICATION)
+	{
+        left->Generate(code);
+        right->Generate(code);
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdPOP, EBX);
+		code.AddCmd(cmdIMUL, EAX, EBX);
+		code.AddCmd(cmdPUSH, EAX);
+	}
+}
+
 //-----------------------------------------------------------------------------
 NodeUnaryOp::NodeUnaryOp(BaseToken* oper_, SyntaxNode* arg_):
     SyntaxNode(oper_)
@@ -330,6 +442,22 @@ SymType* NodeUnaryOp::GetType()
     }
 
     return type;
+}
+
+void NodeUnaryOp::Generate(AsmCode& code)
+{
+    //code.AddCmd(cmdPUSH, EAX);
+    arg->Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    if (*token == SUBSTRACTION)
+        if (*arg->GetType() == floatType)
+        {
+
+        } else
+        {
+            code.AddCmd(cmdNEG, EAX);
+            code.AddCmd(cmdPUSH, EAX);
+        }
 }
 
 bool NodeUnaryOp::IsModifiableLvalue()
@@ -406,7 +534,7 @@ bool NodeCall::IsLvalue()
 
 void NodeCall::Print(int width, int indent, ostream& out)
 {
-    out << setw(indent) << "funtion: " << endl;
+    out << setw(indent) << "function: " << endl;
     name->Print(width, indent+width, out);
 
     if (args.size() > 0)
@@ -418,6 +546,17 @@ void NodeCall::Print(int width, int indent, ostream& out)
         args[i]->Print(width, indent+width, out);
     }
     out << endl;
+}
+
+void NodeCall::Generate(AsmCode& code)
+{
+    code.AddCmd(cmdSUB, ESP, type->GetByteSize());//!!!
+    for (int i = args.size() - 1; i > -1; --i)
+    {
+        args[i]->Generate(code);
+    }
+    code.AddCmd(cmdCALL, new AsmLabel(name->token->GetText()));
+    code.AddCmd(cmdADD, ESP, type->params->GetByteSize());//!!!
 }
 
 //-----------------------------------------------------------------------------
@@ -514,6 +653,163 @@ void NodeVar::Print(int width, int indent, ostream& out)
     SyntaxNode::Print(width, indent, out);
 }
 
+void NodeVar::GenerateData(AsmCode& code)
+{
+    SymType* type = symbol->GetType();
+    if (type == intType)
+    {
+        //code.AddCmd(cmdDD,
+        //            new AsmArgMemory("int_" + to_string((long double)counter++)),
+        //            new AsmArgInt(dynamic_cast<TokenVal <int> *>(token)->GetValue()));
+    }
+    else if (type == floatType)
+    {
+        code.AddCmd(cmdDD,
+                    new AsmArgMemory("float_" + to_string((long double)counter++)),
+                    new AsmArgFloat(dynamic_cast<TokenVal <float> *>(token)->GetValue()));
+    }
+    else if (type == charType)
+    {
+        code.AddCmd(cmdDD,
+                    new AsmArgMemory("ch_" + to_string((long double)counter++)),
+                    GenAsmString(token->GetText()));
+    }
+    else if (type == stringType)
+    {
+        code.AddCmd(cmdDB,
+                    new AsmArgMemory("str_" + to_string((long double)counter++)),
+                    GenAsmString(token->GetText()));
+    }
+}
+
+void NodeVar::GenerateLvalue(AsmCode& code)
+{
+    if (*token == IDENTIFIER)
+    {
+        code.AddCmd(cmdPUSH, new AsmArgMemory(symbol->name->GetText(), true));//!!!
+
+        //code.AddCmd(cmdMOV, EAX, EBP);
+        //code.AddCmd(cmdMOV, EBX, OFFSET);
+        //code.AddCmd(cmdADD, EAX, EBX);
+        //code.AddCmd(cmdPUSH, EAX);
+        return;
+    }
+
+    SymType* type = symbol->GetType();
+    if (type == intType)
+    {
+        throw Exception(token->GetLine(),
+                token->GetPosition(),
+                "WOW");
+    }
+    else if (type == floatType)
+    {
+        throw Exception(token->GetLine(),
+                token->GetPosition(),
+                "WOW");
+    }
+    else if (type == charType)
+    {
+        throw Exception(token->GetLine(),
+                token->GetPosition(),
+                "WOW");
+    }
+    else if (type == stringType)
+    {
+        throw Exception(token->GetLine(),
+                token->GetPosition(),
+                "WOW");
+    }
+}
+
+void NodeVar::Generate(AsmCode& code)
+{
+    if (*token == IDENTIFIER)
+    {
+        int size = symbol->GetByteSize();
+        int steps = size / 4 + (size % 4 != 0);
+        //global
+        for (int i = 0; i < steps; ++i)
+        {
+            code.AddCmd(cmdPUSH,
+                        new AsmArgMemory("dword ptr ["
+                                            + token->GetText()
+                                            + " + "
+                                            + to_string((long double)(4 * (steps - i - 1))) +"]"));
+        }
+        return;
+    }
+
+    SymType* type = symbol->GetType();
+    if (type == intType)
+    {
+        code.AddCmd(cmdMOV, EAX, dynamic_cast<TokenVal <int> *>(token)->GetValue());
+        code.AddCmd(cmdPUSH, EAX);
+    }
+    else if (type == floatType)
+    {
+        
+    }
+    else if (type == charType)
+    {
+        
+    }
+    else if (type == stringType)
+    {
+        
+    }
+}
+
+//-----------------------------------------------------------------------------
+NodePrintf::NodePrintf(BaseToken* token, SyntaxNode* format_):
+    format(format_),
+    NodeCall(NULL, new SyntaxNode(token))
+    {}
+
+NodePrintf::~NodePrintf() {}
+
+void NodePrintf::Generate(AsmCode& code)
+{
+    int size = 0;
+    for (int i = args.size() - 1; i > -1; --i)
+    {
+        SymType* type = args[i]->GetType();
+        args[i]->Generate(code);
+        size += type->GetByteSize();
+        //if (*type == floatType)
+        //{
+        //    code.AddCmd(cmdPOP, real4);
+        //    code.AddCmd(cmdFLD, real4);
+        //    code.AddCmd(cmdFSTP, real8);
+        //    code.AddCmd(cmdMOV, makeArg(EAX), makeArgMemory(real8name, true));
+        //    code.AddCmd(cmdPUSH, makeIndirectArg(EAX, 4));
+        //    code.AddCmd(cmdPUSH, makeIndirectArg(EAX));
+        //    size += 4;
+        //}
+    }
+    code.AddCmd(new AsmArgMemory("str_" + to_string((long double)counter++)));
+    code.AddCmd(cmdADD, ESP, size);
+}
+
+void NodePrintf::Print(int width, int indent, ostream& out)
+{
+    out << setw(indent) << "function: " << endl;
+    name->Print(width, indent+width, out);
+
+    out << setw(indent) << "format: " << endl;
+    format->Print(width, indent+width, out);
+
+    if (args.size() > 0)
+    {
+        out << setw(indent) << "args: " << endl;
+    }
+    for (int i = 0, size = args.size(); i < size; ++i)
+    {
+        args[i]->Print(width, indent+width, out);
+    }
+    out << endl;
+}
+
 //-----------------------------------------------------------------------------
 NodeDummy::NodeDummy(SymType* type_, SyntaxNode* node):
     NodeUnaryOp(NULL, node),
@@ -530,6 +826,11 @@ SymType* NodeDummy::GetType()
 void NodeDummy::Print(int width, int indent, ostream& out)
 {
     NodeUnaryOp::Print(width, indent, out);
+}
+
+void NodeDummy::Generate(AsmCode& code)
+{
+    arg->Generate(code);
 }
 
 //-----------------------------------------------------------------------------

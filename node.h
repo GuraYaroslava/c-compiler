@@ -37,6 +37,9 @@ public:
     virtual bool IsModifiableLvalue();
 
     virtual void Print(int, int, ostream&);
+    virtual void Generate(AsmCode&);
+    virtual void GenerateData(AsmCode&);
+    virtual void GenerateLvalue(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -58,12 +61,13 @@ public:
     bool IsModifiableLvalue();
 
     void Print(int, int, ostream&);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
 class NodeUnaryOp: public SyntaxNode
 {
-private:
+protected:
     SyntaxNode* arg;
 
 public:
@@ -77,12 +81,13 @@ public:
     bool IsModifiableLvalue();
 
     void Print(int, int, ostream&);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
 class NodeCall: public SyntaxNode
 {
-private:
+protected:
     SymTypeFunc* type;
     SyntaxNode* name;
     vector <SyntaxNode*> args;
@@ -98,6 +103,7 @@ public:
 
     void AddArg(SyntaxNode*);
     void Print(int, int, ostream&);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -136,8 +142,26 @@ public:
     bool IsModifiableLvalue();
 
     void Print(int, int, ostream&);
+
+    void Generate(AsmCode&);
+    void GenerateData(AsmCode&);
+    void GenerateLvalue(AsmCode&);
 };
 
+//-----------------------------------------------------------------------------
+class NodePrintf: public NodeCall
+{
+private:
+    SyntaxNode* format;
+
+public:
+    NodePrintf(BaseToken*, SyntaxNode*);
+    ~NodePrintf();
+
+    void Generate(AsmCode&);
+
+    void Print(int, int, ostream&);
+};
 //-----------------------------------------------------------------------------
 class NodeDummy: public NodeUnaryOp
 {
@@ -154,4 +178,5 @@ public:
     //bool IsModifiableLvalue();
 
     void Print(int, int, ostream&);
+    void Generate(AsmCode&);
 };
