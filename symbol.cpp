@@ -1,4 +1,5 @@
 #include "symbol.h"
+#include "exception.h"
 
 Symbol::Symbol(BaseToken* name_): name(name_) {}
 
@@ -12,6 +13,11 @@ void Symbol::SymPrint(ostream& out)
 SymType* Symbol::GetType()
 {
     return NULL;
+}
+
+int Symbol::GetByteSize() const
+{
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -59,6 +65,21 @@ bool SymTypeScalar::CanConvertTo(SymType* to)
     }
     //return this->name->GetSubType() <= to->name->GetSubType() ? true : false;
     return true;
+}
+
+int SymTypeScalar::GetByteSize() const
+{
+    TokenType type = name->GetSubType();
+    switch(type)
+    {
+    case CHAR:
+        return 1;
+    case INT:
+        return 4;
+    case FLOAT:
+        return 4;
+    }
+    Exception(name->GetLine(), name->GetPosition(), "invalid type");
 }
 
 //-----------------------------------------------------------------------------
@@ -163,6 +184,11 @@ void SymTypePointer::SymPrint(ostream& out)
 {
     out << "pointer to ";
     refType->SymPrint(out);
+}
+
+int SymTypePointer::GetByteSize() const
+{
+    return 4;
 }
 
 //-----------------------------------------------------------------------------
@@ -289,6 +315,11 @@ void SymVar::SymPrint(ostream& out)
     type->SymPrint(out);
 };
 
+int SymVar::GetByteSize() const
+{
+    return type->GetByteSize();
+}
+
 //-----------------------------------------------------------------------------
 SymTable::SymTable(): symbols(NULL) {}
 
@@ -308,6 +339,16 @@ void SymTable::Add(Symbol* symbol)
 int SymTable::GetSize()
 {
     return symbols.size();
+}
+
+int SymTable::GetByteSize()
+{
+    int bytes = 0;
+    for (int i = 0, size = GetSize(); i < size; ++i)
+    {
+        bytes += symbols[i]->GetByteSize();
+    }
+    return bytes;
 }
 
 bool SymTable::operator == (SymTable* table)

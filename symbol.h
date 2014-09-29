@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "token.h"
+#include "generator.h"
+#include "statement_base.h"
+#include "utils.h"
 
 class SymTypeScalar;
 class SymTypePointer;
@@ -26,6 +29,7 @@ public:
     virtual SymType* GetType();
 
     virtual void SymPrint(ostream&);
+    virtual int GetByteSize() const;
 };
 
 //-----------------------------------------------------------------------------
@@ -51,7 +55,7 @@ public:
 
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
-
+    int GetByteSize() const;
     //void SymPrint(ostream&);
 };
 
@@ -103,7 +107,7 @@ public:
     bool CanConvertTo(SymType*);
 
     bool operator == (SymType*);
-
+    int GetByteSize() const;
     void SymPrint(ostream&);
 };
 
@@ -142,6 +146,7 @@ public:
     SymVar(BaseToken*);
     ~SymVar();
 
+    int GetByteSize() const;
     SymType* GetType();
     void SetType(SymType*);
 
@@ -164,6 +169,7 @@ public:
     void Add(Symbol*);
 
     int GetSize();
+    int GetByteSize();
 
     bool operator == (SymTable*);
 
