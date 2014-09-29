@@ -27,7 +27,7 @@ Statement* Parser::ParseStatement()
     else
     {
         StmtExpr* stmt = new StmtExpr(ParseExpression());
-        Expected(lexer.Get()->GetSubType(), SEMICOLON);
+        Expected(*lexer.Get() == SEMICOLON, "expacted a `;`");
         return stmt;
     }
 }
@@ -128,11 +128,13 @@ StmtJump* Parser::ParseJump()
         break;
 
     case RETURN:
+        Expected(parseFunc != NULL, "return statement not within a func");// is it possible?
         SyntaxNode* arg = *lexer.Peek() == SEMICOLON ? NULL : ParseExpression();
         result = new StmtReturn(arg, parseFunc);
         break;
     }
 
+    Expected(*lexer.Get() == SEMICOLON, "expected `;`");
     return result;
 }
 
