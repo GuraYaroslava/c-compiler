@@ -69,7 +69,7 @@ typedef enum
     cmdFCOMPP,
     cmdFNSTSW,
     cmdSAHF,
-} AsmCmdType;
+} AsmCmdName;
 
 typedef enum
 {
