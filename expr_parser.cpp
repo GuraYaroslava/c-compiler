@@ -120,21 +120,23 @@ SyntaxNode* Parser::ParsePrimaryExpression()
             Expected(symbol != NULL, "identifier is undefined");
             result = new NodeVar(symbol);
         }
-        else if (*token == NUMBER_INT)
+        else
         {
-            result = new NodeVar(new SymVar(token, intType));
-        }
-        else if (*token == NUMBER_FLOAT)
-        {
-            result = new NodeVar(new SymVar(token, floatType));
-        }
-        else if (*token == CHARACTER)
-        {
-            result = new NodeVar(new SymVar(token, charType));
-        }
-        else if (*token == STRING)
-        {
-            result = new NodeVar(new SymVar(token, stringType));
+            switch(token->GetSubType())
+            {
+            case NUMBER_INT:
+                result = new NodeVar(new SymVar(token, intType));
+                break;
+            case NUMBER_FLOAT:
+                result = new NodeVar(new SymVar(token, floatType));
+                break;
+            case CHARACTER:
+                result = new NodeVar(new SymVar(token, charType));
+                break;
+            case STRING:
+                result = new NodeVar(new SymVar(token, stringType));
+                break;
+            }
         }
     }
     else if (*token == OPERATOR && *token == ROUND_LEFT_BRACKET)
