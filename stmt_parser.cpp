@@ -1,11 +1,6 @@
 #include "exception.h"
 #include "_parser.h"
 
-//StmtExpr* Parser::ParseExpr()
-//{
-//
-//}
-
 Statement* Parser::ParseStatement()
 {
     BaseToken* token = lexer.Peek();
@@ -33,10 +28,6 @@ Statement* Parser::ParseStatement()
     {
         StmtExpr* stmt = new StmtExpr(ParseExpression());
         Expected(lexer.Get()->GetSubType(), SEMICOLON);
-        //if (*lexer.Get() != SEMICOLON)
-        //{
-        //    Error("expacted a `;`");
-        //}
         return stmt;
     }
 }

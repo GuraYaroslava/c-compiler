@@ -14,9 +14,9 @@ private:
     vector <SyntaxNode*> nodeStack;
     vector <Statement*> stmtStack;
 
-    map<TokenType, int> precedences;
-    map<TokenType, bool> unary_oper;
-    map<TokenType, bool> right_assoc_oper;
+    map <TokenType, int> precedences;
+    map <TokenType, bool> unary_oper;
+    map <TokenType, bool> right_assoc_oper;
 
     vector <SyntaxNode*> consts;
 
@@ -45,7 +45,6 @@ public:
     void ParseParameterList();
 
     Statement* ParseStatement();
-    //StmtExpr* ParseExpr();
     StmtBlock* ParseBlock();
     StmtIf* ParseIf();
     StmtFor* ParseFor();
