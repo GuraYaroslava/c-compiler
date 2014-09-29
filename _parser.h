@@ -50,6 +50,7 @@ public:
 
     SyntaxNode* ParseExpression(int precedence = 0);
     SyntaxNode* ParsePrimaryExpression();
+    SyntaxNode* ParsePrintf(BaseToken*);
     void ParseFuncCall(SyntaxNode*&);
     void ParseArrIndex(SyntaxNode*&);
     void ParseMemberSelection(SyntaxNode*&, BaseToken*);

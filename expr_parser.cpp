@@ -202,6 +202,33 @@ void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
     node = new NodeBinaryOp(node, oper, field);
 }
 
+SyntaxNode* Parser::ParsePrintf(BaseToken* token)
+{
+    NodePrintf* result = NULL;
+    Expected(*lexer.Get() == ROUND_LEFT_BRACKET, "expected a `(`");
+    SyntaxNode* format = ParseExpression(precedences[COMMA] + 1);
+    SymType* type = format->GetType();
+    Expected(type == stringType, "expected parameter of char*");
+    result = new NodePrintf(token, format);
+    if (*lexer.Peek() == COMMA)
+    {
+        lexer.Get();
+        while (true)
+        {
+            SyntaxNode* arg = ParseExpression(precedences[COMMA] + 1);
+            Expected(arg != NULL, "expected argument");
+            result->AddArg(arg);
+            if (*lexer.Peek() == ROUND_RIGHT_BRACKET)
+            {
+                break;
+            }
+            Expected(*lexer.Get() == COMMA, "expected a `,`");
+        }
+    }
+    Expected(*lexer.Get() == ROUND_RIGHT_BRACKET, "expected a `)`");
+    return result;
+}
+
 void Parser::PrintStmtTrees(int width, int indent, ostream& out)
 {
     for (int i = 0, size = stmtStack.size(); i < size; ++i)
