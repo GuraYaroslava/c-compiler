@@ -166,6 +166,7 @@ void Parser::ParseFuncCall(SyntaxNode*& node)
 {
     SymTypeFunc* type = dynamic_cast<SymTypeFunc*>(node->GetType());
     Expected(type != NULL, "expression must have (pointer-to-) function type");
+
     node = new NodeCall(type, node);
     while (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
@@ -426,4 +427,34 @@ void Parser::Init()
     right_assoc_oper[BIT_OR_ASSIGN] = true;
     right_assoc_oper[BIT_SHIFT_LEFT_ASSIGN] = true;
     right_assoc_oper[BIT_SHIFT_RIGHT_ASSIGN] = true;
+}
+
+
+void Parser::GenerateCode()
+{
+    //generate consts
+    for (int i = 0, size = consts.size(); i < size; ++i)
+    {
+        consts[i]->GenerateData(generator.data);
+    }
+
+    //generate globals symbols
+    symStack.Top()->GenerateData(generator.data);
+
+    //generate function declarations
+    symStack.Top()->GenerateCode(generator.code);
+
+    //start
+    generator.code.AddCmd(new AsmLabel("start"));
+
+    //call main function
+    generator.code.AddCmd(cmdSUB, ESP, 4);//!!!
+    generator.code.AddCmd(cmdCALL, new AsmArgLabel("main"));
+    generator.code.AddCmd(cmdADD, ESP, 4);//!!!
+
+    //end of start
+    generator.code.AddCmd(cmdRET, new AsmArg());
+
+    //generate body of main function
+    generator.Generate();
 }

@@ -30,6 +30,7 @@ public:
     BaseToken* GetUnary();
 
     void Parse();
+    void GenerateCode();
 
     void ParseDeclaration();
     SymType* ParseTypeSpecifier();
