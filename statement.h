@@ -1,18 +1,9 @@
 #pragma once
 
 #include "node.h"
+#include "statement_base.h"
 
 using namespace std;
-
-//-----------------------------------------------------------------------------
-class Statement
-{
-public:
-    Statement();
-    ~Statement();
-
-    virtual void StmtPrint(ostream &out, int);
-};
 
 //-----------------------------------------------------------------------------
 class StmtExpr: public Statement
