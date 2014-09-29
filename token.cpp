@@ -156,4 +156,5 @@ void BaseToken::InitTokenTypeTable()
     tokenTypeToString[CONTINUE] = "CONTINUE";
     tokenTypeToString[RETURN] = "RETURN";
     tokenTypeToString[STRUCT] = "STRUCT";
+    tokenTypeToString[PRINTF] = "PRINTF";
 }
