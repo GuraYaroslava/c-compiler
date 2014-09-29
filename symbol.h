@@ -196,7 +196,7 @@ public:
 
     void Pop();
 
-    //SymTable* Top();
+    SymTable* Top();
 };
 
 extern SymTypeScalar* intType;

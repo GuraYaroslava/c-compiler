@@ -464,10 +464,10 @@ void SymTableStack::Add(Symbol* symbol)
     tables.back()->Add(symbol);
 }
 
-//SymTable* SymTableStack::Top()
-//{
-    //SymTable* tbl = tables.back();
+SymTable* SymTableStack::Top()
+{
+    SymTable* tbl = tables.back();
     //int size = tbl->symbols.size();
     //return tbl->symbols[size-1];
-    //return tables.size() > 0 ? tables.back() : 0;
-//}
+    return tables.size() > 0 ? tables.back() : 0;
+}
