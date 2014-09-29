@@ -112,17 +112,16 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-class StmtBlock;
-
 class SymTypeFunc: public SymType
 {
 public:
     SymType* type;
     SymTable* params;
-    StmtBlock* body;
+    Statement* body;
+    AsmArgLabel* end;
 
     SymTypeFunc(SymType*);
-    SymTypeFunc(SymType*, SymTable*, StmtBlock*);
+    SymTypeFunc(SymType*, SymTable*, Statement*);
     ~SymTypeFunc();
 
     bool IsModifiableLvalue();

@@ -232,18 +232,20 @@ void SymTypeStruct::SymPrint(ostream& out)
 }
 
 //-----------------------------------------------------------------------------
-SymTypeFunc::SymTypeFunc(SymType* type_, SymTable* params_, StmtBlock* body_):
+SymTypeFunc::SymTypeFunc(SymType* type_, SymTable* params_, Statement* body_):
     SymType(NULL),
     type(type_),
     params(params_),
-    body(body_)
+    body(body_),
+    end(NULL)
     {};
 
 SymTypeFunc::SymTypeFunc(SymType* type_):
     SymType(NULL),
     type(type_),
     params(new SymTable()),
-    body(NULL)
+    body(NULL),
+    end(NULL)
     {};
 
 SymTypeFunc::~SymTypeFunc() {}
