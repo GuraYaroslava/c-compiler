@@ -91,7 +91,6 @@ enum TokenType
     INT,
     FLOAT,
 
-
     DO,
     WHILE,
     IF,
@@ -103,6 +102,8 @@ enum TokenType
     RETURN,
 
     STRUCT,
+
+    PRINTF,
 };
 
 class BaseToken
