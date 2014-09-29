@@ -441,6 +441,7 @@ void Scanner::InitKeyWordsTable()
     keywords["continue"] = CONTINUE;
     keywords["return"] = RETURN;
     keywords["struct"] = STRUCT;
+    keywords["printf"] = PRINTF;
 }
 
 char Scanner::GetCh()
