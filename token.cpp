@@ -69,10 +69,10 @@ TokenType BaseToken::GetSubType()
 
 void BaseToken::Print(ostream &fout)
 {
-    fout << "type: " << tokenTypeToString[GetType()] << "\t\t";
-    fout << "ln: " << GetLine() << "\t\t";
-    fout << "pos: " << GetPosition() << "\t\t";
-    fout << "lx: " << GetText() << "\t\t";
+    fout << "type: " << tokenTypeToString[GetType()] << "        ";
+    fout << "ln: " << GetLine() << "        ";
+    fout << "pos: " << GetPosition() << "        ";
+    fout << "lx: " << GetText() << "        ";
 };
 
 bool BaseToken::operator == (TokenType subType_)
