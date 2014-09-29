@@ -103,8 +103,7 @@ SyntaxNode* Parser::ParseExpression(int precedence)
 
 SyntaxNode* Parser::ParsePrimaryExpression()
 {
-    if (*lexer.Peek() == SEMICOLON
-        || *lexer.Peek() == KEYWORD)
+    if (*lexer.Peek() == SEMICOLON)
     {
         return NULL;
     }
@@ -143,6 +142,14 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     {
         result = ParseExpression();
         Expected(lexer.Get()->GetSubType(), ROUND_RIGHT_BRACKET);
+    }
+    else if (*token == PRINTF)
+    {
+        result = ParsePrintf(token);
+    }
+    else if (*token == KEYWORD)
+    {
+        return NULL;
     }
     else
     {
