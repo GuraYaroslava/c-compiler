@@ -8,6 +8,11 @@ Statement::~Statement() {}
 
 void Statement::StmtPrint(ostream& out, int indent) {};
 
+void Statement::Generate(AsmCode&)
+{
+
+}
+
 //-----------------------------------------------------------------------------
 StmtExpr::StmtExpr(SyntaxNode* node): Statement(), expr(node) {}
 
@@ -21,6 +26,11 @@ void StmtExpr::StmtPrint(ostream &out, int indent)
     }
     expr->Print(indent, indent, out);
     out << endl;
+}
+
+void StmtExpr::Generate(AsmCode& code)
+{
+    expr->Generate(code);
 }
 
 //-----------------------------------------------------------------------------
@@ -48,6 +58,14 @@ void StmtBlock::StmtPrint(ostream& out, int indent)
     out << "}" << endl;
 }
 
+void StmtBlock::Generate(AsmCode& code)
+{
+    for (int i = 0, size = statements.size(); i < size; ++i)
+    {
+        statements[i]->Generate(code);
+    }
+}
+
 //-----------------------------------------------------------------------------
 StmtIf::StmtIf(SyntaxNode* conditioin_, Statement* bodyIf_, Statement* bodyElse_):
     Statement(),
@@ -69,6 +87,10 @@ void StmtIf::StmtPrint(ostream& out, int indent)
         out << "else" << endl;
         bodyElse->StmtPrint(out, indent);
     }
+}
+
+void StmtIf::Generate(AsmCode& code)
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -119,6 +141,10 @@ void StmtFor::StmtPrint(ostream& out, int indent)
     }
 }
 
+void StmtFor::Generate(AsmCode& code)
+{
+}
+
 //-----------------------------------------------------------------------------
 StmtWhile::StmtWhile(SyntaxNode* condition_, Statement* body_):
     Statement(),
@@ -143,6 +169,10 @@ void StmtWhile::StmtPrint(ostream& out, int indent)
     }
 }
 
+void StmtWhile::Generate(AsmCode& code)
+{
+}
+
 //-----------------------------------------------------------------------------
 StmtJump::StmtJump(): Statement() {}
 
@@ -154,12 +184,20 @@ void StmtContinue::StmtPrint(ostream& out, int indent)
     out << "continue" << endl;
 }
 
+void StmtContinue::Generate(AsmCode& code)
+{
+}
+
 //-----------------------------------------------------------------------------
 StmtBreak::StmtBreak(): StmtJump() {}
 
 void StmtBreak::StmtPrint(ostream& out, int indent)
 {
     out << "break" << endl;
+}
+
+void StmtBreak::Generate(AsmCode& code)
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -176,4 +214,19 @@ void StmtReturn::StmtPrint(ostream& out, int indent)
     {
         arg->Print(indent, indent, out);
     }
+}
+
+void StmtReturn::Generate(AsmCode& code)
+{
+    arg->Generate(code);
+    int size = func->type->GetByteSize();
+    int steps = size / 4 + (size % 4 != 0);
+    for (int i = 0; i < steps; ++i)
+    {
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdMOV,
+                    new AsmArgIndirect(EBP, 4 + func->params->GetByteSize() + size - 4 * (steps - i - 1)),
+                    new AsmArgRegister(EAX));
+    }
+    code.AddCmd(cmdJMP, func->end);
 }

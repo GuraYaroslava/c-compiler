@@ -15,7 +15,8 @@ public:
     StmtExpr(SyntaxNode*);
     ~StmtExpr();
 
-    void StmtPrint(ostream& out, int);
+    void StmtPrint(ostream&, int);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -32,7 +33,8 @@ public:
     ~StmtBlock();
 
     void AddStatement(Statement*);
-    void StmtPrint(ostream& out, int);
+    void StmtPrint(ostream&, int);
+    void Generate(AsmCode&);
     friend class Parser;
 };
 
@@ -48,7 +50,8 @@ public:
     StmtIf(SyntaxNode*,  Statement*, Statement*);
     ~StmtIf();
 
-    void StmtPrint(ostream& out, int);
+    void StmtPrint(ostream&, int);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -65,7 +68,8 @@ public:
     StmtFor(StmtExpr*, StmtExpr*, StmtExpr*, Statement*);
     ~StmtFor();
 
-    void StmtPrint(ostream& out, int);
+    void StmtPrint(ostream&, int);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -79,7 +83,8 @@ public:
     StmtWhile(SyntaxNode*, Statement*);
     ~StmtWhile();
 
-    void StmtPrint(ostream& out, int);
+    void StmtPrint(ostream&, int);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -98,6 +103,7 @@ public:
     ~StmtBreak();
 
     void StmtPrint(ostream& out, int);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -108,6 +114,7 @@ public:
     ~StmtContinue();
 
     void StmtPrint(ostream& out, int);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -115,10 +122,12 @@ class StmtReturn: public StmtJump
 {
 private:
     SyntaxNode* arg;
+    SymTypeFunc* func;
 
 public:
-    StmtReturn(SyntaxNode*);
+    StmtReturn(SyntaxNode*, SymTypeFunc*);
     ~StmtReturn();
 
     void StmtPrint(ostream& out, int);
+    void Generate(AsmCode&);
 };
