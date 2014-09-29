@@ -9,9 +9,9 @@ typedef enum
     //cmdREAL4,
     //cmdREAL8,
 
-    //cmdDD,
-    //cmdDB,
-    //cmdDQ,
+    cmdDD,
+    cmdDB,
+    cmdDQ,
 
     cmdMOV,
 
