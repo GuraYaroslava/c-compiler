@@ -163,7 +163,11 @@ void StmtBreak::StmtPrint(ostream& out, int indent)
 }
 
 //-----------------------------------------------------------------------------
-StmtReturn::StmtReturn(SyntaxNode* arg_): StmtJump(), arg(arg_) {}
+StmtReturn::StmtReturn(SyntaxNode* arg_, SymTypeFunc* f):
+    StmtJump(),
+    arg(arg_),
+    func(f)
+    {}
 
 void StmtReturn::StmtPrint(ostream& out, int indent)
 {

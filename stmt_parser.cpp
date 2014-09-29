@@ -138,7 +138,7 @@ StmtJump* Parser::ParseJump()
 
     case RETURN:
         SyntaxNode* arg = *lexer.Peek() == SEMICOLON ? NULL : ParseExpression();
-        result = new StmtReturn(arg);
+        result = new StmtReturn(arg, parseFunc);
         break;
     }
 
