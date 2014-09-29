@@ -299,6 +299,14 @@ bool Parser::Eof()
     return *lexer.Peek() == EOF_ ? true : false;
 }
 
+void Parser::Next()
+{
+    if (*lexer.Peek() == SEMICOLON)
+    {
+        lexer.Get();
+    }
+}
+
 void Parser::PrintSymTables(ostream& out)
 {
     for (int i = 0, size = symStack.tables.size(); i < size; ++i)

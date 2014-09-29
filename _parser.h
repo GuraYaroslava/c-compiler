@@ -23,6 +23,7 @@ public:
     void Init();
 
     bool Eof();
+    void Next();
 
     BaseToken* GetUnary();
 
