@@ -7,7 +7,11 @@
 
 const int INF = numeric_limits<int>::max();
 
-Parser::Parser(const char* fin): lexer(fin), inLoop(false), parseFunc(false)
+Parser::Parser(const char* fin, const char* asmout):
+    lexer(fin),
+    generator(asmout),
+    inLoop(false),
+    parseFunc(NULL)
 {
     Init();
 }

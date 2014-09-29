@@ -1,5 +1,6 @@
 #pragma once
 
+#include "generator.h"
 #include "statement.h"
 #include "lexer.h"
 #include "node.h"
@@ -8,6 +9,7 @@ class Parser
 {
 private:
     Lexer lexer;
+    Generator generator;
     SymTableStack symStack;
     vector <SyntaxNode*> nodeStack;
     vector <Statement*> stmtStack;
@@ -17,7 +19,7 @@ private:
     map<TokenType, bool> right_assoc_oper;
 
 public:
-    Parser(const char*);
+    Parser(const char*, const char*);
     ~Parser();
 
     void Init();
