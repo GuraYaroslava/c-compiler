@@ -27,7 +27,7 @@ public:
     ~Symbol();
 
     virtual SymType* GetType();
-
+    virtual void Generate(AsmCode&);
     virtual void SymPrint(ostream&);
     virtual int GetByteSize() const;
 };
@@ -131,6 +131,7 @@ public:
     bool operator == (SymType*);
 
     void SymPrint(ostream&);
+    void Generate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -149,7 +150,7 @@ public:
     int GetByteSize() const;
     SymType* GetType();
     void SetType(SymType*);
-
+    void Generate(AsmCode&);
     void SymPrint(ostream&);
 };
 
@@ -174,6 +175,9 @@ public:
     bool operator == (SymTable*);
 
     void Print(ostream&);
+
+    void GenerateData(AsmCode&);
+    void GenerateCode(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------

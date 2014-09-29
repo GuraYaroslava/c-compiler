@@ -5,6 +5,11 @@ Symbol::Symbol(BaseToken* name_): name(name_) {}
 
 Symbol::~Symbol() {}
 
+void Symbol::Generate(AsmCode&)
+{
+
+}
+
 void Symbol::SymPrint(ostream& out)
 {
     out << "`" << name->GetText() << "`";
@@ -290,6 +295,17 @@ void SymTypeFunc::SymPrint(ostream& out)
     //}
 }
 
+void SymTypeFunc::Generate(AsmCode& code)
+{
+    code.AddCmd(cmdPUSH, EBP);
+    code.AddCmd(cmdMOV, EBP, ESP);
+    body->Generate(code);
+    code.AddCmd(end);
+    code.AddCmd(cmdMOV, ESP, EBP);
+    code.AddCmd(cmdPOP, EBP);
+    code.AddCmd(cmdRET, new AsmArg());
+}
+
 //-----------------------------------------------------------------------------
 SymVar::SymVar(BaseToken* name_, SymType* type_): Symbol(name_), type(type_) {}
 SymVar::SymVar(BaseToken* name_): Symbol(name_), type(NULL) {}
@@ -304,6 +320,20 @@ SymType* SymVar::GetType()
 void SymVar::SetType(SymType* type_)
 {
     type = type_;
+}
+
+void SymVar::Generate(AsmCode& code)
+{
+    if (dynamic_cast<SymTypeFunc*>(type))
+    {
+        dynamic_cast<SymTypeFunc*>(type)->end = new AsmArgLabel("end_"+name->GetText());
+        code.AddCmd(new AsmLabel(name->GetText()));
+        type->Generate(code);
+        return;
+    }
+    int size = type->GetByteSize();
+    //int dwords = size / 4 + (size % 4 != 0);
+    code.AddCmd(cmdDB, new AsmArgMemory(name->GetText()), new AsmArgDup(size));
 }
 
 void SymVar::SymPrint(ostream& out)
@@ -375,6 +405,30 @@ void SymTable::Print(ostream& out)
     {
         symbols[i]->SymPrint(out);
         out << endl;
+    }
+}
+
+void SymTable::GenerateData(AsmCode& data)
+{
+    for (int i = 0, size = GetSize(); i < size; ++i)
+    {
+        SymVar* sym = dynamic_cast<SymVar*>(symbols[i]);
+        if (sym && !dynamic_cast<SymTypeFunc*>(sym->type))
+        {
+            sym->Generate(data);
+        }
+    }
+}
+
+void SymTable::GenerateCode(AsmCode& code)
+{
+    for (int i = 0, size = GetSize(); i < size; ++i)
+    {
+        SymVar* sym = dynamic_cast<SymVar*>(symbols[i]);
+        if (dynamic_cast<SymTypeFunc*>(sym->type))
+        {
+            sym->Generate(code);
+        }
     }
 }
 
