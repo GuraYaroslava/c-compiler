@@ -140,6 +140,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
                 result = new NodeVar(new SymVar(token, stringType));
                 break;
             }
+            consts.push_back(result);
         }
     }
     else if (*token == OPERATOR && *token == ROUND_LEFT_BRACKET)

@@ -18,6 +18,8 @@ private:
     map<TokenType, bool> unary_oper;
     map<TokenType, bool> right_assoc_oper;
 
+    vector <SyntaxNode*> consts;
+
 public:
     Parser(const char*, const char*);
     ~Parser();
