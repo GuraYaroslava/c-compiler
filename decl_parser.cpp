@@ -40,7 +40,7 @@ void Parser::ParseDeclaration()
 
         if (parseFunc)
         {
-            parseFunc = false;
+            parseFunc = NULL;
             break;
         }
 
@@ -203,8 +203,9 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
         symStack.Pop();
         if (*lexer.Peek() == FIGURE_LEFT_BRACKET)
         {
+            parseFunc = t;
             t->body = ParseBlock();
-            parseFunc = true;
+            //parseFunc = NULL;
         }
         result->SetType(t);
     }
