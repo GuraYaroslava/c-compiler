@@ -21,14 +21,17 @@ class SyntaxNode
 {
 protected:
     BaseToken* token;
+    int id;
 
 public:
     friend class Parser;
     friend class NodeCall;
     friend class NodeBinaryOp;
+    friend class NodePrintf;
+    friend class NodeDummy;
     friend SyntaxNode* MakeConversion(SyntaxNode* n, SymType* l, SymType* r);
 
-    SyntaxNode(BaseToken*);
+    SyntaxNode(int, BaseToken*);
     ~SyntaxNode();
 
     virtual SymType* GetType();
@@ -51,7 +54,7 @@ private:
 
 public:
     friend class SyntaxNode;
-    NodeBinaryOp(SyntaxNode*, BaseToken*, SyntaxNode*);
+    NodeBinaryOp(int, SyntaxNode*, BaseToken*, SyntaxNode*);
     NodeBinaryOp(NodeBinaryOp*);
     ~NodeBinaryOp();
 
@@ -71,7 +74,7 @@ protected:
     SyntaxNode* arg;
 
 public:
-    NodeUnaryOp(BaseToken*, SyntaxNode*);
+    NodeUnaryOp(int, BaseToken*, SyntaxNode*);
     NodeUnaryOp(NodeUnaryOp*);
     ~NodeUnaryOp();
 
@@ -93,7 +96,7 @@ protected:
     vector <SyntaxNode*> args;
 
 public:
-    NodeCall(SymTypeFunc*, SyntaxNode*);
+    NodeCall(int, SymTypeFunc*, SyntaxNode*);
     ~NodeCall();
 
     SymType* GetType();
@@ -114,7 +117,7 @@ private:
     SyntaxNode* index;
 
 public:
-    NodeArr(SyntaxNode*, SyntaxNode*);
+    NodeArr(int, SyntaxNode*, SyntaxNode*);
     NodeArr(BaseToken*);
     ~NodeArr();
 
@@ -133,7 +136,7 @@ private:
     Symbol* symbol;
 
 public:
-    NodeVar(Symbol*);
+    NodeVar(int, Symbol*);
     ~NodeVar();
 
     SymType* GetType();
@@ -155,7 +158,7 @@ private:
     SyntaxNode* format;
 
 public:
-    NodePrintf(BaseToken*, SyntaxNode*);
+    NodePrintf(int, BaseToken*, SyntaxNode*);
     ~NodePrintf();
 
     void Generate(AsmCode&);

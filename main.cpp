@@ -66,10 +66,10 @@ int main(int argc, char* argv[])
             //cin.getline(p, 100);
             //SimpleParser parser(p);
 
-            int counter = 1;
+            int index = 1;
             while (!parser.Eof())
             {
-                fout << "tree " << counter++ << ":" << endl;
+                fout << "tree " << index++ << ":" << endl;
                 Node* root = parser.ParseExpr();
                 parser.PrintTree(root, 5, 0, fout);
                 fout << endl;
@@ -78,21 +78,21 @@ int main(int argc, char* argv[])
         //parsing of expressions
         else if (!strcmp(argv[1], "-p"))
         {
-            Parser parser(argv[2]);
+            Parser parser(argv[2], "");
 
             //char p[100];
             //cin.getline(p, 100);
-            //Parser parser(p);
+            //Parser parser(p, "");
 
-            int counter = 1;
+            int index = 1;
 
             while (!parser.Eof())
             {
-                fout << "tree " << counter++ << ":" << endl;
+                fout << "tree " << index++ << ":" << endl;
                 SyntaxNode* root = parser.ParseExpression();
                 parser.PrintTree(root, 10, 0, fout);
                 fout << endl;
-
+                parser.Next();
             }
         }
         //parsing of declarations
@@ -100,17 +100,38 @@ int main(int argc, char* argv[])
         {
             //char p[100];
             //cin.getline(p, 100);
-            //Parser parser(p);
+            //Parser parser(p, "");
 
-            Parser parser(argv[2]);
+            Parser parser(argv[2], "");
 
             while (!parser.Eof())
             {
                 parser.Parse();
             }
 
-            parser.PrintSymTables(fout);
-            parser.PrintStmtTrees(5, 5, fout);
+            //see tasks.todo
+            //parser.PrintSymTables(fout);
+            //parser.PrintNodeTrees(5, 5, fout);
+            //parser.PrintStmtTrees(5, 5, fout);
+        }
+        //parsing of declarations
+        else if (!strcmp(argv[1], "-g"))
+        {
+            //char fin_[100];
+            //cin.getline(fin_, 100);
+
+            string asmout =  string((char*) argv[2]) + ".asm";
+            //string asmout = "out.asm";
+
+            Parser parser(argv[2], asmout.c_str());
+            //Parser parser(fin_, asmout.c_str());
+
+            while (!parser.Eof())
+            {
+                parser.Parse();
+            }
+
+            parser.GenerateCode();
         }
     }
     catch (Exception exp)

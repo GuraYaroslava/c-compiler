@@ -1,8 +1,6 @@
 #include "node.h"
 #include "exception.h"
 
-static int counter = 0;
-
 SymTypeScalar* intType = new SymTypeScalar(new BaseToken("int", 0, 0, KEYWORD, INT));
 SymTypeScalar* floatType = new SymTypeScalar(new BaseToken("float", 0, 0, KEYWORD, FLOAT));
 SymTypeScalar* charType = new SymTypeScalar(new BaseToken("char", 0, 0, KEYWORD, CHAR));
@@ -22,7 +20,7 @@ Node::Node(Node* left_, Node* right_, BaseToken* oper_)
 Node::~Node() {}
 
 //-----------------------------------------------------------------------------
-SyntaxNode::SyntaxNode(BaseToken* token_): token(token_) {}
+SyntaxNode::SyntaxNode(int id_, BaseToken* token_): id(id_), token(token_) {}
 
 SyntaxNode::~SyntaxNode() {}
 
@@ -72,15 +70,15 @@ void SyntaxNode::GenerateLvalue(AsmCode&)
 }
 
 //-----------------------------------------------------------------------------
-NodeBinaryOp::NodeBinaryOp(SyntaxNode* left_, BaseToken* oper_, SyntaxNode* right_):
-    SyntaxNode(oper_)
+NodeBinaryOp::NodeBinaryOp(int id_, SyntaxNode* left_, BaseToken* oper_, SyntaxNode* right_):
+    SyntaxNode(id_, oper_)
 {
     left = left_;
     right = right_;
 }
 
 NodeBinaryOp::NodeBinaryOp(NodeBinaryOp* node):
-    SyntaxNode(node->token)
+    SyntaxNode(node->id, node->token)
 {
     left = node->left;
     right = node->right;
@@ -370,14 +368,14 @@ void NodeBinaryOp::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
-NodeUnaryOp::NodeUnaryOp(BaseToken* oper_, SyntaxNode* arg_):
-    SyntaxNode(oper_)
+NodeUnaryOp::NodeUnaryOp(int id_, BaseToken* oper_, SyntaxNode* arg_):
+    SyntaxNode(id_, oper_)
 {
     arg = arg_;
 }
 
 NodeUnaryOp::NodeUnaryOp(NodeUnaryOp* node):
-    SyntaxNode(node->token)
+    SyntaxNode(node->id, node->token)
 {
     arg = node->arg;
 }
@@ -478,8 +476,8 @@ void NodeUnaryOp::Print(int width, int indent, ostream& out)
 }
 
 //-----------------------------------------------------------------------------
-NodeCall::NodeCall(SymTypeFunc* type_, SyntaxNode* name_):
-    SyntaxNode(name_->token),
+NodeCall::NodeCall(int id_, SymTypeFunc* type_, SyntaxNode* name_):
+    SyntaxNode(id_, name_->token),
     type(type_),
     name(name_),
     args(NULL)
@@ -560,8 +558,8 @@ void NodeCall::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
-NodeArr::NodeArr(SyntaxNode* name_, SyntaxNode* index_):
-    SyntaxNode(NULL), name(name_), index(index_) {}
+NodeArr::NodeArr(int id_, SyntaxNode* name_, SyntaxNode* index_):
+    SyntaxNode(id_, NULL), name(name_), index(index_) {}
 
 NodeArr::~NodeArr() {}
 
@@ -600,8 +598,8 @@ void NodeArr::Print(int width, int indent, ostream& out)
 }
 
 //-----------------------------------------------------------------------------
-NodeVar::NodeVar(Symbol* symbol_):
-    SyntaxNode(symbol_->name),
+NodeVar::NodeVar(int id_, Symbol* symbol_):
+    SyntaxNode(id_, symbol_->name),
     symbol(symbol_)
     {}
 
@@ -761,9 +759,9 @@ void NodeVar::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
-NodePrintf::NodePrintf(BaseToken* token, SyntaxNode* format_):
+NodePrintf::NodePrintf(int id_, BaseToken* token, SyntaxNode* format_):
     format(format_),
-    NodeCall(NULL, new SyntaxNode(token))
+    NodeCall(0, NULL, new SyntaxNode(0, token))
     {}
 
 NodePrintf::~NodePrintf() {}
@@ -787,7 +785,7 @@ void NodePrintf::Generate(AsmCode& code)
         //    size += 4;
         //}
     }
-    code.AddCmd(new AsmArgMemory("str_" + to_string((long double)counter++)));
+    code.AddCmd(new AsmArgMemory("var_" + to_string((long double)format->id)));
     code.AddCmd(cmdADD, ESP, size);
 }
 
@@ -812,7 +810,7 @@ void NodePrintf::Print(int width, int indent, ostream& out)
 
 //-----------------------------------------------------------------------------
 NodeDummy::NodeDummy(SymType* type_, SyntaxNode* node):
-    NodeUnaryOp(NULL, node),
+    NodeUnaryOp(node->id, NULL, node),
     type(type_)
     {}
 
@@ -857,9 +855,12 @@ SyntaxNode* MakeConversion(SyntaxNode* node, SymType* from, SymType* to)
     return new NodeDummy(to, node);
 }
 
+//-----------------------------------------------------------------------------
 bool IsIntegralType(SymType* type)
 {
-    if (type == intType || type == charType)
+    return type == intType || type == charType;
+}
+
     {
         return true;
     }

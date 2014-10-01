@@ -1,8 +1,6 @@
 #include "exception.h"
 #include "_parser.h"
 
-int counter = 0;
-
 void Parser::ParseDeclaration()
 {
     SymType* type = ParseTypeSpecifier();
@@ -25,14 +23,14 @@ void Parser::ParseDeclaration()
         if (*lexer.Peek() == ASSIGN)
         {
             BaseToken* oper = lexer.Get();
-            SyntaxNode* left = new NodeVar(symbol);
+            SyntaxNode* left = new NodeVar(counter++, symbol);
             SyntaxNode* right = ParseExpression(precedences[COMMA]+1);
-            NodeBinaryOp* node = new NodeBinaryOp(left, oper, right);
             nodeStack.push_back(node);
+            NodeBinaryOp* node = new NodeBinaryOp(counter++, left, oper, right);
             node->GetType();
         }
 
-        if (*lexer.Peek() == SEMICOLON )
+        if (*lexer.Peek() == SEMICOLON)
         {
             lexer.Get();
             break;
@@ -215,7 +213,6 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
 
 void Parser::ParseParameterList()
 {
-    int counter = 0;
     while (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
         SymType* type = ParseTypeSpecifier();

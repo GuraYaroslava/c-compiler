@@ -13,6 +13,7 @@ Parser::Parser(const char* fin, const char* asmout):
     inLoop(false),
     parseFunc(NULL)
 {
+    counter = 0;
     Init();
 }
 
@@ -46,7 +47,7 @@ SyntaxNode* Parser::ParseExpression(int precedence)
         if (oper)
         {
             SyntaxNode* expr = ParseExpression(precedence);
-            SyntaxNode* node = new NodeUnaryOp(oper, expr);
+            SyntaxNode* node = new NodeUnaryOp(counter++, oper, expr);
 
             // type check
             node->GetType();
@@ -91,7 +92,7 @@ SyntaxNode* Parser::ParseExpression(int precedence)
         else
         {
             SyntaxNode* right = ParseExpression(precedence + (right_assoc_oper[subType] == true ? 0 : 1));
-            left = new NodeBinaryOp(left, oper, right);
+            left = new NodeBinaryOp(counter++, left, oper, right);
         }
 
         // type check
@@ -121,23 +122,23 @@ SyntaxNode* Parser::ParsePrimaryExpression()
         if (*token == IDENTIFIER)
         {
             Expected(symbol != NULL, "identifier is undefined");
-            result = new NodeVar(symbol);
+            result = new NodeVar(counter++, symbol);
         }
         else
         {
             switch(token->GetSubType())
             {
             case NUMBER_INT:
-                result = new NodeVar(new SymVar(token, intType));
+                result = new NodeVar(counter++, new SymVar(token, intType));
                 break;
             case NUMBER_FLOAT:
-                result = new NodeVar(new SymVar(token, floatType));
+                result = new NodeVar(counter++, new SymVar(token, floatType));
                 break;
             case CHARACTER:
-                result = new NodeVar(new SymVar(token, charType));
+                result = new NodeVar(counter++, new SymVar(token, charType));
                 break;
             case STRING:
-                result = new NodeVar(new SymVar(token, stringType));
+                result = new NodeVar(counter++, new SymVar(token, stringType));
                 break;
             }
             consts.push_back(result);
@@ -168,7 +169,7 @@ void Parser::ParseFuncCall(SyntaxNode*& node)
     SymTypeFunc* type = dynamic_cast<SymTypeFunc*>(node->GetType());
     Expected(type != NULL, "expression must have (pointer-to-) function type");
 
-    node = new NodeCall(type, node);
+    node = new NodeCall(counter++, type, node);
     while (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
         SyntaxNode* arg = ParseExpression(precedences[COMMA]+1);
@@ -190,7 +191,7 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
     Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
     SyntaxNode* index = ParseExpression();
-    node = new NodeArr(node, index);
+    node = new NodeArr(counter++, node, index);
 
     Expected(lexer.Get()->GetSubType(), SQUARE_RIGHT_BRACKET);
 }
@@ -214,7 +215,7 @@ void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
 
     SyntaxNode* field = ParseExpression();
     Expected(st->fields->Find(field->token->GetText()) != NULL, "struct has no this member");
-    node = new NodeBinaryOp(node, oper, field);
+    node = new NodeBinaryOp(counter++, node, oper, field);
 }
 
 SyntaxNode* Parser::ParsePrintf(BaseToken* token)
@@ -224,7 +225,7 @@ SyntaxNode* Parser::ParsePrintf(BaseToken* token)
     SyntaxNode* format = ParseExpression(precedences[COMMA] + 1);
     SymType* type = format->GetType();
     Expected(type == stringType, "expected parameter of char*");
-    result = new NodePrintf(token, format);
+    result = new NodePrintf(counter++, token, format);
     if (*lexer.Peek() == COMMA)
     {
         lexer.Get();
