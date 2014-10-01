@@ -7,7 +7,27 @@ SymTypeScalar* charType = new SymTypeScalar(new BaseToken("char", 0, 0, KEYWORD,
 SymTypePointer* stringType = new SymTypePointer(charType);
 
 SymType* GetWideType(SymType*, SymType*);
+
 bool IsIntegralType(SymType*);
+bool IsAssignment(TokenType);
+bool IsComparison(TokenType);
+
+static void GenerateAssign(SyntaxNode*, SyntaxNode*, AsmCode&);
+
+//Mul Or Div Or Mod
+static void GenerateOperator(AsmCmdName, AsmCode&, bool isMod = false);
+static void GenerateMulOrDivOrModAssign(AsmCmdName, AsmCode&, bool isMod = false);
+
+static void GenerateBitWiseShift(AsmCmdName cmd, AsmCode&);
+static void GenerateBitWiseShiftAssign(AsmCmdName cmd, AsmCode&);
+
+static void GenerateAddOrSubInts(AsmCmdName, AsmCode&);
+static void GenerateAddWithPointer(SyntaxNode*, SyntaxNode*, AsmCode&);
+static void GenerateSubWithPointer(SyntaxNode*, SyntaxNode*, AsmCode&);
+static void GenerateAddOrSubAssign(AsmCmdName, AsmCode&);
+
+static void GenerateCmp(AsmCmdName, AsmCode&);
+static void GenerateLogicAndOrNot(AsmCmdName, AsmCode&);
 
 // for simple parser ----------------------------------------------------------
 Node::Node(Node* left_, Node* right_, BaseToken* oper_)
@@ -282,89 +302,150 @@ void NodeBinaryOp::Generate(AsmCode& code)
     SymTypePointer* leftTypePointer = dynamic_cast<SymTypePointer*>(leftType);
     SymTypePointer* rightTypePointer = dynamic_cast<SymTypePointer*>(rightType);
 
-    if (op == ASSIGN)
+    if (IsAssignment(op))
     {
-        right->Generate(code);
         left->GenerateLvalue(code);
-        code.AddCmd(cmdPOP, EAX);
-        int size = right->GetType()->GetByteSize();
-        int steps = size / 4 + (size % 4 != 0);
-        for (int i = 0; i < steps; i++)
-        {
-            code.AddCmd(cmdPOP, EBX);
-            code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), new AsmArgRegister(EBX));
-        }
-        code.AddCmd(cmdMOV, EAX, EBX);
-        code.AddCmd(cmdPUSH, EAX);
+        right->Generate(code);
     }
-    else if (op == ADDITION || op == SUBSTRACTION)
+    else
     {
+        left->Generate(code);
+        right->Generate(code);
+    }
+
+    switch(op)
+    {
+    case ASSIGN:
+        GenerateAssign(left, right, code);
+        break;
+
+    case MUL_ASSIGN:
+        GenerateMulOrDivOrModAssign(cmdIMUL, code);
+        break;
+
+    case DIV_ASSIGN:
+        GenerateMulOrDivOrModAssign(cmdIDIV, code);
+        break;
+
+    case MOD_ASSIGN:
+        GenerateMulOrDivOrModAssign(cmdIDIV, code, true);
+        break;
+
+    case BIT_SHIFT_LEFT:
+        GenerateBitWiseShift(cmdSHL, code);
+        break;
+
+    case BIT_SHIFT_RIGHT:
+        GenerateBitWiseShift(cmdSHR, code);
+        break;
+
+    case BIT_SHIFT_LEFT_ASSIGN:
+        GenerateBitWiseShiftAssign(cmdSHL, code);
+        break;
+
+    case BIT_SHIFT_RIGHT_ASSIGN:
+        GenerateBitWiseShiftAssign(cmdSHR, code);
+        break;
+
+    case ADDITION:
         if (!leftTypePointer && !rightTypePointer)
+        {
+            GenerateAddOrSubInts(cmdADD, code);
+        }
+        if (leftTypePointer || rightTypePointer)
         {
             if (!leftTypePointer)
             {
                 swap(left, right);
                 swap(leftTypePointer, rightTypePointer);
             }
-            left->Generate(code);
-            right->Generate(code);
-            code.AddCmd(cmdPOP, EAX);
-            code.AddCmd(cmdPOP, EBX);
-            code.AddCmd(op == ADDITION ? cmdADD : cmdSUB, EAX, EBX);
-            code.AddCmd(cmdPUSH, EAX);
+            GenerateAddWithPointer(left, right, code);
         }
-        else if (leftTypePointer || rightTypePointer)
+        break;
+
+    case SUBSTRACTION:
+        if (!leftTypePointer && !rightTypePointer)
         {
-            if (op == ADDITION)
-            {
-                if (!leftTypePointer)
-                {
-                    swap(left, right);
-                    swap(leftTypePointer, rightTypePointer);
-                }
-                left->Generate(code);
-                right->Generate(code);
-                code.AddCmd(cmdPOP, EAX);
-                code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
-                code.AddCmd(cmdIMUL, EBX, EAX);
-                code.AddCmd(cmdPOP, EBX);
-                code.AddCmd(cmdADD, EAX, EBX);
-                code.AddCmd(cmdPUSH, EAX);
-            }
-            else if (op == SUBSTRACTION)
-            {
-                left->Generate(code);
-                right->Generate(code);
-                if (leftTypePointer && rightTypePointer)
-                {
-                    //расстояние = модуль разности //!!!
-                    code.AddCmd(cmdPOP, EAX);
-                    code.AddCmd(cmdPOP, EBX);
-                    code.AddCmd(cmdSUB, EAX, EBX);
-                    code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
-                    code.AddCmd(cmdCDQ);
-                    code.AddCmd(cmdIDIV, EBX);
-                    code.AddCmd(cmdPUSH, EAX);
-                    return;
-                }
-                code.AddCmd(cmdPOP, EAX);
-                code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
-                code.AddCmd(cmdIMUL, EBX, EAX);
-                code.AddCmd(cmdPOP, EBX);
-                code.AddCmd(cmdSUB, EAX, EBX);
-                code.AddCmd(cmdPUSH, EAX);
-            }
+            GenerateAddOrSubInts(cmdSUB, code);
         }
+        if (leftTypePointer || rightTypePointer)
+        {
+            GenerateSubWithPointer(left, right, code);
+        }
+        break;
+
+    case MULTIPLICATION:
+        GenerateOperator(cmdIMUL, code);
+        break;
+
+    case DIVISION:
+        GenerateOperator(cmdIDIV, code);
+        break;
+
+    case MODULO:
+        GenerateOperator(cmdIDIV, code, true);
+        break;
+
+    case EQUAL:
+        GenerateCmp(cmdSETE, code);
+        break;
+
+    case NOT_EQUAL:
+        GenerateCmp(cmdSETNE, code);
+        break;
+
+    case LESS:
+        GenerateCmp(cmdSETL, code);
+        break;
+
+    case LESS_EQUAL:
+        GenerateCmp(cmdSETLE, code);
+        break;
+
+    case GREATER:
+        GenerateCmp(cmdSETG, code);
+        break;
+
+    case GREATER_EQUAL:
+        GenerateCmp(cmdSETGE, code);
+        break;
+
+    case AND:
+        GenerateLogicAndOrNot(cmdIMUL, code);
+        break;
+
+    case OR:
+        GenerateLogicAndOrNot(cmdADD, code);
+        break;
+
+    case ADD_ASSIGN:
+        GenerateAddOrSubAssign(cmdADD, code);
+        break;
+
+    case SUB_ASSIGN:
+        GenerateAddOrSubAssign(cmdSUB, code);
+        break;
+
+    case BIT_AND_ASSIGN:
+    case BIT_AND:
+        GenerateOperator(cmdAND, code);
+        break;
+
+    case BIT_OR_ASSIGN:
+    case BIT_OR:
+        GenerateOperator(cmdOR, code);
+        break;
+
+    case BIT_XOR_ASSIGN:
+    case BIT_XOR:
+        GenerateOperator(cmdXOR, code);
+        break;
     }
-	else if (op == MULTIPLICATION)
-	{
-        left->Generate(code);
-        right->Generate(code);
-        code.AddCmd(cmdPOP, EAX);
-        code.AddCmd(cmdPOP, EBX);
-		code.AddCmd(cmdIMUL, EAX, EBX);
-		code.AddCmd(cmdPUSH, EAX);
-	}
+    /*if (IsAssignment(op))
+    {
+        code.AddCmd(cmdMOV, ECX, EAX);
+        code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(ECX));
+    }*/
 }
 
 //-----------------------------------------------------------------------------
@@ -447,7 +528,9 @@ void NodeUnaryOp::Generate(AsmCode& code)
     //code.AddCmd(cmdPUSH, EAX);
     arg->Generate(code);
     code.AddCmd(cmdPOP, EAX);
-    if (*token == SUBSTRACTION)
+    switch(token->GetSubType())
+    {
+    case SUBSTRACTION:
         if (*arg->GetType() == floatType)
         {
 
@@ -456,6 +539,12 @@ void NodeUnaryOp::Generate(AsmCode& code)
             code.AddCmd(cmdNEG, EAX);
             code.AddCmd(cmdPUSH, EAX);
         }
+        break;
+
+    case ADDITION:
+        code.AddCmd(cmdPUSH, EAX);
+        break;
+    }
 }
 
 bool NodeUnaryOp::IsModifiableLvalue()
@@ -663,19 +752,19 @@ void NodeVar::GenerateData(AsmCode& code)
     else if (type == floatType)
     {
         code.AddCmd(cmdDD,
-                    new AsmArgMemory("float_" + to_string((long double)counter++)),
+                    new AsmArgMemory("var_" + to_string((long double)(id))),
                     new AsmArgFloat(dynamic_cast<TokenVal <float> *>(token)->GetValue()));
     }
     else if (type == charType)
     {
         code.AddCmd(cmdDD,
-                    new AsmArgMemory("ch_" + to_string((long double)counter++)),
+                    new AsmArgMemory("var_" + to_string((long double)(id))),
                     GenAsmString(token->GetText()));
     }
     else if (type == stringType)
     {
         code.AddCmd(cmdDB,
-                    new AsmArgMemory("str_" + to_string((long double)counter++)),
+                    new AsmArgMemory("var_" + to_string((long double)(id))),
                     GenAsmString(token->GetText()));
     }
 }
@@ -861,8 +950,162 @@ bool IsIntegralType(SymType* type)
     return type == intType || type == charType;
 }
 
+bool IsAssignment(TokenType cmd)
+{
+    return cmd == ASSIGN
+        || cmd == ADD_ASSIGN || cmd == BIT_AND_ASSIGN
+        || cmd == SUB_ASSIGN || cmd == BIT_XOR_ASSIGN
+        || cmd == MUL_ASSIGN || cmd == BIT_OR_ASSIGN
+        || cmd == DIV_ASSIGN || cmd == BIT_SHIFT_LEFT_ASSIGN
+        || cmd == MOD_ASSIGN || cmd == BIT_SHIFT_RIGHT_ASSIGN;
+}
+
+bool IsComparison(TokenType cmd)
+{
+    return cmd == EQUAL      || cmd == NOT_EQUAL
+        || cmd == LESS       || cmd == GREATER
+        || cmd == LESS_EQUAL || cmd == GREATER_EQUAL;
+}
+
+void GenerateAssign(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
+{
+    code.AddCmd(cmdPOP, EBX);
+    int size = right->GetType()->GetByteSize();
+    int steps = size / 4 + (size % 4 != 0);
+    for (int i = 0; i < steps; i++)
     {
-        return true;
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), new AsmArgRegister(EBX));
     }
-    return false;
+    code.AddCmd(cmdMOV, EAX, EBX);
+}
+
+void GenerateMulOrDivOrModAssign(AsmCmdName cmd, AsmCode& code, bool isMod)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, ECX, EAX);
+    code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(ECX));
+    code.AddCmd(cmdCDQ);
+    code.AddCmd(cmd, EBX);
+    AsmArgRegister* reg = isMod ? new AsmArgRegister(EDX) : new AsmArgRegister(EAX);
+    code.AddCmd(cmdMOV, new AsmArgIndirect(ECX), reg);
+}
+
+void GenerateAddOrSubAssign(AsmCmdName cmd, AsmCode& code)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, ECX, EAX);
+    code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(ECX));
+    code.AddCmd(cmdCDQ);
+    code.AddCmd(cmd, EAX, EBX);
+    code.AddCmd(cmdMOV, new AsmArgIndirect(ECX), new AsmArgRegister(EAX));
+}
+
+void GenerateBitWiseShiftAssign(AsmCmdName cmd, AsmCode& code)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, EDX, EAX);
+    code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(EDX));
+    code.AddCmd(cmdMOV, ECX, EBX);
+    code.AddCmd(cmd, EAX, CL);
+    code.AddCmd(cmdMOV, new AsmArgIndirect(EDX), new AsmArgRegister(EAX));
+}
+
+void GenerateBitWiseShift(AsmCmdName cmd, AsmCode& code)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, ECX, EBX);
+    code.AddCmd(cmd, EAX, CL);
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void GenerateAddOrSubInts(AsmCmdName cmd, AsmCode& code)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmd, EAX, EBX);
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void GenerateAddWithPointer(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
+{
+    SymTypePointer* leftTypePointer = dynamic_cast<SymTypePointer*>((left)->GetType());
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+    code.AddCmd(cmdIMUL, EBX, EAX);
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdADD, EAX, EBX);
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void GenerateSubWithPointer(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
+{
+    SymTypePointer* leftTypePointer = dynamic_cast<SymTypePointer*>((left)->GetType());
+    SymTypePointer* rightTypePointer = dynamic_cast<SymTypePointer*>((right)->GetType());
+
+    code.AddCmd(cmdPOP, EAX);
+    if (leftTypePointer && rightTypePointer)
+    {
+        //расстояние = модуль разности //!!!
+        code.AddCmd(cmdPOP, EBX);
+        code.AddCmd(cmdSUB, EAX, EBX);
+        code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+        code.AddCmd(cmdCDQ);
+        code.AddCmd(cmdIDIV, EBX);
+    }
+    else
+    {
+        code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+        code.AddCmd(cmdIMUL, EBX, EAX);
+        code.AddCmd(cmdPOP, EBX);
+        code.AddCmd(cmdSUB, EAX, EBX);
+    }
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void GenerateOperator(AsmCmdName cmd, AsmCode& code, bool isMod)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdCDQ);
+    code.AddCmd(cmd, EBX);
+    if (isMod)
+    {
+        code.AddCmd(cmdMOV, EAX, EDX);
+    }
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void GenerateCmp(AsmCmdName cmd, AsmCode& code)
+{
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdCMP, EAX, EBX);
+    code.AddCmd(cmdMOV, EAX, 0);
+    code.AddCmd(cmd, AL);
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void GenerateLogicAndOrNot(AsmCmdName cmd, AsmCode& code)
+{
+    code.AddCmd(cmdCMP, EAX, 0);// set flags: sub
+    code.AddCmd(cmdMOV, EAX, 0);
+    //code.AddCmd(cmdXOR, EAX, EAX);
+    code.AddCmd(cmdSETNE, AL);// set 01h / 00h
+
+    code.AddCmd(cmdCMP, EBX, 0);
+    code.AddCmd(cmdMOV, EBX, 0);
+    //code.AddCmd(cmdXOR, EBX, EBX);
+    code.AddCmd(cmdSETNE, BL);
+
+    code.AddCmd(cmd, EAX, EBX);
+    code.AddCmd(cmdCMP, EAX, 0);
+    code.AddCmd(cmdMOV, EAX, 0);
+    //code.AddCmd(cmdXOR, EAX, EAX);
+    code.AddCmd(cmdSETNE, AL);
+    code.AddCmd(cmdPUSH, EAX);
 }
