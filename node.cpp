@@ -27,7 +27,7 @@ static void GenerateSubWithPointer(SyntaxNode*, SyntaxNode*, AsmCode&);
 static void GenerateAddOrSubAssign(AsmCmdName, AsmCode&);
 
 static void GenerateCmp(AsmCmdName, AsmCode&);
-static void GenerateLogicAndOrNot(AsmCmdName, AsmCode&);
+static void GenerateLogicAndOr(AsmCmdName, AsmCode&);
 
 // for simple parser ----------------------------------------------------------
 Node::Node(Node* left_, Node* right_, BaseToken* oper_)
@@ -411,11 +411,11 @@ void NodeBinaryOp::Generate(AsmCode& code)
         break;
 
     case AND:
-        GenerateLogicAndOrNot(cmdIMUL, code);
+        GenerateLogicAndOr(cmdIMUL, code);
         break;
 
     case OR:
-        GenerateLogicAndOrNot(cmdADD, code);
+        GenerateLogicAndOr(cmdADD, code);
         break;
 
     case ADD_ASSIGN:
@@ -1090,7 +1090,7 @@ void GenerateCmp(AsmCmdName cmd, AsmCode& code)
     code.AddCmd(cmdPUSH, EAX);
 }
 
-void GenerateLogicAndOrNot(AsmCmdName cmd, AsmCode& code)
+void GenerateLogicAndOr(AsmCmdName cmd, AsmCode& code)
 {
     code.AddCmd(cmdCMP, EAX, 0);// set flags: sub
     code.AddCmd(cmdMOV, EAX, 0);
