@@ -76,6 +76,7 @@ public:
 
     bool operator == (SymType*);
 
+    int GetByteSize() const;
     void SymPrint(ostream&);
 };
 
@@ -92,6 +93,7 @@ public:
 
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
+    int GetByteSize() const;
 
     void SymPrint(ostream&);
 };

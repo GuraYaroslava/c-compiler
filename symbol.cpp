@@ -134,6 +134,11 @@ void SymTypeArray::SymPrint(ostream &out)
     type->SymPrint(out);
 }
 
+int SymTypeArray::GetByteSize() const
+{
+    return type->GetByteSize() * size;
+}
+
 //-----------------------------------------------------------------------------
 SymTypePointer::SymTypePointer(SymType* type_): SymType(NULL), refType(type_) {}
 
@@ -229,6 +234,12 @@ void SymTypeStruct::SymPrint(ostream& out)
         out << endl << "fields:" << endl;
         fields->Print(out);
     }
+}
+
+int SymTypeStruct::GetByteSize() const
+{
+    cout << "struct get byte type" << endl;
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
