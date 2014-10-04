@@ -1044,6 +1044,7 @@ void GenerateAssign(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
         code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), new AsmArgRegister(EBX));
     }
     code.AddCmd(cmdMOV, EAX, EBX);
+    code.AddCmd(cmdPUSH, EAX);
 }
 
 void GenerateMulOrDivOrModAssign(AsmCmdName cmd, AsmCode& code, bool isMod)
