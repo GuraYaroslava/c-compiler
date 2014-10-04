@@ -87,7 +87,7 @@ class SymTypeStruct: public SymType
 public:
     SymTable* fields;
 
-    SymTypeStruct(BaseToken*, SymTable*);
+    SymTypeStruct(BaseToken*);
     ~SymTypeStruct();
 
     bool IsModifiableLvalue();
