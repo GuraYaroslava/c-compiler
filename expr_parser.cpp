@@ -119,6 +119,10 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     if (*token == IDENTIFIER || *token == CONSTANT || *token == STRING)
     {
         Symbol* symbol = symStack.Find(token->GetText());
+        if (!symbol && parseFunc)
+        {
+            symbol = parseFunc->params->Find(token->GetText());
+        }
         if (*token == IDENTIFIER)
         {
             Expected(symbol != NULL, "identifier is undefined");
