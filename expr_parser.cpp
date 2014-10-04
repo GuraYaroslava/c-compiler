@@ -195,7 +195,7 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
     Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
     SyntaxNode* index = ParseExpression();
-    node = new NodeArr(counter++, node, index);
+    node = new NodeArr(counter++, type, node, index);
 
     Expected(lexer.Get()->GetSubType(), SQUARE_RIGHT_BRACKET);
 }

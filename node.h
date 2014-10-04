@@ -113,11 +113,12 @@ public:
 class NodeArr: public SyntaxNode
 {
 private:
+    SymTypeArray* type;
     SyntaxNode* name;
     SyntaxNode* index;
 
 public:
-    NodeArr(int, SyntaxNode*, SyntaxNode*);
+    NodeArr(int, SymTypeArray*, SyntaxNode*, SyntaxNode*);
     NodeArr(BaseToken*);
     ~NodeArr();
 
