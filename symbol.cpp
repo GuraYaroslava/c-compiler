@@ -282,7 +282,6 @@ bool SymTypeFunc::CanConvertTo(SymType* to)
     return *this == to;
 }
 
-
 void SymTypeFunc::SymPrint(ostream& out)
 {
     out << "function(";
@@ -464,7 +463,7 @@ void SymTable::GenerateCode(AsmCode& code)
     for (int i = 0, size = GetSize(); i < size; ++i)
     {
         SymVar* sym = dynamic_cast<SymVar*>(symbols[i]);
-        if (dynamic_cast<SymTypeFunc*>(sym->type))
+        if (sym && dynamic_cast<SymTypeFunc*>(sym->type))
         {
             sym->Generate(code);
         }
