@@ -173,6 +173,7 @@ public:
     Symbol* Find(const string&);
 
     void Add(Symbol*);
+    void Add(Symbol*, int);
 
     int GetSize();
     int GetByteSize();
@@ -197,6 +198,7 @@ public:
     Symbol* Find(const string&);
 
     void Add(Symbol*);
+    void Add(Symbol*, int);
 
     void Push(SymTable*);
 

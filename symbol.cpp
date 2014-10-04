@@ -373,6 +373,27 @@ void SymTable::Add(Symbol* symbol)
     GetIndexByName[symbol->name->GetText()] = symbols.size()-1;
 }
 
+void SymTable::Add(Symbol* symbol, int flag)
+{
+    SymTable::Add(symbol);
+    switch (flag)
+    {
+    case 0://locals
+        break;
+
+    case 1://params
+        //dynamic_cast<SymVar*>(symbol)->local = true;
+        symbol->offset = offset + symbol->GetByteSize();//!!! if struct
+        offset += symbol->GetByteSize();
+        break;
+
+    case 2://fields
+        symbol->offset = offset;
+        offset += symbol->GetByteSize();
+        break;
+    }
+}
+
 int SymTable::GetSize()
 {
     return symbols.size();
@@ -467,6 +488,11 @@ Symbol* SymTableStack::Find(const string& name)
 void SymTableStack::Add(Symbol* symbol)
 {
     tables.back()->Add(symbol);
+}
+
+void SymTableStack::Add(Symbol* symbol, int flag)
+{
+    tables.back()->Add(symbol, flag);
 }
 
 SymTable* SymTableStack::Top()

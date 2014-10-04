@@ -106,7 +106,7 @@ void Parser::ParseStructDeclaration()
 
     while (true)
     {
-        symStack.Add(declarator);
+        symStack.Add(declarator, 2);
 
         Expected(*lexer.Peek() != ASSIGN, "data member initializer is not allowed");
 
@@ -224,8 +224,7 @@ void Parser::ParseParameterList()
             lexer.Get();
         }
         dynamic_cast<SymVar*>(param)->local = true;
-
-        symStack.Add(param);
+        symStack.Add(param, 1);
     }
 
     lexer.Get();
