@@ -760,6 +760,25 @@ void NodeArr::Print(int width, int indent, ostream& out)
     index->Print(width, indent+width, out);
 }
 
+void NodeArr::GenerateLvalue(AsmCode& code)
+{
+    name->GenerateLvalue(code);
+    index->Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, EBX, type->type->GetByteSize());
+    code.AddCmd(cmdIMUL, EAX, EBX);
+    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdADD, EAX, EBX);
+    code.AddCmd(cmdPUSH, EAX);
+}
+
+void NodeArr::Generate(AsmCode& code)
+{
+    GenerateLvalue(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdPUSH, new AsmArgIndirect(EAX));
+}
+
 //-----------------------------------------------------------------------------
 NodeVar::NodeVar(int id_, Symbol* symbol_):
     SyntaxNode(id_, symbol_->name),
