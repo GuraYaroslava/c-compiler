@@ -73,16 +73,15 @@ SymTypeStruct* Parser::ParseStructSpecifier()
     {
         string n = to_string((long double)counter++);
         BaseToken* dummy = new BaseToken("abstract-struct-"+n, 0, 0, IDENTIFIER, IDENTIFIER);
-        result = new SymTypeStruct(dummy, NULL);
+        result = new SymTypeStruct(dummy);
     }
     else
     {
         BaseToken* name = lexer.Get();
-        result = new SymTypeStruct(name, NULL);
+        result = new SymTypeStruct(name);
     }
 
     //---------------------------------------------------------------------------
-    result->fields = new SymTable();
     symStack.Push(result->fields);
     //expected either a definition or a tag name
     Expected(lexer.Get()->GetSubType(), FIGURE_LEFT_BRACKET);

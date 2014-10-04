@@ -197,9 +197,9 @@ int SymTypePointer::GetByteSize() const
 }
 
 //-----------------------------------------------------------------------------
-SymTypeStruct::SymTypeStruct(BaseToken* name_, SymTable* fields_):
+SymTypeStruct::SymTypeStruct(BaseToken* name_):
     SymType(name_),
-    fields(fields_)
+    fields(new SymTable())
     {}
 
 SymTypeStruct::~SymTypeStruct() {}
