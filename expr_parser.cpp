@@ -217,9 +217,9 @@ void Parser::ParseMemberSelection(SyntaxNode*& node, BaseToken* oper)
         Expected(st != NULL, "expression must have struct type");
     }
 
-    SyntaxNode* field = ParseExpression();
-    Expected(st->fields->Find(field->token->GetText()) != NULL, "struct has no this member");
-    node = new NodeBinaryOp(counter++, node, oper, field);
+    Symbol* symbol = st->fields->Find(lexer.Get()->GetText());
+    Expected(symbol != NULL, "struct has no this member");
+    node = new NodeBinaryOp(counter++, node, oper, new NodeVar(counter++, symbol));
 }
 
 SyntaxNode* Parser::ParsePrintf(BaseToken* token)
