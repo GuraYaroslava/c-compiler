@@ -897,7 +897,8 @@ void NodeVar::Generate(AsmCode& code)
     {
         int size = symbol->GetByteSize();
         int steps = size / 4 + (size % 4 != 0);
-        for (int i = 0; i < steps; ++i)
+
+        for (int i = 0; i < steps && !dynamic_cast<SymVar*>(symbol)->local; ++i)
         {
             code.AddCmd(cmdPUSH,
                         new AsmArgMemory("dword ptr ["
@@ -905,6 +906,11 @@ void NodeVar::Generate(AsmCode& code)
                                             //+ " + "
                                             //+ to_string((long double)(4 * (steps - i - 1)))
                                             +"]"));
+        }
+
+        for (int i = 0; i < steps && dynamic_cast<SymVar*>(symbol)->local; ++i)
+        {
+            code.AddCmd(cmdPUSH, new AsmArgIndirect(EBP, symbol->offset + 4 * (steps - i - 1)));//!!!
         }
         return;
     }
