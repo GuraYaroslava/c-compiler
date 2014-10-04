@@ -743,8 +743,8 @@ SymType* NodeArr::GetType()
 
 bool NodeArr::IsModifiableLvalue()
 {
-    SymType* type = name->GetType();
-    return type->IsModifiableLvalue();
+    SymType* type = GetType();
+    return !dynamic_cast<SymTypeArray*>(type) && !dynamic_cast<SymTypeFunc*>(type);
 }
 
 bool NodeArr::IsLvalue()
