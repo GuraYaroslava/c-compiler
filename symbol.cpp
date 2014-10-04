@@ -309,8 +309,13 @@ void SymTypeFunc::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
-SymVar::SymVar(BaseToken* name_, SymType* type_): Symbol(name_), type(type_) {}
-SymVar::SymVar(BaseToken* name_): Symbol(name_), type(NULL) {}
+SymVar::SymVar(BaseToken* name_, SymType* type_):
+    Symbol(name_),
+    type(type_),
+    local(false)
+    {}
+
+SymVar::SymVar(BaseToken* name_): Symbol(name_), type(NULL), local(false) {}
 
 SymVar::~SymVar() {}
 

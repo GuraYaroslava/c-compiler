@@ -223,6 +223,7 @@ void Parser::ParseParameterList()
         {
             lexer.Get();
         }
+        dynamic_cast<SymVar*>(param)->local = true;
 
         symStack.Add(param);
     }

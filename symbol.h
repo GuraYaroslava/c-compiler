@@ -144,6 +144,8 @@ protected:
 public:
     friend class SymTable;
 
+    bool local;
+
     SymVar(BaseToken*, SymType*);
     SymVar(BaseToken*);
     ~SymVar();
