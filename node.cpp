@@ -22,7 +22,7 @@ static void GenerateBitWiseShift(AsmCmdName cmd, AsmCode&);
 static void GenerateBitWiseShiftAssign(AsmCmdName cmd, AsmCode&);
 
 static void GenerateAddOrSubInts(AsmCmdName, AsmCode&);
-static void GenerateAddWithPointer(SyntaxNode*, SyntaxNode*, AsmCode&);
+static void GenerateAddWithPointer(int, AsmCode&);
 static void GenerateSubWithPointer(SyntaxNode*, SyntaxNode*, AsmCode&);
 static void GenerateAddOrSubAssign(AsmCmdName, AsmCode&);
 
@@ -1091,11 +1091,10 @@ void GenerateAddOrSubInts(AsmCmdName cmd, AsmCode& code)
     code.AddCmd(cmdPUSH, EAX);
 }
 
-void GenerateAddWithPointer(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
+void GenerateAddWithPointer(int shift, AsmCode& code)
 {
-    SymTypePointer* leftTypePointer = dynamic_cast<SymTypePointer*>((left)->GetType());
     code.AddCmd(cmdPOP, EAX);
-    code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
+    code.AddCmd(cmdMOV, EBX, shift);
     code.AddCmd(cmdIMUL, EBX, EAX);
     code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdADD, EAX, EBX);
