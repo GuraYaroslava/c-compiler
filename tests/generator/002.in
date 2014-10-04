@@ -1,0 +1,11 @@
+int sayHi()
+{
+    printf("Hello, World!");
+    return 0;
+}
+
+int main()
+{
+    sayHi();
+    return 0;
+}

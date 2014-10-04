@@ -1,0 +1,11 @@
+int *a;
+int *b;
+
+int main()
+{
+    //a = a + 1;
+    printf("%d", a);
+    printf("%d", b);
+    printf("%d", a - b);
+    return 0;
+}

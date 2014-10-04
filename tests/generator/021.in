@@ -1,0 +1,5 @@
+int main()
+{
+    printf("%d", 14 << 2);
+    return 0;
+}

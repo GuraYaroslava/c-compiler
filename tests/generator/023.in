@@ -1,0 +1,10 @@
+int a;
+
+int main()
+{
+    a = 12;
+    a >>= 2;
+    printf("%d\n", 12 >> 2);
+    printf("%d", a);
+    return 0;
+}

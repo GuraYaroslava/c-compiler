@@ -1,0 +1,10 @@
+int one()
+{
+    return 1;
+}
+
+int main()
+{
+    printf("%d", one());
+    return 0;
+}

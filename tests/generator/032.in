@@ -1,0 +1,12 @@
+struct point
+{
+    int x, y;
+} a;
+
+int main()
+{
+    a.x = 48;
+    a.y = a.x;
+    printf("%d %d", a.x, a.y);
+    return 0;
+}

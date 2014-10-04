@@ -1,0 +1,23 @@
+int a, b;
+
+int main()
+{
+    a = 0;
+    b = 3;
+    a += b;
+    printf("%d\n", a);
+    a -= 3 * b;
+    printf("%d\n", a);
+    a = 1;
+    a *= 15;
+    printf("%d\n", a);
+    a /= 3;
+    printf("%d\n", a);
+    a *= b * 3 * 3;
+    printf("%d\n", a);
+    a %= 2;
+    printf("%d\n", a);
+    printf("%d\n", -a);
+    printf("%d\n", +a);
+    return 0;
+}
