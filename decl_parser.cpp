@@ -165,9 +165,9 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
         BaseToken* dummy = new BaseToken("abstract-"+n, 0, 0, IDENTIFIER, IDENTIFIER);
         result = new SymVar(dummy, type);
     }
-    else if (symStack.Find(lexer.Peek()->GetText()))
+    else if (symStack.Top()->Find(lexer.Peek()->GetText()))
     {
-        Error("redefinition");
+        Error("redefinition: " + lexer.Peek()->GetText());
     }
     else
     {
