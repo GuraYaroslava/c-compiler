@@ -1,7 +1,7 @@
 #include "symbol.h"
 #include "exception.h"
 
-Symbol::Symbol(BaseToken* name_): name(name_) {}
+Symbol::Symbol(BaseToken* name_): name(name_), offset(0) {}
 
 Symbol::~Symbol() {}
 
@@ -353,7 +353,7 @@ int SymVar::GetByteSize() const
 }
 
 //-----------------------------------------------------------------------------
-SymTable::SymTable(): symbols(NULL) {}
+SymTable::SymTable(): symbols(NULL), offset(0) {}
 
 SymTable::~SymTable() {}
 

@@ -23,6 +23,8 @@ class Symbol
 public:
     BaseToken* name;
 
+    int offset;
+
     Symbol(BaseToken*);
     ~Symbol();
 
@@ -157,6 +159,8 @@ public:
 class SymTable
 {
 public:
+    int offset;
+
     vector <Symbol*> symbols;
 
     map <string, int> GetIndexByName;
