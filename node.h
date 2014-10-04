@@ -141,6 +141,7 @@ private:
     Symbol* symbol;
 
 public:
+    friend class NodeBinaryOp;
     NodeVar(int, Symbol*);
     ~NodeVar();
 
