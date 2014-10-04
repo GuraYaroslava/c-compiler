@@ -307,7 +307,7 @@ void NodeBinaryOp::Generate(AsmCode& code)
         left->GenerateLvalue(code);
         right->Generate(code);
     }
-    else
+    else if (op != POINT && op != ARROW)
     {
         left->Generate(code);
         right->Generate(code);
@@ -359,7 +359,7 @@ void NodeBinaryOp::Generate(AsmCode& code)
                 swap(left, right);
                 swap(leftTypePointer, rightTypePointer);
             }
-            GenerateAddWithPointer(left, right, code);
+            GenerateAddWithPointer(leftTypePointer->refType->GetByteSize(), code);
         }
         break;
 
@@ -428,18 +428,35 @@ void NodeBinaryOp::Generate(AsmCode& code)
 
     case BIT_AND_ASSIGN:
     case BIT_AND:
-        GenerateOperator(cmdAND, code);
+        //GenerateOperator(cmdAND, code);
+        GenerateAddOrSubInts(cmdAND, code);
         break;
 
     case BIT_OR_ASSIGN:
     case BIT_OR:
-        GenerateOperator(cmdOR, code);
+        //GenerateOperator(cmdOR, code);
+        GenerateAddOrSubInts(cmdOR, code);
         break;
 
     case BIT_XOR_ASSIGN:
     case BIT_XOR:
-        GenerateOperator(cmdXOR, code);
+        //GenerateOperator(cmdXOR, code);
+        GenerateAddOrSubInts(cmdXOR, code);
         break;
+
+    case POINT:
+        GenerateLvalue(code);
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdPUSH, new AsmArgIndirect(EAX));
+        break;
+
+    case ARROW:
+        GenerateLvalue(code);
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdPUSH, new AsmArgIndirect(EAX));
+        break;
+    }
+}
 
 void NodeBinaryOp::GenerateLvalue(AsmCode& code)
 {

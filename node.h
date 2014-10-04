@@ -130,6 +130,7 @@ public:
     bool IsModifiableLvalue();
 
     void Print(int, int, ostream&);
+    void Generate(AsmCode&);
     void GenerateLvalue(AsmCode&);
 };
 
