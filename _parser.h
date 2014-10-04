@@ -71,5 +71,6 @@ public:
     void PrintSymTables(ostream&);
 
     bool inLoop;
+    int counter;
     SymTypeFunc* parseFunc;
 };
