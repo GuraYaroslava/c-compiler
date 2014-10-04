@@ -65,6 +65,7 @@ public:
 
     void Print(int, int, ostream&);
     void Generate(AsmCode&);
+    void GenerateLvalue(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -85,6 +86,7 @@ public:
 
     void Print(int, int, ostream&);
     void Generate(AsmCode&);
+    void GenerateLvalue(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -128,6 +130,7 @@ public:
     bool IsModifiableLvalue();
 
     void Print(int, int, ostream&);
+    void GenerateLvalue(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------

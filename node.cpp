@@ -440,12 +440,30 @@ void NodeBinaryOp::Generate(AsmCode& code)
     case BIT_XOR:
         GenerateOperator(cmdXOR, code);
         break;
-    }
-    /*if (IsAssignment(op))
+
+void NodeBinaryOp::GenerateLvalue(AsmCode& code)
+{
+    if (IsAssignment(token->GetSubType()))
     {
-        code.AddCmd(cmdMOV, ECX, EAX);
-        code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(ECX));
-    }*/
+        Generate(code);
+        code.AddCmd(cmdPOP, EAX);
+        left->GenerateLvalue(code);
+        return;
+    }
+
+    if (*token == POINT)
+    {
+        left->GenerateLvalue(code);
+    }
+    else if (*token == ARROW)
+    {
+        left->Generate(code);
+    }
+
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, EBX, dynamic_cast<NodeVar*>(right)->symbol->offset);
+    code.AddCmd(cmdADD, EAX, EBX);
+    code.AddCmd(cmdPUSH, EAX);
 }
 
 //-----------------------------------------------------------------------------
@@ -545,6 +563,11 @@ void NodeUnaryOp::Generate(AsmCode& code)
         code.AddCmd(cmdPUSH, EAX);
         break;
     }
+}
+
+void NodeUnaryOp::GenerateLvalue(AsmCode& code)
+{
+    //*pointer
 }
 
 bool NodeUnaryOp::IsModifiableLvalue()
