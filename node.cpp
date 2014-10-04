@@ -561,11 +561,11 @@ SymType* NodeUnaryOp::GetType()
 void NodeUnaryOp::Generate(AsmCode& code)
 {
     //code.AddCmd(cmdPUSH, EAX);
-    arg->Generate(code);
-    code.AddCmd(cmdPOP, EAX);
     switch(token->GetSubType())
     {
     case SUBSTRACTION:
+        arg->Generate(code);
+        code.AddCmd(cmdPOP, EAX);
         if (*arg->GetType() == floatType)
         {
 
@@ -577,7 +577,41 @@ void NodeUnaryOp::Generate(AsmCode& code)
         break;
 
     case ADDITION:
+        arg->Generate(code);
+        code.AddCmd(cmdPOP, EAX);
         code.AddCmd(cmdPUSH, EAX);
+        break;
+
+    case NOT:
+        arg->Generate(code);
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdCMP, EAX, 0);
+        code.AddCmd(cmdSETE, AL);
+        code.AddCmd(cmdPUSH, EAX);
+        break;
+
+    case BIT_AND:
+        arg->GenerateLvalue(code);
+        break;
+
+    case BIT_NOT:
+        arg->Generate(code);
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdNOT, EAX);
+        code.AddCmd(cmdPUSH, EAX);
+        break;
+
+    case MULTIPLICATION:
+        arg->Generate(code);
+        code.AddCmd(cmdPOP, EAX);
+        int size = dynamic_cast<SymTypePointer*>(arg->GetType())->refType->GetByteSize();
+        int steps = size / 4 + (size % 4 != 0);
+        code.AddCmd(cmdMOV, EBX, EAX);
+        for (int i = 0; i < steps; ++i)
+        {
+            code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(EBX, (steps - i - 1) * 4));
+            code.AddCmd(cmdPUSH, EAX);
+        }
         break;
     }
 }
