@@ -711,13 +711,13 @@ void NodeCall::Print(int width, int indent, ostream& out)
 
 void NodeCall::Generate(AsmCode& code)
 {
-    code.AddCmd(cmdSUB, ESP, type->GetByteSize());//!!!
+    code.AddCmd(cmdSUB, ESP, type->type->GetByteSize());
     for (int i = args.size() - 1; i > -1; --i)
     {
         args[i]->Generate(code);
     }
     code.AddCmd(cmdCALL, new AsmLabel(name->token->GetText()));
-    code.AddCmd(cmdADD, ESP, type->params->GetByteSize());//!!!
+    code.AddCmd(cmdADD, ESP, type->params->GetByteSize());
 }
 
 //-----------------------------------------------------------------------------
@@ -783,12 +783,7 @@ bool NodeVar::IsLvalue()
                         "NODE VAR HAVE NOT SCALAR TYPE");
     }
 
-    if (type->name->GetSubType() == IDENTIFIER)
-    {
-        return true;
-    }
-
-    return false;
+    return  type->name->GetSubType() == IDENTIFIER;
 }
 
 bool NodeVar::IsModifiableLvalue()
@@ -796,12 +791,8 @@ bool NodeVar::IsModifiableLvalue()
     Symbol* type = symbol->GetType();
     SymTypeScalar* sc = dynamic_cast<SymTypeScalar*>(type);
 
-    if (sc && *symbol->name == IDENTIFIER)
-    {
-        return true;
-    }
-
-    if (dynamic_cast<SymTypePointer*>(type))
+    if (sc && *symbol->name == IDENTIFIER
+        || dynamic_cast<SymTypePointer*>(type))
     {
         return true;
     }
@@ -819,9 +810,7 @@ void NodeVar::GenerateData(AsmCode& code)
     SymType* type = symbol->GetType();
     if (type == intType)
     {
-        //code.AddCmd(cmdDD,
-        //            new AsmArgMemory("int_" + to_string((long double)counter++)),
-        //            new AsmArgInt(dynamic_cast<TokenVal <int> *>(token)->GetValue()));
+
     }
     else if (type == floatType)
     {
@@ -889,14 +878,14 @@ void NodeVar::Generate(AsmCode& code)
     {
         int size = symbol->GetByteSize();
         int steps = size / 4 + (size % 4 != 0);
-        //global
         for (int i = 0; i < steps; ++i)
         {
             code.AddCmd(cmdPUSH,
                         new AsmArgMemory("dword ptr ["
                                             + token->GetText()
-                                            + " + "
-                                            + to_string((long double)(4 * (steps - i - 1))) +"]"));
+                                            //+ " + "
+                                            //+ to_string((long double)(4 * (steps - i - 1)))
+                                            +"]"));
         }
         return;
     }
@@ -906,18 +895,6 @@ void NodeVar::Generate(AsmCode& code)
     {
         code.AddCmd(cmdMOV, EAX, dynamic_cast<TokenVal <int> *>(token)->GetValue());
         code.AddCmd(cmdPUSH, EAX);
-    }
-    else if (type == floatType)
-    {
-        
-    }
-    else if (type == charType)
-    {
-        
-    }
-    else if (type == stringType)
-    {
-        
     }
 }
 
@@ -937,16 +914,6 @@ void NodePrintf::Generate(AsmCode& code)
         SymType* type = args[i]->GetType();
         args[i]->Generate(code);
         size += type->GetByteSize();
-        //if (*type == floatType)
-        //{
-        //    code.AddCmd(cmdPOP, real4);
-        //    code.AddCmd(cmdFLD, real4);
-        //    code.AddCmd(cmdFSTP, real8);
-        //    code.AddCmd(cmdMOV, makeArg(EAX), makeArgMemory(real8name, true));
-        //    code.AddCmd(cmdPUSH, makeIndirectArg(EAX, 4));
-        //    code.AddCmd(cmdPUSH, makeIndirectArg(EAX));
-        //    size += 4;
-        //}
     }
     code.AddCmd(new AsmArgMemory("var_" + to_string((long double)format->id)));
     code.AddCmd(cmdADD, ESP, size);
@@ -1046,7 +1013,7 @@ void GenerateAssign(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
     code.AddCmd(cmdPOP, EBX);
     int size = right->GetType()->GetByteSize();
     int steps = size / 4 + (size % 4 != 0);
-    for (int i = 0; i < steps; i++)
+    for (int i = 0; i < steps; ++i)
     {
         code.AddCmd(cmdPOP, EAX);
         code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), new AsmArgRegister(EBX));
@@ -1124,7 +1091,6 @@ void GenerateSubWithPointer(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
     code.AddCmd(cmdPOP, EAX);
     if (leftTypePointer && rightTypePointer)
     {
-        //расстояние = модуль разности //!!!
         code.AddCmd(cmdPOP, EBX);
         code.AddCmd(cmdSUB, EAX, EBX);
         code.AddCmd(cmdMOV, EBX, leftTypePointer->refType->GetByteSize());
@@ -1168,18 +1134,15 @@ void GenerateLogicAndOr(AsmCmdName cmd, AsmCode& code)
 {
     code.AddCmd(cmdCMP, EAX, 0);// set flags: sub
     code.AddCmd(cmdMOV, EAX, 0);
-    //code.AddCmd(cmdXOR, EAX, EAX);
     code.AddCmd(cmdSETNE, AL);// set 01h / 00h
 
     code.AddCmd(cmdCMP, EBX, 0);
     code.AddCmd(cmdMOV, EBX, 0);
-    //code.AddCmd(cmdXOR, EBX, EBX);
     code.AddCmd(cmdSETNE, BL);
 
     code.AddCmd(cmd, EAX, EBX);
     code.AddCmd(cmdCMP, EAX, 0);
     code.AddCmd(cmdMOV, EAX, 0);
-    //code.AddCmd(cmdXOR, EAX, EAX);
     code.AddCmd(cmdSETNE, AL);
     code.AddCmd(cmdPUSH, EAX);
 }

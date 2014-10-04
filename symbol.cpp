@@ -350,8 +350,8 @@ void SymVar::Generate(AsmCode& code)
         return;
     }
     int size = type->GetByteSize();
-    //int dwords = size / 4 + (size % 4 != 0);
-    code.AddCmd(cmdDB, new AsmArgMemory(name->GetText()), new AsmArgDup(size));
+    int dwords = size / 4 + (size % 4 != 0);
+    code.AddCmd(cmdDD, new AsmArgMemory(name->GetText()), new AsmArgDup(size));
 }
 
 void SymVar::SymPrint(ostream& out)
@@ -488,7 +488,7 @@ void SymTableStack::Pop()
 
 Symbol* SymTableStack::Find(const string& name)
 {
-    Symbol *symbol = 0;
+    Symbol* symbol = NULL;
     for (int i = tables.size() - 1; i >= 0 && !symbol; --i)
     {
         symbol = tables[i]->Find(name);

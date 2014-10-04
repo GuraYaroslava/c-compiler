@@ -130,7 +130,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
         }
         else
         {
-            switch(token->GetSubType())
+            switch (token->GetSubType())
             {
             case NUMBER_INT:
                 result = new NodeVar(counter++, new SymVar(token, intType));
@@ -454,9 +454,9 @@ void Parser::GenerateCode()
     generator.code.AddCmd(new AsmLabel("start"));
 
     //call main function
-    generator.code.AddCmd(cmdSUB, ESP, 4);//!!!
+    generator.code.AddCmd(cmdSUB, ESP, 4);
     generator.code.AddCmd(cmdCALL, new AsmArgLabel("main"));
-    generator.code.AddCmd(cmdADD, ESP, 4);//!!!
+    generator.code.AddCmd(cmdADD, ESP, 4);
 
     //end of start
     generator.code.AddCmd(cmdRET, new AsmArg());
