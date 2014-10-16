@@ -9,9 +9,6 @@ AsmArgString* GenAsmString(const string&);
 
 typedef enum
 {
-    //cmdREAL4,
-    //cmdREAL8,
-
     cmdDD,
     cmdDB,
     cmdDQ,
@@ -168,16 +165,6 @@ public:
 
     bool operator != (AsmArg*) const;
     bool operator != (AsmRegName) const;
-
-    virtual bool IsRegister() const;
-    virtual bool UsesRegister(AsmRegName) const;
-
-    virtual bool IsMemoryLocation() const;
-
-    virtual bool IsImmediate() const;
-
-    virtual bool IsOffset() const;
-    virtual void ClearOffset();
 };
 
 //-----------------------------------------------------------------------------
@@ -193,8 +180,6 @@ public:
     string Generate();
 
     bool operator == (int) const;
-
-    bool IsImmediate() const;
 };
 
 //-----------------------------------------------------------------------------
@@ -214,9 +199,6 @@ public:
 
     bool operator == (AsmArg*) const;
 
-    bool IsRegister() const;
-    bool UsesRegister(AsmRegName) const;
-
     friend class AsmArgIndirect;
 };
 
@@ -234,9 +216,6 @@ public:
 
     bool operator == (AsmArg*) const;
     bool operator == (AsmRegName) const;
-
-    bool IsMemoryLocation() const;
-    bool UsesRegister(AsmRegName) const;
 };
 
 //-----------------------------------------------------------------------------
@@ -253,11 +232,6 @@ public:
     string Generate();
 
     bool operator == (AsmArg*) const;
-
-    bool IsMemoryLocation() const;
-
-    bool IsOffset() const;
-    void ClearOffset();
 };
 
 //-----------------------------------------------------------------------------

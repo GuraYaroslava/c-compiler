@@ -86,36 +86,6 @@ bool AsmArg::operator != (AsmRegName arg) const
     return !(*this == arg);
 }
 
-bool AsmArg::IsRegister() const
-{
-    return false;
-}
-
-bool AsmArg::UsesRegister(AsmRegName) const
-{
-    return false;
-}
-
-bool AsmArg::IsImmediate() const
-{
-    return false;
-}
-
-bool AsmArg::IsOffset() const
-{
-    return false;
-}
-
-void AsmArg::ClearOffset()
-{
-
-}
-
-bool AsmArg::IsMemoryLocation() const
-{
-    return false;
-}
-
 //-----------------------------------------------------------------------------
 AsmArgImmediate::AsmArgImmediate(int value_): AsmArg(), value(value_) {}
 
@@ -129,11 +99,6 @@ string AsmArgImmediate::Generate()
 bool AsmArgImmediate::operator == (int value_) const
 {
     return value == value_;
-}
-
-bool AsmArgImmediate::IsImmediate() const
-{
-    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -181,16 +146,6 @@ bool AsmArgRegister::operator == (AsmArg* arg) const
     return tmp && tmp->reg == reg/* && !dynamic_cast<AsmArgIndirect*>(arg)*/;
 }
 
-bool AsmArgRegister::IsRegister() const
-{
-    return true;
-}
-
-bool AsmArgRegister::UsesRegister(AsmRegName reg_) const
-{
-    return reg == reg_;
-}
-
 //-----------------------------------------------------------------------------
 AsmArgIndirect::AsmArgIndirect(AsmRegName reg_, int shift):
     AsmArgRegister(reg_),
@@ -215,16 +170,6 @@ bool AsmArgIndirect::operator == (AsmRegName) const
     return false;
 }
 
-bool AsmArgIndirect::IsMemoryLocation() const
-{
-    return true;
-}
-
-bool AsmArgIndirect::UsesRegister(AsmRegName reg_) const
-{
-    return reg == reg_;
-}
-
 //-----------------------------------------------------------------------------
 AsmArgMemory::AsmArgMemory(const string& name_, bool lvalue_):
     name(name_),
@@ -242,21 +187,6 @@ bool AsmArgMemory::operator == (AsmArg* arg) const
 {
     AsmArgMemory* tmp = dynamic_cast<AsmArgMemory*>(arg);
     return tmp && tmp->name == name;
-}
-
-bool AsmArgMemory::IsMemoryLocation() const
-{
-    return true;
-}
-
-bool AsmArgMemory::IsOffset() const
-{
-    return lvalue;
-}
-
-void AsmArgMemory::ClearOffset()
-{
-    lvalue = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -429,14 +359,6 @@ void Generator::Generate()
            "include c:\\masm32\\include\\msvcrt.inc\n"
            "includelib c:\\masm32\\lib\\msvcrt.lib\n"
 
-           //"include c:\\masm32\\include\\masm32.inc\n"
-           //"includelib c:\\masm32\\lib\\masm32.lib\n"
-
-           //"include c:\\masm32\\include\\kernel32.inc\n"
-           //"includelib c:\\masm32\\lib\\kernel32.lib\n"
-
-           //"include c:\\masm32\\macros\\macros.asm\n\n"
-
            "\n.data\n";
 
     for (int i = 0, size = data.cmds.size(); i < size; ++i)
@@ -449,8 +371,6 @@ void Generator::Generate()
     {
         out << (dynamic_cast<AsmLabel*>(code.cmds[i]) ? "" : "    ") << code.cmds[i]->Generate() << endl;
     }
-    //out << "\tprint \"Hello world\"" << endl;
-    //out << "\texit" <<endl;
     out << "end start";
 }
 
@@ -503,10 +423,6 @@ string AsmCmdNameToString(AsmCmdName opcode)
         return "dd";
     case cmdDQ:
         return "dq";
-    //case cmdREAL8:
-        //return "real8";
-    //case cmdREAL4:
-        //return "real4";
     case cmdINVOKE:
         return "invoke";
     case cmdXOR:
