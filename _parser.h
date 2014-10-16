@@ -73,4 +73,5 @@ public:
     bool inLoop;
     int counter;
     SymTypeFunc* parseFunc;
+    StmtIteration* parseIter;
 };

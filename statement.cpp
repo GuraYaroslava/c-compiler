@@ -67,6 +67,39 @@ void StmtBlock::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
+StmtIteration::StmtIteration(): start(NULL), inc(NULL), cond(NULL), end(NULL), body(NULL) {}
+
+StmtIteration::~StmtIteration()
+{
+
+}
+
+void StmtIteration::SetStartLabel(string label)
+{
+    start = new AsmArgLabel(label);
+}
+
+void StmtIteration::SetIncLabel(string label)
+{
+    inc = new AsmArgLabel(label);
+}
+
+void StmtIteration::SetCondLabel(string label)
+{
+    cond = new AsmArgLabel(label);
+}
+
+void StmtIteration::SetEndLabel(string label)
+{
+    end = new AsmArgLabel(label);
+}
+
+void StmtIteration::SetBody(Statement* body_)
+{
+    body = body_;
+}
+
+//-----------------------------------------------------------------------------
 StmtIf::StmtIf(SyntaxNode* conditioin_, Statement* bodyIf_, Statement* bodyElse_):
     Statement(),
     condition(conditioin_),
@@ -96,24 +129,11 @@ void StmtIf::Generate(AsmCode& code)
 //-----------------------------------------------------------------------------
 StmtFor::StmtFor(SyntaxNode* expr1_,
                  SyntaxNode* expr2_,
-                 SyntaxNode* expr3_,
-                 Statement* body_):
-    Statement(),
+                 SyntaxNode* expr3_):
+    StmtIteration(),
     expr1(new StmtExpr(expr1_)),
     expr2(new StmtExpr(expr2_)),
-    expr3(new StmtExpr(expr3_)),
-    body(body_)
-    {}
-
-StmtFor::StmtFor(StmtExpr* expr1_,
-                 StmtExpr* expr2_,
-                 StmtExpr* expr3_,
-                 Statement* body_):
-    Statement(),
-    expr1(expr1_),
-    expr2(expr2_),
-    expr3(expr3_),
-    body(body_)
+    expr3(new StmtExpr(expr3_))
     {}
 
 void StmtFor::StmtPrint(ostream& out, int indent)
@@ -146,10 +166,9 @@ void StmtFor::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
-StmtWhile::StmtWhile(SyntaxNode* condition_, Statement* body_):
-    Statement(),
-    condition(condition_),
-    body(body_)
+StmtWhile::StmtWhile(SyntaxNode* condition_):
+    StmtIteration(),
+    condition(condition_)
     {}
 
 void StmtWhile::StmtPrint(ostream& out, int indent)

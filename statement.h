@@ -55,17 +55,39 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-class StmtFor: public Statement
+class StmtIteration: public Statement
+{
+protected:
+    AsmArgLabel* start;
+    AsmArgLabel* inc;
+    AsmArgLabel* cond;
+    AsmArgLabel* end;
+    Statement* body;
+
+public:
+    StmtIteration();
+    ~StmtIteration();
+
+    virtual void SetStartLabel(string);
+    virtual void SetIncLabel(string);
+    virtual void SetCondLabel(string);
+    virtual void SetEndLabel(string);
+    virtual void SetBody(Statement*);
+
+    friend class StmtContinue;
+    friend class StmtBreak;
+};
+
+//-----------------------------------------------------------------------------
+class StmtFor: public StmtIteration
 {
 private:
     StmtExpr *expr1;
     StmtExpr *expr2;
     StmtExpr *expr3;
-    Statement* body;
 
 public:
-    StmtFor(SyntaxNode*, SyntaxNode*, SyntaxNode*, Statement*);
-    StmtFor(StmtExpr*, StmtExpr*, StmtExpr*, Statement*);
+    StmtFor(SyntaxNode*, SyntaxNode*, SyntaxNode*);
     ~StmtFor();
 
     void StmtPrint(ostream&, int);
@@ -73,14 +95,13 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-class StmtWhile: public Statement
+class StmtWhile: public StmtIteration
 {
 private:
     SyntaxNode* condition;
-    Statement* body;
 
 public:
-    StmtWhile(SyntaxNode*, Statement*);
+    StmtWhile(SyntaxNode*);
     ~StmtWhile();
 
     void StmtPrint(ostream&, int);
