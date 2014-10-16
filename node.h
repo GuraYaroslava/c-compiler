@@ -25,6 +25,7 @@ protected:
 
 public:
     friend class Parser;
+    friend class NodeArr;
     friend class NodeCall;
     friend class NodeBinaryOp;
     friend class NodePrintf;
@@ -43,6 +44,9 @@ public:
     virtual void Generate(AsmCode&);
     virtual void GenerateData(AsmCode&);
     virtual void GenerateLvalue(AsmCode&);
+
+    void Error(int, int, const string);
+    void Expected(int, int, bool, const string);
 };
 
 //-----------------------------------------------------------------------------

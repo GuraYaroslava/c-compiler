@@ -14,7 +14,6 @@ bool IsComparison(TokenType);
 
 static void GenerateAssign(SyntaxNode*, SyntaxNode*, AsmCode&);
 
-//Mul Or Div Or Mod
 static void GenerateOperator(AsmCmdName, AsmCode&, bool isMod = false);
 static void GenerateMulOrDivOrModAssign(AsmCmdName, AsmCode&, bool isMod = false);
 
@@ -87,6 +86,20 @@ void SyntaxNode::GenerateData(AsmCode&)
 void SyntaxNode::GenerateLvalue(AsmCode&)
 {
 
+}
+
+void SyntaxNode::Error(int ln, int col, const string msg)
+{
+    throw Exception(ln, col, msg);
+}
+
+void SyntaxNode::Expected(int ln, int col, bool actual, const string msg)
+{
+    bool expected = true;
+    if (actual != expected)
+    {
+        Error(ln, col, msg);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -171,15 +184,12 @@ SymType* NodeBinaryOp::GetType()
     case BIT_SHIFT_RIGHT_ASSIGN:
 
     case MOD_ASSIGN:
-        if (!leftType->CanConvertTo(intType) || !rightType->CanConvertTo(intType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must have integral type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+                 leftType->CanConvertTo(intType) && rightType->CanConvertTo(intType),
+                 "expression must have integral type");
 
     case ASSIGN:
-        if (dynamic_cast<SymTypeStruct*>(leftType) && leftType == rightType)
+        if (*leftType == rightType)
         {
             return leftType;
         }
@@ -191,66 +201,47 @@ SymType* NodeBinaryOp::GetType()
     case SUB_ASSIGN:
 
     case DIV_ASSIGN:
-        if (!left->IsModifiableLvalue())
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must be a modifiable lvalue");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+                 left->IsModifiableLvalue(),
+                 "expression must be a modifiable lvalue");
 
         right = MakeConversion(right, rightType, leftType);
         return leftType;
 
     case POINT:
-        if (!dynamic_cast<SymTypeStruct*>(leftType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must have struct type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+                 dynamic_cast<SymTypeStruct*>(leftType),
+                 "expression must have struct type");
         return rightType;
 
     case ARROW:
-        if (!leftTypePointer
-            || !dynamic_cast<SymTypeStruct*>(leftTypePointer->refType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must have pointer-to-struct type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+                 leftTypePointer && dynamic_cast<SymTypeStruct*>(leftTypePointer->refType),
+                 "expression must have pointer-to-struct type");
         return rightType;
 
     case SUBSTRACTION:
         if (leftTypePointer && rightTypePointer)
         {
-            if (leftTypePointer->refType != rightTypePointer->refType)
-            {
-                throw Exception(token->GetLine(),
-                                token->GetPosition(),
-                                "operand types are incompatible");
-            }
+            Expected(token->GetLine(), token->GetPosition(),
+                     leftTypePointer->refType == rightTypePointer->refType,
+                     "operand types are incompatible");
             return intType;
         }
 
-        if (leftTypePointer || rightTypePointer)
+        /*if (leftTypePointer || rightTypePointer)
         {
-            if (leftTypePointer && (IsIntegralType(rightType) || rightType->CanConvertTo(leftType))
-                || rightTypePointer && (IsIntegralType(leftType) || leftType->CanConvertTo(rightType)))
-            {
-                return intType;
-            }
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "operand types are incompatible");
-        }
+            Expected(token->GetLine(), token->GetPosition(),
+                     leftTypePointer && (IsIntegralType(rightType) || rightType->CanConvertTo(leftType))
+                     || rightTypePointer && (IsIntegralType(leftType) || leftType->CanConvertTo(rightType)),
+                     "operand types are incompatible");
+            return intType;
+        }*/
 
     case ADDITION:
-        if (leftTypePointer && rightTypePointer || leftTypeArray && rightTypeArray)
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must have integral type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+            (!leftTypePointer || !rightTypePointer) && (!leftTypeArray || !rightTypeArray),
+            "expression must have integral type");
 
         if (leftTypePointer && (IsIntegralType(rightType)/* || leftType == rightType*/)
             || rightTypePointer && (IsIntegralType(leftType)/* || leftType == rightType*/))
@@ -271,12 +262,9 @@ SymType* NodeBinaryOp::GetType()
         //}
 
     default:
-        if (dynamic_cast<SymTypeStruct*>(leftType) || dynamic_cast<SymTypeStruct*>(rightType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "no operator matches these operands (struct)");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+            !dynamic_cast<SymTypeStruct*>(leftType) && !dynamic_cast<SymTypeStruct*>(rightType),
+            "no operator matches these operands (struct)");
 
         left = MakeConversion(left, leftType, wideType);
         right = MakeConversion(right, rightType, wideType);
@@ -505,54 +493,36 @@ SymType* NodeUnaryOp::GetType()
     switch (token->GetSubType())
     {
     case MULTIPLICATION: // Indirection Operator
-        if (!dynamic_cast<SymTypePointer*>(type))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "operad of `*` must be a pointer");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+            dynamic_cast<SymTypePointer*>(type), "operad of `*` must be a pointer");
         return dynamic_cast<SymTypePointer*>(type)->refType;
 
     case BIT_AND: // Address Operator
-        if (!arg->IsLvalue())
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must be an lvalue or a function designator");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+            arg->IsLvalue(), "expression must be an lvalue or a function designator");
         return new SymTypePointer(type);
 
     case BIT_NOT:
-        if (!type->CanConvertTo(intType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must have integral type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+            type->CanConvertTo(intType), "expression must have integral type");
         arg = MakeConversion(arg, type, intType);
         break;
 
     case NOT:
-        if (!dynamic_cast<SymTypePointer*>(type)
-            && !dynamic_cast<SymTypeArray*>(type)
-            && !type->CanConvertTo(floatType)
-            && !type->CanConvertTo(intType)
-            && !type->CanConvertTo(charType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "expression must have integral type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+                 dynamic_cast<SymTypePointer*>(type)
+                 || dynamic_cast<SymTypeArray*>(type)
+                 || type->CanConvertTo(floatType)
+                 || type->CanConvertTo(intType)
+                 || type->CanConvertTo(charType),
+                 "expression must have integral type");
         break;
 
     case ADDITION:
     case SUBSTRACTION:
-        if (!type->CanConvertTo(floatType))
-        {
-            throw Exception(token->GetLine(),
-                            token->GetPosition(),
-                            "exspression must have arithmetic type");
-        }
+        Expected(token->GetLine(), token->GetPosition(),
+                 type->CanConvertTo(floatType),
+                 "exspression must have arithmetic type");
     }
 
     return type;
@@ -653,24 +623,18 @@ SymType* NodeCall::GetType()
     int formalParametersCount = type->params->GetSize();
     int realParametersCount = args.size();
 
-    if (formalParametersCount != realParametersCount)
-    {
-        throw Exception(name->token->GetLine(),
-                        name->token->GetPosition(),
-                        "incorrect arguments in function call");
-    }
+        Expected(name->token->GetLine(), name->token->GetPosition(),
+                 formalParametersCount == realParametersCount,
+                 "incorrect arguments in function call");
 
     for (int i = 0; i < formalParametersCount; ++i)
     {
         SymType* realParamType = args[i]->GetType();
         SymType* formalParamType = type->params->symbols[i]->GetType();
 
-        if (!realParamType->CanConvertTo(formalParamType))
-        {
-            throw Exception(args[i]->token->GetLine(),
-                            args[i]->token->GetPosition(),
-                            "argument is incompatible with parameter");
-        }
+        Expected(args[i]->token->GetLine(), args[i]->token->GetPosition(),
+                 realParamType->CanConvertTo(formalParamType),
+                 "argument is incompatible with parameter");
 
         args[i] = MakeConversion(args[i], realParamType, formalParamType);
     }
@@ -729,13 +693,10 @@ NodeArr::~NodeArr() {}
 SymType* NodeArr::GetType()
 {
     SymType* type = name->GetType();
-    if (!dynamic_cast<SymTypeArray*>(type)
-        && !dynamic_cast<SymTypePointer*>(type))
-    {
-        throw Exception(token->GetLine(),
-                        token->GetPosition(),
-                        "expression must be a pointer to a complete object type");
-    }
+    Expected(name->token->GetLine(), name->token->GetPosition(),
+             (dynamic_cast<SymTypeArray*>(type) || dynamic_cast<SymTypePointer*>(type)),
+             "expression must be a pointer to a complete object type");
+
     SymTypeArray* arrType = dynamic_cast<SymTypeArray*>(type);
     SymTypePointer* pType = dynamic_cast<SymTypePointer*>(type);
     return arrType ? arrType->type : pType->refType;
