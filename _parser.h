@@ -45,7 +45,7 @@ public:
     void ParseParameterList();
 
     Statement* ParseStatement();
-    StmtBlock* ParseBlock();
+    StmtBlock* ParseBlock(bool flag = false);
     StmtIf* ParseIf();
     StmtFor* ParseFor();
     StmtWhile* ParseWhile();

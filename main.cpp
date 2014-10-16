@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
     if (argc <= 1)
     {
-        cout << "Usage: " << argv[0] << " <key: -s -sp -p -d -o> <input file name> <output file name>" << endl;
+        cout << "Usage: " << argv[0] << " <key: -s -sp -p -d -g> <input file name> <output file name>" << endl;
         return EXIT_SUCCESS;
     }
 
@@ -132,6 +132,9 @@ int main(int argc, char* argv[])
             }
 
             parser.GenerateCode();
+
+            //parser.PrintSymTables(fout);
+            //parser.PrintStmtTrees(5, 5, fout);
         }
     }
     catch (Exception exp)

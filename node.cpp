@@ -696,7 +696,7 @@ void NodeCall::Generate(AsmCode& code)
     {
         args[i]->Generate(code);
     }
-    code.AddCmd(cmdCALL, new AsmLabel(name->token->GetText()));
+    code.AddCmd(cmdCALL, new AsmLabel("func_"+name->token->GetText()));
     code.AddCmd(cmdADD, ESP, type->params->GetByteSize());
 }
 
@@ -739,10 +739,13 @@ void NodeArr::Print(int width, int indent, ostream& out)
 
 void NodeArr::GenerateLvalue(AsmCode& code)
 {
+    int shift = dynamic_cast<SymTypeArray*>(type) ?
+                dynamic_cast<SymTypeArray*>(type)->type->GetByteSize() :
+                dynamic_cast<SymTypePointer*>(type)->refType->GetByteSize();
     name->GenerateLvalue(code);
     index->Generate(code);
     code.AddCmd(cmdPOP, EAX);
-    code.AddCmd(cmdMOV, EBX, type->type->GetByteSize());
+    code.AddCmd(cmdMOV, EBX, shift);
     code.AddCmd(cmdIMUL, EAX, EBX);
     code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdADD, EAX, EBX);
@@ -771,15 +774,7 @@ SymType* NodeVar::GetType()
 
 bool NodeVar::IsLvalue()
 {
-    Symbol* type = symbol->GetType();
-    if (!dynamic_cast<SymTypeScalar*>(type))
-    {
-        throw Exception(token->GetLine(),
-                        token->GetPosition(),
-                        "NODE VAR HAVE NOT SCALAR TYPE");
-    }
-
-    return  type->name->GetSubType() == IDENTIFIER;
+    return  token->GetSubType() == IDENTIFIER;
 }
 
 bool NodeVar::IsModifiableLvalue()
@@ -832,39 +827,22 @@ void NodeVar::GenerateLvalue(AsmCode& code)
 {
     if (*token == IDENTIFIER)
     {
-        code.AddCmd(cmdPUSH, new AsmArgMemory(symbol->name->GetText(), true));//!!!
-
-        //code.AddCmd(cmdMOV, EAX, EBP);
-        //code.AddCmd(cmdMOV, EBX, OFFSET);
-        //code.AddCmd(cmdADD, EAX, EBX);
-        //code.AddCmd(cmdPUSH, EAX);
-        return;
+        if (dynamic_cast<SymVar*>(symbol)->local)
+        {
+            code.AddCmd(cmdMOV, EAX, EBP);
+            code.AddCmd(cmdMOV, EBX, symbol->offset);
+            code.AddCmd(cmdADD, EAX, EBX);
+            code.AddCmd(cmdPUSH, EAX);
+        }
+        else
+        {
+            code.AddCmd(cmdPUSH, new AsmArgMemory("var_"+symbol->name->GetText(), true));//!!!
+        }
     }
-
-    SymType* type = symbol->GetType();
-    if (type == intType)
+    else
     {
-        throw Exception(token->GetLine(),
-                token->GetPosition(),
-                "WOW");
-    }
-    else if (type == floatType)
-    {
-        throw Exception(token->GetLine(),
-                token->GetPosition(),
-                "WOW");
-    }
-    else if (type == charType)
-    {
-        throw Exception(token->GetLine(),
-                token->GetPosition(),
-                "WOW");
-    }
-    else if (type == stringType)
-    {
-        throw Exception(token->GetLine(),
-                token->GetPosition(),
-                "WOW");
+        SymType* type = symbol->GetType();
+        Expected(token->GetLine(), token->GetPosition(), type == intType, "WOW");
     }
 }
 
@@ -872,16 +850,24 @@ void NodeVar::Generate(AsmCode& code)
 {
     if (*token == IDENTIFIER)
     {
+        SymType* type = GetType();
+        if (dynamic_cast<SymTypeArray*>(type))
+        {
+            GenerateLvalue(code);
+            return;
+        }
+
+
         int size = symbol->GetByteSize();
         int steps = size / 4 + (size % 4 != 0);
 
         for (int i = 0; i < steps && !dynamic_cast<SymVar*>(symbol)->local; ++i)
         {
             code.AddCmd(cmdPUSH,
-                        new AsmArgMemory("dword ptr ["
+                        new AsmArgMemory("dword ptr [var_"
                                             + token->GetText()
-                                            //+ " + "
-                                            //+ to_string((long double)(4 * (steps - i - 1)))
+                                            + " + "
+                                            + to_string((long double)(4 * (steps - i - 1)))
                                             +"]"));
         }
 
