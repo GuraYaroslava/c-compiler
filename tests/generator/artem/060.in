@@ -1,0 +1,11 @@
+int main()
+{
+	int a = 0;
+	do {
+		int c = -1;
+		do 
+			printf("%d\n", ++c);
+		while (c < a);
+		printf("%d\n", ++a);
+	} while (a < 10);
+}
