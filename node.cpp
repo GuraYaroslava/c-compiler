@@ -685,7 +685,7 @@ void NodeCall::Generate(AsmCode& code)
 }
 
 //-----------------------------------------------------------------------------
-NodeArr::NodeArr(int id_, SymTypeArray*type_, SyntaxNode* name_, SyntaxNode* index_):
+NodeArr::NodeArr(int id_, SymType *type_, SyntaxNode* name_, SyntaxNode* index_):
     SyntaxNode(id_, NULL), type(type_), name(name_), index(index_) {}
 
 NodeArr::~NodeArr() {}

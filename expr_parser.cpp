@@ -192,6 +192,12 @@ void Parser::ParseFuncCall(SyntaxNode*& node)
 
 void Parser::ParseArrIndex(SyntaxNode*& node)
 {
+    SymType* type = dynamic_cast<SymTypeArray*>(node->GetType());
+    if (!type)
+    {
+        type = dynamic_cast<SymTypePointer*>(node->GetType());
+    }
+    Expected(type != NULL, "expression must have array type");
     Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
     SyntaxNode* index = ParseExpression();
