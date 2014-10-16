@@ -290,10 +290,19 @@ void NodeBinaryOp::Generate(AsmCode& code)
     SymTypePointer* leftTypePointer = dynamic_cast<SymTypePointer*>(leftType);
     SymTypePointer* rightTypePointer = dynamic_cast<SymTypePointer*>(rightType);
 
+    if (!leftTypePointer && dynamic_cast<SymTypeArray*>(leftType))
+    {
+        leftTypePointer = new SymTypePointer(dynamic_cast<SymTypeArray*>(leftType)->type);
+    }
+    if (!rightTypePointer && dynamic_cast<SymTypeArray*>(rightType))
+    {
+        rightTypePointer = new SymTypePointer(dynamic_cast<SymTypeArray*>(rightType)->type);
+    }
+
     if (IsAssignment(op))
     {
-        left->GenerateLvalue(code);
         right->Generate(code);
+        left->GenerateLvalue(code);
     }
     else if (op != POINT && op != ARROW)
     {
@@ -933,7 +942,7 @@ void NodePrintf::Print(int width, int indent, ostream& out)
 
 //-----------------------------------------------------------------------------
 NodeDummy::NodeDummy(SymType* type_, SyntaxNode* node):
-    NodeUnaryOp(node->id, NULL, node),
+    NodeUnaryOp(node->id, node->token, node),
     type(type_)
     {}
 
@@ -1003,13 +1012,13 @@ bool IsComparison(TokenType cmd)
 
 void GenerateAssign(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
 {
-    code.AddCmd(cmdPOP, EBX);
+    code.AddCmd(cmdPOP, EAX);
     int size = right->GetType()->GetByteSize();
     int steps = size / 4 + (size % 4 != 0);
     for (int i = 0; i < steps; ++i)
     {
-        code.AddCmd(cmdPOP, EAX);
-        code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), new AsmArgRegister(EBX));
+        code.AddCmd(cmdPOP, EBX);
+        code.AddCmd(cmdMOV, new AsmArgIndirect(EAX, i * 4), EBX);
     }
     code.AddCmd(cmdMOV, EAX, EBX);
     code.AddCmd(cmdPUSH, EAX);
@@ -1017,36 +1026,33 @@ void GenerateAssign(SyntaxNode* left, SyntaxNode* right, AsmCode& code)
 
 void GenerateMulOrDivOrModAssign(AsmCmdName cmd, AsmCode& code, bool isMod)
 {
-    code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdMOV, ECX, EAX);
-    code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(ECX));
+    code.AddCmd(cmdMOV, EAX, new AsmArgIndirect(ECX));
     code.AddCmd(cmdCDQ);
     code.AddCmd(cmd, EBX);
-    AsmArgRegister* reg = isMod ? new AsmArgRegister(EDX) : new AsmArgRegister(EAX);
-    code.AddCmd(cmdMOV, new AsmArgIndirect(ECX), reg);
+    code.AddCmd(cmdMOV, new AsmArgIndirect(ECX), isMod ? EDX : EAX);
 }
 
 void GenerateAddOrSubAssign(AsmCmdName cmd, AsmCode& code)
 {
-    code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdMOV, ECX, EAX);
-    code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(ECX));
+    code.AddCmd(cmdMOV, EAX, new AsmArgIndirect(ECX));
     code.AddCmd(cmdCDQ);
     code.AddCmd(cmd, EAX, EBX);
-    code.AddCmd(cmdMOV, new AsmArgIndirect(ECX), new AsmArgRegister(EAX));
+    code.AddCmd(cmdMOV, new AsmArgIndirect(ECX), EAX);
 }
 
 void GenerateBitWiseShiftAssign(AsmCmdName cmd, AsmCode& code)
 {
-    code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdPOP, EAX);
-    code.AddCmd(cmdMOV, EDX, EAX);
-    code.AddCmd(cmdMOV, new AsmArgRegister(EAX), new AsmArgIndirect(EDX));
+    code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdMOV, ECX, EBX);
-    code.AddCmd(cmd, EAX, CL);
-    code.AddCmd(cmdMOV, new AsmArgIndirect(EDX), new AsmArgRegister(EAX));
+    code.AddCmd(cmd, new AsmArgIndirect(EAX), CL);
+    code.AddCmd(cmdPUSH, EAX);
 }
 
 void GenerateBitWiseShift(AsmCmdName cmd, AsmCode& code)
@@ -1070,7 +1076,7 @@ void GenerateAddWithPointer(int shift, AsmCode& code)
 {
     code.AddCmd(cmdPOP, EAX);
     code.AddCmd(cmdMOV, EBX, shift);
-    code.AddCmd(cmdIMUL, EBX, EAX);
+    code.AddCmd(cmdIMUL, EAX, EBX);
     code.AddCmd(cmdPOP, EBX);
     code.AddCmd(cmdADD, EAX, EBX);
     code.AddCmd(cmdPUSH, EAX);
@@ -1106,11 +1112,7 @@ void GenerateOperator(AsmCmdName cmd, AsmCode& code, bool isMod)
     code.AddCmd(cmdPOP, EAX);
     code.AddCmd(cmdCDQ);
     code.AddCmd(cmd, EBX);
-    if (isMod)
-    {
-        code.AddCmd(cmdMOV, EAX, EDX);
-    }
-    code.AddCmd(cmdPUSH, EAX);
+    code.AddCmd(cmdPUSH, isMod ? EDX : EAX);
 }
 
 void GenerateCmp(AsmCmdName cmd, AsmCode& code)
@@ -1125,12 +1127,17 @@ void GenerateCmp(AsmCmdName cmd, AsmCode& code)
 
 void GenerateLogicAndOr(AsmCmdName cmd, AsmCode& code)
 {
-    code.AddCmd(cmdCMP, EAX, 0);// set flags: sub
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdPOP, EBX);
+
+    code.AddCmd(cmdCMP, EAX, 0);
     code.AddCmd(cmdMOV, EAX, 0);
-    code.AddCmd(cmdSETNE, AL);// set 01h / 00h
+    //code.AddCmd(cmdXOR, EAX, EAX);
+    code.AddCmd(cmdSETNE, AL);
 
     code.AddCmd(cmdCMP, EBX, 0);
     code.AddCmd(cmdMOV, EBX, 0);
+    //code.AddCmd(cmdXOR, EBX, EBX);
     code.AddCmd(cmdSETNE, BL);
 
     code.AddCmd(cmd, EAX, EBX);
