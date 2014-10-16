@@ -42,7 +42,7 @@ bool SymType::CanConvertTo(SymType*)
 
 bool SymType::operator == (SymType* type_)
 {
-    return name == type_->name;
+    return name->GetText() == type_->name->GetText();
 }
 
 bool SymType::operator != (SymType* type_)
