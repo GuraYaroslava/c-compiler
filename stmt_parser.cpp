@@ -96,9 +96,16 @@ StmtFor* Parser::ParseFor()
     }
     Expected(*lexer.Get() == ROUND_RIGHT_BRACKET, "expected a `)`");
 
+    StmtFor* result = new StmtFor(expr1, expr2, expr3);
+    StmtIteration* tmp = parseIter;
+    parseIter = result;
+
     Statement* body = ParseStatement();
+    result->SetBody(body);
+
+    parseIter = tmp;
     inLoop = false;
-    return new StmtFor(expr1, expr2, expr3, body);
+    return result;
 }
 
 StmtWhile* Parser::ParseWhile()
@@ -106,9 +113,17 @@ StmtWhile* Parser::ParseWhile()
     inLoop = true;
     lexer.Get();
     SyntaxNode* condition = GetCondition();
+
+    StmtWhile* result = new StmtWhile(condition);
+    StmtIteration* tmp = parseIter;
+    parseIter = result;
+
     Statement* body = ParseStatement();
-    inLoop = false;
-    return new StmtWhile(condition, body);
+    result->SetBody(body);
+
+    parseIter = tmp;
+    inLoop = false;//!!!
+    return result;
 }
 
 StmtJump* Parser::ParseJump()

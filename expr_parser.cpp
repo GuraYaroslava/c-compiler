@@ -11,9 +11,10 @@ Parser::Parser(const char* fin, const char* asmout):
     lexer(fin),
     generator(asmout),
     inLoop(false),
-    parseFunc(NULL)
+    parseFunc(NULL),
+    parseIter(NULL),
+    counter(0)
 {
-    counter = 0;
     Init();
 }
 
