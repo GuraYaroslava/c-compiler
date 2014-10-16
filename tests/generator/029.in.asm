@@ -5,13 +5,44 @@ includelib c:\masm32\lib\msvcrt.lib
 
 .data
     var_30 db "%d %d %d", 0
-    a dd 40 dup(0)
+    var_a dd 10 dup(0)
 
 .code
-main:
+func_main:
     push ebp
     mov ebp, esp
-    push offset a
+    sub esp, 0
+    mov eax, 15
+    push eax
+    push offset var_a
+    mov eax, 2
+    push eax
+    pop eax
+    mov ebx, 4
+    imul eax, ebx
+    pop ebx
+    add eax, ebx
+    push eax
+    pop eax
+    pop ebx
+    mov dword ptr [eax + 0], ebx
+    mov eax, ebx
+    push eax
+    push offset var_a
+    mov eax, 1
+    push eax
+    pop eax
+    mov ebx, 4
+    imul eax, ebx
+    pop ebx
+    add eax, ebx
+    push eax
+    pop eax
+    pop ebx
+    mov dword ptr [eax + 0], ebx
+    mov eax, ebx
+    push eax
+    push offset var_a
     mov eax, 0
     push eax
     pop eax
@@ -20,69 +51,30 @@ main:
     pop ebx
     add eax, ebx
     push eax
-    push offset a
-    mov eax, 1
-    push eax
     pop eax
-    mov ebx, 4
-    imul eax, ebx
     pop ebx
-    add eax, ebx
-    push eax
-    push offset a
-    mov eax, 2
-    push eax
-    pop eax
-    mov ebx, 4
-    imul eax, ebx
-    pop ebx
-    add eax, ebx
-    push eax
-    mov eax, 15
-    push eax
-    pop ebx
-    pop eax
     mov dword ptr [eax + 0], ebx
     mov eax, ebx
-    push eax
-    pop ebx
-    pop eax
-    mov dword ptr [eax + 0], ebx
-    mov eax, ebx
-    push eax
-    pop ebx
-    pop eax
-    mov dword ptr [eax + 0], ebx
-    mov eax, ebx
-    push eax
-    push offset a
-    mov eax, 1
-    push eax
-    pop eax
-    mov ebx, 4
-    imul eax, ebx
-    pop ebx
-    add eax, ebx
     push eax
     mov eax, 10
     push eax
-    pop ebx
+    push offset var_a
+    mov eax, 1
+    push eax
     pop eax
+    mov ebx, 4
+    imul eax, ebx
+    pop ebx
+    add eax, ebx
+    push eax
+    pop eax
+    pop ebx
     mov ecx, eax
     mov eax, dword ptr [ecx + 0]
     cdq
     add eax, ebx
     mov dword ptr [ecx + 0], eax
-    push offset a
-    mov eax, 2
-    push eax
-    pop eax
-    mov ebx, 4
-    imul eax, ebx
-    pop ebx
-    add eax, ebx
-    push eax
-    push offset a
+    push offset var_a
     mov eax, 1
     push eax
     pop eax
@@ -93,7 +85,7 @@ main:
     push eax
     pop eax
     push dword ptr [eax + 0]
-    push offset a
+    push offset var_a
     mov eax, 0
     push eax
     pop eax
@@ -108,12 +100,21 @@ main:
     pop eax
     sub eax, ebx
     push eax
-    pop ebx
+    push offset var_a
+    mov eax, 2
+    push eax
     pop eax
+    mov ebx, 4
+    imul eax, ebx
+    pop ebx
+    add eax, ebx
+    push eax
+    pop eax
+    pop ebx
     mov dword ptr [eax + 0], ebx
     mov eax, ebx
     push eax
-    push offset a
+    push offset var_a
     mov eax, 2
     push eax
     pop eax
@@ -124,7 +125,7 @@ main:
     push eax
     pop eax
     push dword ptr [eax + 0]
-    push offset a
+    push offset var_a
     mov eax, 1
     push eax
     pop eax
@@ -135,7 +136,7 @@ main:
     push eax
     pop eax
     push dword ptr [eax + 0]
-    push offset a
+    push offset var_a
     mov eax, 0
     push eax
     pop eax
@@ -148,13 +149,13 @@ main:
     push dword ptr [eax + 0]
     invoke crt_printf, addr var_30
     add esp, 12
-end_main:
+end_func_main:
     mov esp, ebp
     pop ebp
     ret 0
 start:
     sub esp, 4
-    call main
+    call func_main
     add esp, 4
     ret 0
 end start

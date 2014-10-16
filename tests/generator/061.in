@@ -1,0 +1,21 @@
+struct foo{
+    int a[10];
+    int x, y;
+};
+
+struct point{
+    int x, y;
+    struct {
+        int ro, fi;
+        struct foo field[50];
+    } polar;
+};
+
+struct point a[100], b;
+
+int main()
+{
+    a[50].polar.field[49].a[0] = 768;
+    printf("%d", a[50].polar.field[49].a[0]);
+    return 0;
+}

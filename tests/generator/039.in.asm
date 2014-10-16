@@ -7,9 +7,10 @@ includelib c:\masm32\lib\msvcrt.lib
     var_3 db "%d", 0
 
 .code
-kvadrat:
+func_kvadrat:
     push ebp
     mov ebp, esp
+    sub esp, 0
     push dword ptr [ebp + 8]
     push dword ptr [ebp + 8]
     pop ebx
@@ -19,18 +20,19 @@ kvadrat:
     push eax
     pop eax
     mov dword ptr [ebp + 12], eax
-    jmp end_kvadrat
-end_kvadrat:
+    jmp end_func_kvadrat
+end_func_kvadrat:
     mov esp, ebp
     pop ebp
     ret 0
-main:
+func_main:
     push ebp
     mov ebp, esp
+    sub esp, 0
     sub esp, 4
     mov eax, 3
     push eax
-    call kvadrat
+    call func_kvadrat
     add esp, 4
     invoke crt_printf, addr var_3
     add esp, 4
@@ -38,14 +40,14 @@ main:
     push eax
     pop eax
     mov dword ptr [ebp + 8], eax
-    jmp end_main
-end_main:
+    jmp end_func_main
+end_func_main:
     mov esp, ebp
     pop ebp
     ret 0
 start:
     sub esp, 4
-    call main
+    call func_main
     add esp, 4
     ret 0
 end start

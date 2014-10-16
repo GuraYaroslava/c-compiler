@@ -1,0 +1,20 @@
+struct point{
+    int x, y, z;
+};
+
+int distance(struct point a, struct point b)
+{
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z);
+}
+
+struct point a, b;
+
+int main()
+{
+    printf("%d %d\n", distance(a, b), distance(b, a));
+    a.x = 1;
+    printf("%d %d\n", distance(b, a), distance(a, b));
+    b.x = -1;
+    printf("%d %d\n", distance(a, b), distance(b, a));
+    return 0;
+}

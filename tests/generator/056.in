@@ -1,0 +1,13 @@
+struct point{
+    int x, y, z;
+};
+
+struct point a;
+
+int main()
+{
+    struct point *p = &a;
+    p->x = p->y = p->z = 256;
+    printf("%d %d %d", a.x, a.y, a.z);
+    return 0;
+}

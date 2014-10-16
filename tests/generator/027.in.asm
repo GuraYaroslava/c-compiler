@@ -5,13 +5,16 @@ includelib c:\masm32\lib\msvcrt.lib
 
 .data
     var_6 db "%d", 0
-    a dd 40 dup(0)
+    var_a dd 10 dup(0)
 
 .code
-main:
+func_main:
     push ebp
     mov ebp, esp
-    push offset a
+    sub esp, 0
+    mov eax, 157
+    push eax
+    push offset var_a
     mov eax, 6
     push eax
     pop eax
@@ -20,14 +23,12 @@ main:
     pop ebx
     add eax, ebx
     push eax
-    mov eax, 157
-    push eax
-    pop ebx
     pop eax
+    pop ebx
     mov dword ptr [eax + 0], ebx
     mov eax, ebx
     push eax
-    push offset a
+    push offset var_a
     mov eax, 6
     push eax
     pop eax
@@ -40,13 +41,13 @@ main:
     push dword ptr [eax + 0]
     invoke crt_printf, addr var_6
     add esp, 4
-end_main:
+end_func_main:
     mov esp, ebp
     pop ebp
     ret 0
 start:
     sub esp, 4
-    call main
+    call func_main
     add esp, 4
     ret 0
 end start

@@ -1,0 +1,12 @@
+struct point {
+    int x, y, z;
+} a;
+
+int main()
+{
+    struct point b;
+    b.x = b.y = b.z = -30;
+    a = b;
+    printf("%d %d %d", a.x, a.y, a.z);
+    return 0;
+}

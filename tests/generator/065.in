@@ -1,0 +1,13 @@
+int main()
+{
+    int i;
+    for (i = 0; i < 11; i += 1)
+    {
+        if (i & 1)
+        {
+            continue;
+        }
+        printf("%d is even\n", i);
+    }
+    return 0;
+}

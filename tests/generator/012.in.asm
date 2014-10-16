@@ -5,36 +5,37 @@ includelib c:\masm32\lib\msvcrt.lib
 
 .data
     var_8 db "%d", 0
-    a dd 4 dup(0)
-    b dd 4 dup(0)
+    var_a dd 1 dup(0)
+    var_b dd 1 dup(0)
 
 .code
-main:
+func_main:
     push ebp
     mov ebp, esp
-    push offset a
+    sub esp, 0
     mov eax, 5
     push eax
-    pop ebx
+    push offset var_a
     pop eax
+    pop ebx
     mov dword ptr [eax + 0], ebx
     mov eax, ebx
     push eax
-    push offset b
-    push dword ptr [a]
+    push dword ptr [var_a + 0]
     mov eax, 2
     push eax
     pop ebx
     pop eax
     add eax, ebx
     push eax
-    pop ebx
+    push offset var_b
     pop eax
+    pop ebx
     mov dword ptr [eax + 0], ebx
     mov eax, ebx
     push eax
-    push dword ptr [b]
-    push dword ptr [a]
+    push dword ptr [var_b + 0]
+    push dword ptr [var_a + 0]
     pop ebx
     pop eax
     sub eax, ebx
@@ -45,14 +46,14 @@ main:
     push eax
     pop eax
     mov dword ptr [ebp + 8], eax
-    jmp end_main
-end_main:
+    jmp end_func_main
+end_func_main:
     mov esp, ebp
     pop ebp
     ret 0
 start:
     sub esp, 4
-    call main
+    call func_main
     add esp, 4
     ret 0
 end start

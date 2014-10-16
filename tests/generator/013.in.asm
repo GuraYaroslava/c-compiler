@@ -4,54 +4,67 @@ include c:\masm32\include\msvcrt.inc
 includelib c:\masm32\lib\msvcrt.lib
 
 .data
-    var_0 db "%d", 0dh, 0ah, 0
-    var_3 db "%d", 0dh, 0ah, 0
-    var_8 db "%d", 0
-    a dd 4 dup(0)
+    var_12 db "%d", 0
+    var_a dd 1 dup(0)
 
 .code
-main:
+func_main:
     push ebp
     mov ebp, esp
-    push dword ptr [a]
-    invoke crt_printf, addr var_0
-    add esp, 4
-    push dword ptr [a]
-    mov eax, 1
+    sub esp, 0
+    mov eax, 3
     push eax
+    push offset var_a
     pop eax
-    mov ebx, 4
-    imul ebx, eax
     pop ebx
-    sub eax, ebx
+    mov dword ptr [eax + 0], ebx
+    mov eax, ebx
     push eax
-    invoke crt_printf, addr var_3
-    add esp, 4
-    mov eax, 1
+    mov eax, 3
     push eax
+    push offset var_a
     pop eax
-    neg eax
-    push eax
-    mov eax, 1
-    push eax
     pop ebx
+    mov ecx, eax
+    mov eax, dword ptr [ecx + 0]
+    cdq
+    imul ebx
+    mov dword ptr [ecx + 0], eax
+    mov eax, 3
+    push eax
+    push offset var_a
     pop eax
+    pop ebx
+    mov ecx, eax
+    mov eax, dword ptr [ecx + 0]
+    cdq
     add eax, ebx
+    mov dword ptr [ecx + 0], eax
+    mov eax, 3
     push eax
-    invoke crt_printf, addr var_8
+    push offset var_a
+    pop eax
+    pop ebx
+    mov ecx, eax
+    mov eax, dword ptr [ecx + 0]
+    cdq
+    sub eax, ebx
+    mov dword ptr [ecx + 0], eax
+    push dword ptr [var_a + 0]
+    invoke crt_printf, addr var_12
     add esp, 4
     mov eax, 0
     push eax
     pop eax
     mov dword ptr [ebp + 8], eax
-    jmp end_main
-end_main:
+    jmp end_func_main
+end_func_main:
     mov esp, ebp
     pop ebp
     ret 0
 start:
     sub esp, 4
-    call main
+    call func_main
     add esp, 4
     ret 0
 end start
