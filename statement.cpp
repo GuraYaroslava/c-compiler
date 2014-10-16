@@ -128,6 +128,24 @@ void StmtIf::StmtPrint(ostream& out, int indent)
 
 void StmtIf::Generate(AsmCode& code)
 {
+    string key = to_string((long double)rand());
+    AsmArgLabel* trueLabel = new AsmArgLabel("if" + key + "_true");
+    AsmArgLabel* falseLabel = new AsmArgLabel("if" + key + "_false");
+    AsmArgLabel* endLabel = new AsmArgLabel("if" + key + "_end");
+    condition->Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdCMP, EAX, 0);
+    code.AddCmd(cmdJNE, trueLabel);
+    code.AddCmd(cmdJE, falseLabel);
+    code.AddCmd(trueLabel);
+    bodyIf->Generate(code);
+    code.AddCmd(cmdJMP, endLabel);
+    code.AddCmd(falseLabel);
+    if (bodyElse)
+    {
+        bodyElse->Generate(code);
+    }
+    code.AddCmd(endLabel);
 }
 
 //-----------------------------------------------------------------------------
@@ -167,6 +185,23 @@ void StmtFor::StmtPrint(ostream& out, int indent)
 
 void StmtFor::Generate(AsmCode& code)
 {
+    string id = to_string((long double)rand());
+    SetStartLabel("for_" + id + "_start");
+    SetIncLabel("for_" + id + "_inc");
+    SetCondLabel("for_" + id + "_cond");
+    SetEndLabel("for_" + id + "_end");
+    expr1->Generate(code);
+    code.AddCmd(start);
+    code.AddCmd(cond);
+    expr2->Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdCMP, EAX, 0);
+    code.AddCmd(cmdJE, end);
+    body->Generate(code);
+    code.AddCmd(inc);
+    expr3->Generate(code);
+    code.AddCmd(cmdJMP, cond);
+    code.AddCmd(end);
 }
 
 //-----------------------------------------------------------------------------
@@ -194,13 +229,26 @@ void StmtWhile::StmtPrint(ostream& out, int indent)
 
 void StmtWhile::Generate(AsmCode& code)
 {
+    string id = to_string((long double)rand());
+    SetStartLabel("while_" + id + "_start");
+    SetCondLabel("while_" + id + "_cond");
+    SetEndLabel("while_" + id + "_end");
+    code.AddCmd(start);
+    code.AddCmd(cond);
+    condition->Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdCMP, EAX, 0);
+    code.AddCmd(cmdJE, end);
+    body->Generate(code);
+    code.AddCmd(cmdJMP, cond);
+    code.AddCmd(end);
 }
 
 //-----------------------------------------------------------------------------
-StmtJump::StmtJump(): Statement() {}
+StmtJump::StmtJump(Statement* owner_): Statement(), owner(owner_) {}
 
 //-----------------------------------------------------------------------------
-StmtContinue::StmtContinue(): StmtJump() {}
+StmtContinue::StmtContinue(Statement* owner): StmtJump(owner) {}
 
 void StmtContinue::StmtPrint(ostream& out, int indent)
 {
@@ -209,10 +257,18 @@ void StmtContinue::StmtPrint(ostream& out, int indent)
 
 void StmtContinue::Generate(AsmCode& code)
 {
+    if (dynamic_cast<StmtFor*>(owner))
+    {
+        code.AddCmd(cmdJMP, dynamic_cast<StmtIteration*>(owner)->inc);
+    }
+    else if (dynamic_cast<StmtWhile*>(owner))
+    {
+        code.AddCmd(cmdJMP, dynamic_cast<StmtIteration*>(owner)->start);
+    }
 }
 
 //-----------------------------------------------------------------------------
-StmtBreak::StmtBreak(): StmtJump() {}
+StmtBreak::StmtBreak(Statement* owner): StmtJump(owner) {}
 
 void StmtBreak::StmtPrint(ostream& out, int indent)
 {
@@ -221,11 +277,12 @@ void StmtBreak::StmtPrint(ostream& out, int indent)
 
 void StmtBreak::Generate(AsmCode& code)
 {
+    code.AddCmd(cmdJMP, dynamic_cast<StmtIteration*>(owner)->end);
 }
 
 //-----------------------------------------------------------------------------
 StmtReturn::StmtReturn(SyntaxNode* arg_, SymTypeFunc* f):
-    StmtJump(),
+    StmtJump(NULL),
     arg(arg_),
     func(f)
     {}
@@ -251,5 +308,9 @@ void StmtReturn::Generate(AsmCode& code)
                     new AsmArgIndirect(EBP, 4 + func->params->GetByteSize() + size - 4 * (steps - i - 1)),
                     new AsmArgRegister(EAX));
     }
+    /*code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV,
+                new AsmArgIndirect(EBP, func->params->GetByteSize()),
+                new AsmArgRegister(EAX));*/
     code.AddCmd(cmdJMP, func->end);
 }

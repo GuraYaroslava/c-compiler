@@ -139,12 +139,12 @@ StmtJump* Parser::ParseJump()
     {
     case CONTINUE:
         Expected(inLoop, "continue statement not within a loop");
-        result = new StmtContinue();
+        result = new StmtContinue(parseIter);
         break;
 
     case BREAK:
         Expected(inLoop, "break statement not within a loop");
-        result = new StmtBreak();
+        result = new StmtBreak(parseIter);
         break;
 
     case RETURN:

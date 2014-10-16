@@ -111,8 +111,11 @@ public:
 //-----------------------------------------------------------------------------
 class StmtJump: public Statement
 {
+protected:
+    Statement* owner;
+
 public:
-    StmtJump();
+    StmtJump(Statement*);
     ~StmtJump();
 };
 
@@ -120,7 +123,7 @@ public:
 class StmtBreak: public StmtJump
 {
 public:
-    StmtBreak();
+    StmtBreak(Statement*);
     ~StmtBreak();
 
     void StmtPrint(ostream& out, int);
@@ -131,7 +134,7 @@ public:
 class StmtContinue: public StmtJump
 {
 public:
-    StmtContinue();
+    StmtContinue(Statement*);
     ~StmtContinue();
 
     void StmtPrint(ostream& out, int);
