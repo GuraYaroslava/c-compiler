@@ -588,7 +588,14 @@ void NodeUnaryOp::Generate(AsmCode& code)
 
 void NodeUnaryOp::GenerateLvalue(AsmCode& code)
 {
-    //*pointer
+    switch (token->GetSubType())
+    {
+    case MULTIPLICATION:
+        arg->Generate(code);
+        break;
+    default:
+        throw Exception(token->GetLine(), token->GetPosition(), "O_o");
+    }
 }
 
 bool NodeUnaryOp::IsModifiableLvalue()
