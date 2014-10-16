@@ -399,6 +399,9 @@ public:
 
     //end label:
     void AddCmd(AsmArgLabel*);
+
+    void AddCmd(AsmCmdName, AsmRegName, AsmArg*);
+    void AddCmd(AsmCmdName, AsmArg*, AsmRegName);
 };
 
 //-----------------------------------------------------------------------------

@@ -394,6 +394,16 @@ void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg1, AsmRegName reg2)
     cmds.push_back(new AsmCmd2(cmd, new AsmArgRegister(reg1), new AsmArgRegister(reg2)));
 }
 
+void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName arg1, AsmArg* arg2)
+{
+    cmds.push_back(new AsmCmd2(cmd, new AsmArgRegister(arg1), arg2));
+}
+
+void AsmCode::AddCmd(AsmCmdName cmd, AsmArg* arg1, AsmRegName arg2)
+{
+    cmds.push_back(new AsmCmd2(cmd, arg1, new AsmArgRegister(arg2)));
+}
+
 void AsmCode::AddCmd(AsmArgLabel* label)
 {
     cmds.push_back(new AsmLabel(label));
