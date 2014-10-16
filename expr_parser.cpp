@@ -117,7 +117,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     SyntaxNode* result = NULL;
     BaseToken* token = lexer.Get();
 
-    if (*token == IDENTIFIER || *token == CONSTANT || *token == STRING)
+    if (*token == IDENTIFIER)
     {
         Symbol* symbol = symStack.Find(token->GetText());
         if (!symbol && parseFunc)
@@ -129,25 +129,25 @@ SyntaxNode* Parser::ParsePrimaryExpression()
             Expected(symbol != NULL, "identifier is undefined");
             result = new NodeVar(counter++, symbol);
         }
-        else
+    }
+    else if (*token == CONSTANT || *token == STRING)
+    {
+        switch (token->GetSubType())
         {
-            switch (token->GetSubType())
-            {
-            case NUMBER_INT:
-                result = new NodeVar(counter++, new SymVar(token, intType));
-                break;
-            case NUMBER_FLOAT:
-                result = new NodeVar(counter++, new SymVar(token, floatType));
-                break;
-            case CHARACTER:
-                result = new NodeVar(counter++, new SymVar(token, charType));
-                break;
-            case STRING:
-                result = new NodeVar(counter++, new SymVar(token, stringType));
-                break;
-            }
-            consts.push_back(result);
+        case NUMBER_INT:
+            result = new NodeVar(counter++, new SymVar(token, intType));
+            break;
+        case NUMBER_FLOAT:
+            result = new NodeVar(counter++, new SymVar(token, floatType));
+            break;
+        case CHARACTER:
+            result = new NodeVar(counter++, new SymVar(token, charType));
+            break;
+        case STRING:
+            result = new NodeVar(counter++, new SymVar(token, stringType));
+            break;
         }
+        consts.push_back(result);
     }
     else if (*token == OPERATOR && *token == ROUND_LEFT_BRACKET)
     {
@@ -164,7 +164,7 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     }
     else
     {
-        Error("expected an expression");
+        Error("expected an expression: "+token->GetText());
     }
     return result;
 }
@@ -199,6 +199,7 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
         type = dynamic_cast<SymTypePointer*>(node->GetType());
     }
     Expected(type != NULL, "expression must have array type");
+
     Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
     SyntaxNode* index = ParseExpression();
@@ -462,7 +463,7 @@ void Parser::GenerateCode()
 
     //call main function
     generator.code.AddCmd(cmdSUB, ESP, 4);
-    generator.code.AddCmd(cmdCALL, new AsmArgLabel("main"));
+    generator.code.AddCmd(cmdCALL, new AsmArgLabel("func_main"));
     generator.code.AddCmd(cmdADD, ESP, 4);
 
     //end of start

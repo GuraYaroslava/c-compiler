@@ -18,7 +18,7 @@ Statement* Parser::ParseStatement()
     }
     else if (*token == FIGURE_LEFT_BRACKET)
     {
-        return ParseBlock();
+        return ParseBlock(true);
     }
     else if (*token == CONTINUE || *token == BREAK || *token == RETURN)
     {
@@ -27,15 +27,16 @@ Statement* Parser::ParseStatement()
     else
     {
         StmtExpr* stmt = new StmtExpr(ParseExpression());
-        Expected(*lexer.Get() == SEMICOLON, "expacted a `;`");
+        Expected(*lexer.Get() == SEMICOLON, "expected a `;`");
         return stmt;
     }
 }
 
-StmtBlock* Parser::ParseBlock()
+StmtBlock* Parser::ParseBlock(bool flag)
 {
     lexer.Get();
     StmtBlock* result = new StmtBlock();
+    result->locals->shift = !flag ? 4 : symStack.Top()->shift + symStack.Top()->GetByteSize();
     symStack.Push(result->locals);
 
     while (*lexer.Peek() != FIGURE_RIGHT_BRACKET)
@@ -44,6 +45,11 @@ StmtBlock* Parser::ParseBlock()
             || dynamic_cast<SymType*>(symStack.Find(lexer.Peek()->GetText())))
         {
             ParseDeclaration();
+            for (int i = nodeStack.size()-1; i > -1; --i)//!!!
+            {
+                result->AddStatement(new StmtExpr(nodeStack[i]));
+                nodeStack.pop_back();
+            }
         }
         else
         {
@@ -51,13 +57,11 @@ StmtBlock* Parser::ParseBlock()
         }
     }
 
-    for (int i = 0, size = nodeStack.size(); i < size; ++i)
-    {
-        result->AddStatement(new StmtExpr(nodeStack[i]));
-    }
-
     nodeStack.clear();
-    lexer.Get();
+    if (flag)
+    {
+        lexer.Get();
+    }
     symStack.Pop();
 
     return result;
@@ -70,8 +74,9 @@ StmtIf* Parser::ParseIf()
 
     Statement* trueBranch = ParseStatement();
     Statement* falseBranch = NULL;
-    if (*lexer.Get() == ELSE)
+    if (*lexer.Peek() == ELSE)
     {
+        lexer.Get();
         falseBranch = ParseStatement();
     }
     return new StmtIf(condition, trueBranch, falseBranch);

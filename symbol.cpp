@@ -238,8 +238,32 @@ void SymTypeStruct::SymPrint(ostream& out)
 
 int SymTypeStruct::GetByteSize() const
 {
-    cout << "struct get byte type" << endl;
-    return 0;
+    return fields ? fields->GetByteSize() : 0;
+}
+
+int SymTypeStruct::GetShiftForBase()
+{
+    SymType* type = (*fields).symbols[0]->GetType();
+    while (!dynamic_cast<SymTypeScalar*>(type))
+    {
+        if (dynamic_cast<SymTypeStruct*>(type))
+        {
+            type = (*dynamic_cast<SymTypeStruct*>(type)->fields).symbols[0]->GetType();
+        }
+        else if (dynamic_cast<SymTypeFunc*>(type))
+        {
+            type = dynamic_cast<SymTypeFunc*>(type)->type->GetType();
+        }
+        else if (dynamic_cast<SymTypePointer*>(type))
+        {
+            type = dynamic_cast<SymTypePointer*>(type)->refType->GetType();
+        }
+        else if (dynamic_cast<SymTypeArray*>(type))
+        {
+            type = dynamic_cast<SymTypeArray*>(type)->type->GetType();
+        }
+    }
+    return type->GetByteSize();
 }
 
 //-----------------------------------------------------------------------------
@@ -343,14 +367,15 @@ void SymVar::Generate(AsmCode& code)
 {
     if (dynamic_cast<SymTypeFunc*>(type))
     {
-        dynamic_cast<SymTypeFunc*>(type)->end = new AsmArgLabel("end_"+name->GetText());
-        code.AddCmd(new AsmLabel(name->GetText()));
+        dynamic_cast<SymTypeFunc*>(type)->end = new AsmArgLabel("end_func_"+name->GetText());
+        code.AddCmd(new AsmLabel("func_"+name->GetText()));
         type->Generate(code);
         return;
     }
+
     int size = type->GetByteSize();
     int dwords = size / 4 + (size % 4 != 0);
-    code.AddCmd(cmdDD, new AsmArgMemory(name->GetText()), new AsmArgDup(size));
+    code.AddCmd(cmdDD, new AsmArgMemory("var_"+name->GetText()), new AsmArgDup(dwords));
 }
 
 void SymVar::SymPrint(ostream& out)
@@ -368,7 +393,7 @@ int SymVar::GetByteSize() const
 }
 
 //-----------------------------------------------------------------------------
-SymTable::SymTable(): symbols(NULL), offset(0) {}
+SymTable::SymTable(): symbols(NULL), offset(0), shift(0) {}
 
 SymTable::~SymTable() {}
 
@@ -379,6 +404,7 @@ Symbol* SymTable::Find(const string& name)
 
 void SymTable::Add(Symbol* symbol)
 {
+    //cout << symbol->name->GetText() << endl;
     symbols.push_back(symbol);
     GetIndexByName[symbol->name->GetText()] = symbols.size()-1;
 }
@@ -389,11 +415,34 @@ void SymTable::Add(Symbol* symbol, int flag)
     switch (flag)
     {
     case 0://locals
+    {
+        SymVar* vp = dynamic_cast<SymVar*>(symbol);
+        if (vp)
+        {
+            SymType* type = vp->GetType();
+            if (dynamic_cast<SymTypeArray*>(type))
+            {
+                symbol->offset = -(shift + offset + type->GetByteSize() - dynamic_cast<SymTypeArray*>(type)->type->GetByteSize());
+            }
+            else if (dynamic_cast<SymTypeStruct*>(type))
+            {
+                symbol->offset = -(shift + offset + type->GetByteSize() - dynamic_cast<SymTypeStruct*>(type)->GetShiftForBase());
+            }
+            else
+            {
+                symbol->offset = -(shift + offset);
+            }
+            offset += symbol->GetByteSize();
+            vp->local = true;
+        }
+    }
         break;
 
     case 1://params
-        //dynamic_cast<SymVar*>(symbol)->local = true;
-        symbol->offset = offset + symbol->GetByteSize();//!!! if struct
+        if (dynamic_cast<SymTypeStruct*>(symbol->GetType()))
+            symbol->offset = offset + dynamic_cast<SymTypeStruct*>(symbol->GetType())->GetShiftForBase();
+        else
+            symbol->offset = offset + symbol->GetByteSize();
         offset += symbol->GetByteSize();
         break;
 
@@ -488,7 +537,7 @@ void SymTableStack::Pop()
 Symbol* SymTableStack::Find(const string& name)
 {
     Symbol* symbol = NULL;
-    for (int i = tables.size() - 1; i >= 0 && !symbol; --i)
+    for (int i = tables.size() - 1; i > -1 && !symbol; --i)
     {
         symbol = tables[i]->Find(name);
     }

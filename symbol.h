@@ -94,6 +94,7 @@ public:
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
     int GetByteSize() const;
+    int GetShiftForBase();
 
     void SymPrint(ostream&);
 };
@@ -164,6 +165,7 @@ class SymTable
 {
 public:
     int offset;
+    int shift;//!!!
 
     vector <Symbol*> symbols;
 

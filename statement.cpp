@@ -30,7 +30,10 @@ void StmtExpr::StmtPrint(ostream &out, int indent)
 
 void StmtExpr::Generate(AsmCode& code)
 {
-    expr->Generate(code);
+    if (expr)
+    {
+        expr->Generate(code);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -60,6 +63,7 @@ void StmtBlock::StmtPrint(ostream& out, int indent)
 
 void StmtBlock::Generate(AsmCode& code)
 {
+    code.AddCmd(cmdSUB, ESP, locals->GetByteSize());//!!!
     for (int i = 0, size = statements.size(); i < size; ++i)
     {
         statements[i]->Generate(code);

@@ -18,29 +18,37 @@ void Parser::ParseDeclaration()
 
     while (true)
     {
-        symStack.Add(symbol);
+        if (parseFunc)
+        {
+            symStack.Add(symbol, 0);
+        }
+        else
+        {
+            symStack.Add(symbol);
+        }
 
         if (*lexer.Peek() == ASSIGN)
         {
             BaseToken* oper = lexer.Get();
             SyntaxNode* left = new NodeVar(counter++, symbol);
             SyntaxNode* right = ParseExpression(precedences[COMMA]+1);
-            nodeStack.push_back(node);
             NodeBinaryOp* node = new NodeBinaryOp(counter++, left, oper, right);
+            nodeStack.push_back(node);
+            stmtStack.push_back(new StmtExpr(node));
             node->GetType();
         }
 
-        if (*lexer.Peek() == SEMICOLON)
+        if (*lexer.Peek() == SEMICOLON || *lexer.Peek() == FIGURE_RIGHT_BRACKET)
         {
             lexer.Get();
             break;
         }
 
-        if (parseFunc)
-        {
-            parseFunc = NULL;
-            break;
-        }
+        //if (parseFunc)
+        //{
+        //    parseFunc = NULL;
+        //    break;
+        //}
 
         Expected(lexer.Peek()->GetSubType(), COMMA);
 
@@ -79,6 +87,12 @@ SymTypeStruct* Parser::ParseStructSpecifier()
     {
         BaseToken* name = lexer.Get();
         result = new SymTypeStruct(name);
+    }
+
+    if (symStack.Find(result->name->GetText()))
+    {
+        Expected(*lexer.Peek() != FIGURE_LEFT_BRACKET, "redefinition");
+        return dynamic_cast<SymTypeStruct*>(symStack.Find(result->name->GetText()));
     }
 
     //---------------------------------------------------------------------------
@@ -195,6 +209,7 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
     {
         lexer.Get();
         SymTypeFunc* t = new SymTypeFunc(type);
+        t->params->offset = 4;
         symStack.Push(t->params);
         ParseParameterList();
         symStack.Pop();
@@ -202,7 +217,7 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
         {
             parseFunc = t;
             t->body = ParseBlock();
-            //parseFunc = NULL;
+            parseFunc = NULL;
         }
         result->SetType(t);
     }
