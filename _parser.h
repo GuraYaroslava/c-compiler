@@ -70,7 +70,6 @@ public:
     void PrintNodeTrees(int, int, ostream&);
     void PrintSymTables(ostream&);
 
-    bool inLoop;
     int counter;
     SymTypeFunc* parseFunc;
     StmtIteration* parseIter;

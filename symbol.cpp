@@ -439,9 +439,13 @@ void SymTable::Add(Symbol* symbol, int flag)
 
     case 1://params
         if (dynamic_cast<SymTypeStruct*>(symbol->GetType()))
+        {
             symbol->offset = offset + dynamic_cast<SymTypeStruct*>(symbol->GetType())->GetShiftForBase();
+        }
         else
+        {
             symbol->offset = offset + symbol->GetByteSize();
+        }
         offset += symbol->GetByteSize();
         break;
 
