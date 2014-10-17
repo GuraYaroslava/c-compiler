@@ -10,7 +10,6 @@ const int INF = numeric_limits<int>::max();
 Parser::Parser(const char* fin, const char* asmout):
     lexer(fin),
     generator(asmout),
-    inLoop(false),
     parseFunc(NULL),
     parseIter(NULL),
     counter(0)
@@ -124,11 +123,8 @@ SyntaxNode* Parser::ParsePrimaryExpression()
         {
             symbol = parseFunc->params->Find(token->GetText());
         }
-        if (*token == IDENTIFIER)
-        {
-            Expected(symbol != NULL, "identifier is undefined");
-            result = new NodeVar(counter++, symbol);
-        }
+        Expected(symbol != NULL, "identifier is undefined");
+        result = new NodeVar(counter++, symbol);
     }
     else if (*token == CONSTANT || *token == STRING)
     {
@@ -199,7 +195,6 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
         type = dynamic_cast<SymTypePointer*>(node->GetType());
     }
     Expected(type != NULL, "expression must have array type");
-
     Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
     SyntaxNode* index = ParseExpression();
@@ -234,9 +229,11 @@ SyntaxNode* Parser::ParsePrintf(BaseToken* token)
 {
     NodePrintf* result = NULL;
     Expected(*lexer.Get() == ROUND_LEFT_BRACKET, "expected a `(`");
+
     SyntaxNode* format = ParseExpression(precedences[COMMA] + 1);
     SymType* type = format->GetType();
     Expected(type == stringType, "expected parameter of char*");
+
     result = new NodePrintf(counter++, token, format);
     if (*lexer.Peek() == COMMA)
     {

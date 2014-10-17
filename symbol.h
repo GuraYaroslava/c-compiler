@@ -165,7 +165,7 @@ class SymTable
 {
 public:
     int offset;
-    int shift;//!!!
+    int shift;
 
     vector <Symbol*> symbols;
 

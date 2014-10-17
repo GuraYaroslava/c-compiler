@@ -404,7 +404,6 @@ Symbol* SymTable::Find(const string& name)
 
 void SymTable::Add(Symbol* symbol)
 {
-    //cout << symbol->name->GetText() << endl;
     symbols.push_back(symbol);
     GetIndexByName[symbol->name->GetText()] = symbols.size()-1;
 }
@@ -557,7 +556,5 @@ void SymTableStack::Add(Symbol* symbol, int flag)
 SymTable* SymTableStack::Top()
 {
     SymTable* tbl = tables.back();
-    //int size = tbl->symbols.size();
-    //return tbl->symbols[size-1];
     return tables.size() > 0 ? tables.back() : 0;
 }

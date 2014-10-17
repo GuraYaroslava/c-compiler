@@ -64,8 +64,7 @@ void SyntaxNode::Print(int width, int indent, ostream& out)
     {
         return;
     }
-    out << setw(indent);
-    out << token->GetText();
+    out << setw(indent) << token->GetText();
     if (dynamic_cast<NodeBinaryOp*>(this))
     {
         out << (dynamic_cast<NodeBinaryOp*>(this)->left && dynamic_cast<NodeBinaryOp*>(this)->right ? " <" : "");
@@ -351,12 +350,8 @@ void NodeBinaryOp::Generate(AsmCode& code)
         }
         if (leftTypePointer || rightTypePointer)
         {
-            if (!leftTypePointer)
-            {
-                swap(left, right);
-                swap(leftTypePointer, rightTypePointer);
-            }
-            GenerateAddWithPointer(leftTypePointer->refType->GetByteSize(), code);
+            int shift = leftTypePointer ? leftTypePointer->refType->GetByteSize() : leftTypePointer->refType->GetByteSize();
+            GenerateAddWithPointer(shift, code);
         }
         break;
 
@@ -857,10 +852,8 @@ void NodeVar::Generate(AsmCode& code)
             return;
         }
 
-
         int size = symbol->GetByteSize();
         int steps = size / 4 + (size % 4 != 0);
-
         for (int i = 0; i < steps && !dynamic_cast<SymVar*>(symbol)->local; ++i)
         {
             code.AddCmd(cmdPUSH,
@@ -873,7 +866,7 @@ void NodeVar::Generate(AsmCode& code)
 
         for (int i = 0; i < steps && dynamic_cast<SymVar*>(symbol)->local; ++i)
         {
-            code.AddCmd(cmdPUSH, new AsmArgIndirect(EBP, symbol->offset + 4 * (steps - i - 1)));//!!!
+            code.AddCmd(cmdPUSH, new AsmArgIndirect(EBP, symbol->offset + 4 * (steps - i - 1)));
         }
         return;
     }

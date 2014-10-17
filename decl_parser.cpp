@@ -44,15 +44,9 @@ void Parser::ParseDeclaration()
             break;
         }
 
-        //if (parseFunc)
-        //{
-        //    parseFunc = NULL;
-        //    break;
-        //}
-
         Expected(lexer.Peek()->GetSubType(), COMMA);
-
         lexer.Get();
+
         symbol = ParseDeclarator(type);
     }
 }
@@ -163,28 +157,22 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
     {
         lexer.Get();
         result =  ParseDeclarator(type);
-        Expected(lexer.Peek()->GetSubType(), ROUND_RIGHT_BRACKET);
-        lexer.Get();
+        Expected(lexer.Get()->GetSubType(), ROUND_RIGHT_BRACKET);
         return result;
     }
 
-    BaseToken* t = lexer.Peek();
-    if (!parseParams && *lexer.Peek() != IDENTIFIER)
-    {
-        Error("exepcted an identifier");
-    }
-    else if (parseParams && *lexer.Peek() != IDENTIFIER)
+    Expected(parseParams || *lexer.Peek() == IDENTIFIER, "exepcted an identifier");
+
+    if (parseParams)
     {
         string n = to_string((long double)counter++);
         BaseToken* dummy = new BaseToken("abstract-"+n, 0, 0, IDENTIFIER, IDENTIFIER);
         result = new SymVar(dummy, type);
     }
-    else if (symStack.Top()->Find(lexer.Peek()->GetText()))
-    {
-        Error("redefinition: " + lexer.Peek()->GetText());
-    }
     else
     {
+        string msg = "redefinition: " + lexer.Peek()->GetText();
+        Expected(!symStack.Top()->Find(lexer.Peek()->GetText()) == NULL, &msg[0]);
         result = new SymVar(lexer.Get(), type);
     }
 
@@ -195,10 +183,11 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
         Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
 
         SyntaxNode* index = ParseExpression();
+        Expected(*index->token != IDENTIFIER, "expression must have a constant value");
+
         SymType* indexType = index->GetType();
         Expected(indexType == intType && indexType->CanConvertTo(intType),
                  "expression must be an integral constant expression");
-        Expected(*index->token != IDENTIFIER, "expression must have a constant value");
 
         Expected(lexer.Get()->GetSubType(), SQUARE_RIGHT_BRACKET);
 
