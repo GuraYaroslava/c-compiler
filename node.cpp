@@ -350,7 +350,7 @@ void NodeBinaryOp::Generate(AsmCode& code)
         }
         if (leftTypePointer || rightTypePointer)
         {
-            int shift = leftTypePointer ? leftTypePointer->refType->GetByteSize() : leftTypePointer->refType->GetByteSize();
+            int shift = leftTypePointer ? leftTypePointer->refType->GetByteSize() : rightTypePointer->refType->GetByteSize();
             GenerateAddWithPointer(shift, code);
         }
         break;
