@@ -124,6 +124,7 @@ public:
 
     map <TokenType, string> tokenTypeToString;
 
+    void SetText(string);
     string GetText();
     int GetLine();
     int GetPosition();

@@ -42,6 +42,11 @@ BaseToken::BaseToken(const BaseToken* token_)
 
 BaseToken::~BaseToken() {};
 
+void BaseToken::SetText(string name)
+{
+    text = name;
+}
+
 string BaseToken::GetText()
 {
     return text;
