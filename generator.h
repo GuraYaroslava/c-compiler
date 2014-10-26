@@ -362,7 +362,7 @@ public:
     //label:
     void AddCmd(AsmLabel*);
 
-    //???
+    //for example, mov eax, 12345
     void AddCmd(AsmCmdName, AsmRegName, int);
 
     //cmd register
