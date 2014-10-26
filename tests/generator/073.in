@@ -1,0 +1,13 @@
+struct point{
+    float x, y, z;
+};
+
+int main()
+{
+    struct point a;
+    a.x = 3;
+    a.y = 3.0;
+    a.z = a.x / a.y * a.x;
+    printf("%f %f %f", a.x, a.y, a.z);
+    return 0;
+}

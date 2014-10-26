@@ -1,0 +1,11 @@
+float a[10];
+
+int main()
+{
+    int i;
+    for (i = 0; i < 10; i += 1)
+    {
+        printf("%f\n", a[i]);
+    }
+    return 0;
+}
