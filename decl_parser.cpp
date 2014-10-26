@@ -163,7 +163,7 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
 
     Expected(parseParams || *lexer.Peek() == IDENTIFIER, "exepcted an identifier");
 
-    if (parseParams)
+    if (parseParams && *lexer.Peek() != IDENTIFIER)
     {
         string n = to_string((long double)counter++);
         BaseToken* dummy = new BaseToken("abstract-"+n, 0, 0, IDENTIFIER, IDENTIFIER);
