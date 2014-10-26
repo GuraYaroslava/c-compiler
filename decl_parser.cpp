@@ -199,9 +199,11 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
         lexer.Get();
         SymTypeFunc* t = new SymTypeFunc(type);
         t->params->offset = 4;
+
         symStack.Push(t->params);
         ParseParameterList();
         symStack.Pop();
+
         if (*lexer.Peek() == FIGURE_LEFT_BRACKET)
         {
             parseFunc = t;
