@@ -37,11 +37,11 @@ StmtBlock* Parser::ParseBlock(bool flag)
             || dynamic_cast<SymType*>(symStack.Find(lexer.Peek()->GetText())))
         {
             ParseDeclaration();
-            for (int i = nodeStack.size()-1; i > -1; --i)
+            for (int i = 0, size = stmtStack.size(); i < size; ++i)
             {
                 result->AddStatement(stmtStack[i]);
-                nodeStack.pop_back();
             }
+            stmtStack.clear();
         }
         else
         {
@@ -53,6 +53,7 @@ StmtBlock* Parser::ParseBlock(bool flag)
     {
         lexer.Get();
     }
+
     symStack.Pop();
 
     return result;

@@ -33,7 +33,6 @@ void Parser::ParseDeclaration()
             SyntaxNode* left = new NodeVar(counter++, symbol);
             SyntaxNode* right = ParseExpression(precedences[COMMA]+1);
             NodeBinaryOp* node = new NodeBinaryOp(counter++, left, oper, right);
-            //nodeStack.push_back(node);
             stmtStack.push_back(new StmtExpr(node));
             node->GetType();
         }
