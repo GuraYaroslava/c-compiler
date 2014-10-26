@@ -1,4 +1,5 @@
 #include <fstream>
+#include <sstream>
 
 #include "generator.h"
 #include "exception.h"
@@ -242,7 +243,9 @@ AsmArgFloat::~AsmArgFloat() {}
 
 string AsmArgFloat::Generate()
 {
-    return to_string((long double)val);
+    std::ostringstream buff;
+    buff << fixed << val;
+    return buff.str();
 }
 
 //-----------------------------------------------------------------------------
