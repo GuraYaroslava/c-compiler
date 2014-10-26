@@ -50,4 +50,14 @@ echo test 103: inc
 echo test 104: inc
 echo test 105: do-while
 echo test 106: typedef
-echo test 107-...: float number
+for /L %%i in (107,1,136) do fc /B "%%i.out" "%%i.res" && echo test %%i: Ok>> log.out|| echo test %%i: No>> log.out
+echo test 137-141: type()
+echo test 142: inc
+echo test 143: inc
+for /L %%i in (144,1,144) do fc /B "%%i.out" "%%i.res" && echo test %%i: Ok>> log.out|| echo test %%i: No>> log.out
+echo test 145: inc, type()
+echo test 146-151: typedef
+echo test 152: type()
+echo test 153: inc
+echo test 154: dec
+for /L %%i in (155,1,159) do fc /B "%%i.out" "%%i.res" && echo test %%i: Ok>> log.out|| echo test %%i: No>> log.out
