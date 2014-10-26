@@ -5,33 +5,14 @@ includelib c:\masm32\lib\msvcrt.lib
 
 .data
     var_42 db "%d %d %d %d", 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_main:
     push ebp
     mov ebp, esp
     sub esp, 48
-    mov eax, ebp
-    mov ebx, -40
-    add eax, ebx
-    push eax
-    mov eax, 9
-    push eax
-    pop eax
-    mov ebx, 4
-    imul eax, ebx
-    pop ebx
-    add eax, ebx
-    push eax
-    mov eax, ebp
-    mov ebx, -48
-    add eax, ebx
-    push eax
-    pop eax
-    pop ebx
-    mov dword ptr [eax + 0], ebx
-    mov eax, ebx
-    push eax
     mov eax, ebp
     mov ebx, -40
     add eax, ebx
@@ -46,6 +27,27 @@ func_main:
     push eax
     mov eax, ebp
     mov ebx, -44
+    add eax, ebx
+    push eax
+    pop eax
+    pop ebx
+    mov dword ptr [eax + 0], ebx
+    mov eax, ebx
+    push eax
+    mov eax, ebp
+    mov ebx, -40
+    add eax, ebx
+    push eax
+    mov eax, 9
+    push eax
+    pop eax
+    mov ebx, 4
+    imul eax, ebx
+    pop ebx
+    add eax, ebx
+    push eax
+    mov eax, ebp
+    mov ebx, -48
     add eax, ebx
     push eax
     pop eax

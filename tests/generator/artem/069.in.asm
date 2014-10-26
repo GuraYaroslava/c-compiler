@@ -13,6 +13,8 @@ includelib c:\masm32\lib\msvcrt.lib
     var_66 db "%d", 0
     var_75 db "%d", 0
     var_94 db "%d", 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_main:
@@ -22,7 +24,7 @@ func_main:
     mov eax, 1
     push eax
     mov eax, ebp
-    mov ebx, -8
+    mov ebx, -4
     add eax, ebx
     push eax
     pop eax
@@ -33,7 +35,7 @@ func_main:
     mov eax, 1
     push eax
     mov eax, ebp
-    mov ebx, -4
+    mov ebx, -8
     add eax, ebx
     push eax
     pop eax

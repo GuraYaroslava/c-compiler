@@ -11,6 +11,8 @@ includelib c:\masm32\lib\msvcrt.lib
     var_20 db "%d", 0dh, 0ah, 0
     var_25 db "%d", 0dh, 0ah, 0
     var_30 db "%d", 0dh, 0ah, 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_main:

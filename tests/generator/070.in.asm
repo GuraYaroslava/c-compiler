@@ -5,6 +5,8 @@ includelib c:\masm32\lib\msvcrt.lib
 
 .data
     var_27 db "%d %d", 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_swap:
@@ -58,11 +60,8 @@ func_main:
     sub esp, 8
     mov eax, 3
     push eax
-    pop eax
-    neg eax
-    push eax
     mov eax, ebp
-    mov ebx, -8
+    mov ebx, -4
     add eax, ebx
     push eax
     pop eax
@@ -72,8 +71,11 @@ func_main:
     push eax
     mov eax, 3
     push eax
+    pop eax
+    neg eax
+    push eax
     mov eax, ebp
-    mov ebx, -4
+    mov ebx, -8
     add eax, ebx
     push eax
     pop eax

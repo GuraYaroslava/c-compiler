@@ -4,13 +4,15 @@ include c:\masm32\include\msvcrt.inc
 includelib c:\masm32\lib\msvcrt.lib
 
 .data
-    var_7 db "%d", 0dh, 0ah, 0
-    var_14 db "%d", 0dh, 0ah, 0
-    var_22 db "%d", 0dh, 0ah, 0
-    var_28 db "%d", 0dh, 0ah, 0
-    var_35 db "%d", 0dh, 0ah, 0
-    var_44 db "%d", 0dh, 0ah, 0
-    var_54 db "%d", 0dh, 0ah, 0
+    var_8 db "%d", 0dh, 0ah, 0
+    var_15 db "%d", 0dh, 0ah, 0
+    var_23 db "%d", 0dh, 0ah, 0
+    var_29 db "%d", 0dh, 0ah, 0
+    var_36 db "%d", 0dh, 0ah, 0
+    var_45 db "%d", 0dh, 0ah, 0
+    var_55 db "%d", 0dh, 0ah, 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_loop:
@@ -61,6 +63,7 @@ func_inc:
     cdq
     add eax, ebx
     mov dword ptr [ecx + 0], eax
+    push dword ptr [ebp + 8]
     pop eax
     mov dword ptr [ebp + 12], eax
     jmp end_func_inc
@@ -85,7 +88,7 @@ func_main:
     mov eax, 0
     sete al
     push eax
-    invoke crt_printf, addr var_7
+    invoke crt_printf, addr var_8
     add esp, 4
     mov eax, 1
     push eax
@@ -103,7 +106,7 @@ func_main:
     mov eax, 0
     sete al
     push eax
-    invoke crt_printf, addr var_14
+    invoke crt_printf, addr var_15
     add esp, 4
     sub esp, 4
     mov eax, 1
@@ -112,7 +115,7 @@ func_main:
     push eax
     call func_equal
     add esp, 8
-    invoke crt_printf, addr var_22
+    invoke crt_printf, addr var_23
     add esp, 4
     sub esp, 4
     mov eax, 1
@@ -124,7 +127,7 @@ func_main:
     push eax
     call func_equal
     add esp, 8
-    invoke crt_printf, addr var_28
+    invoke crt_printf, addr var_29
     add esp, 4
     sub esp, 4
     sub esp, 4
@@ -139,7 +142,7 @@ func_main:
     push eax
     call func_equal
     add esp, 8
-    invoke crt_printf, addr var_35
+    invoke crt_printf, addr var_36
     add esp, 4
     sub esp, 4
     sub esp, 4
@@ -154,7 +157,7 @@ func_main:
     add esp, 4
     call func_equal
     add esp, 8
-    invoke crt_printf, addr var_44
+    invoke crt_printf, addr var_45
     add esp, 4
     sub esp, 4
     mov eax, 1
@@ -169,7 +172,7 @@ func_main:
     add esp, 4
     call func_equal
     add esp, 8
-    invoke crt_printf, addr var_54
+    invoke crt_printf, addr var_55
     add esp, 4
     mov eax, 0
     push eax

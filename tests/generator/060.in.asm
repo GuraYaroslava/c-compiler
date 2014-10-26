@@ -7,6 +7,8 @@ includelib c:\masm32\lib\msvcrt.lib
     var_0 db "(%d, %d)", 0dh, 0ah, 0
     var_a dd 2 dup(0)
     var_b dd 2 dup(0)
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_print:

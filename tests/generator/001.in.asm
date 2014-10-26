@@ -5,6 +5,8 @@ includelib c:\masm32\lib\msvcrt.lib
 
 .data
     var_0 db "Hello, World!", 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_main:

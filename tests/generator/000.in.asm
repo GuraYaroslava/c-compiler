@@ -4,6 +4,8 @@ include c:\masm32\include\msvcrt.inc
 includelib c:\masm32\lib\msvcrt.lib
 
 .data
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_main:

@@ -8,6 +8,8 @@ includelib c:\masm32\lib\msvcrt.lib
     var_190 db "%d %d", 0dh, 0ah, 0
     var_200 db "%d %d", 0dh, 0ah, 0
     var_216 db "%d %d", 0dh, 0ah, 0
+    helper4 real4 0.000000
+    helper8 real8 0.000000
 
 .code
 func_print:
@@ -187,48 +189,7 @@ func_cross_product:
     mov ebp, esp
     sub esp, 16
     mov eax, ebp
-    mov ebx, 24
-    add eax, ebx
-    push eax
-    pop eax
     mov ebx, 8
-    add eax, ebx
-    push eax
-    pop eax
-    mov ebx, 4
-    add eax, ebx
-    push eax
-    pop eax
-    push dword ptr [eax + 0]
-    mov eax, ebp
-    mov ebx, 24
-    add eax, ebx
-    push eax
-    pop eax
-    mov ebx, 0
-    add eax, ebx
-    push eax
-    pop eax
-    mov ebx, 4
-    add eax, ebx
-    push eax
-    pop eax
-    push dword ptr [eax + 0]
-    pop ebx
-    pop eax
-    sub eax, ebx
-    push eax
-    mov eax, ebp
-    mov ebx, -16
-    add eax, ebx
-    push eax
-    pop eax
-    pop ebx
-    mov dword ptr [eax + 0], ebx
-    mov eax, ebx
-    push eax
-    mov eax, ebp
-    mov ebx, 24
     add eax, ebx
     push eax
     pop eax
@@ -242,7 +203,7 @@ func_cross_product:
     pop eax
     push dword ptr [eax + 0]
     mov eax, ebp
-    mov ebx, 24
+    mov ebx, 8
     add eax, ebx
     push eax
     pop eax
@@ -260,7 +221,7 @@ func_cross_product:
     sub eax, ebx
     push eax
     mov eax, ebp
-    mov ebx, -12
+    mov ebx, -4
     add eax, ebx
     push eax
     pop eax
@@ -310,7 +271,7 @@ func_cross_product:
     mov eax, ebx
     push eax
     mov eax, ebp
-    mov ebx, 8
+    mov ebx, 24
     add eax, ebx
     push eax
     pop eax
@@ -324,7 +285,7 @@ func_cross_product:
     pop eax
     push dword ptr [eax + 0]
     mov eax, ebp
-    mov ebx, 8
+    mov ebx, 24
     add eax, ebx
     push eax
     pop eax
@@ -342,7 +303,48 @@ func_cross_product:
     sub eax, ebx
     push eax
     mov eax, ebp
-    mov ebx, -4
+    mov ebx, -12
+    add eax, ebx
+    push eax
+    pop eax
+    pop ebx
+    mov dword ptr [eax + 0], ebx
+    mov eax, ebx
+    push eax
+    mov eax, ebp
+    mov ebx, 24
+    add eax, ebx
+    push eax
+    pop eax
+    mov ebx, 8
+    add eax, ebx
+    push eax
+    pop eax
+    mov ebx, 4
+    add eax, ebx
+    push eax
+    pop eax
+    push dword ptr [eax + 0]
+    mov eax, ebp
+    mov ebx, 24
+    add eax, ebx
+    push eax
+    pop eax
+    mov ebx, 0
+    add eax, ebx
+    push eax
+    pop eax
+    mov ebx, 4
+    add eax, ebx
+    push eax
+    pop eax
+    push dword ptr [eax + 0]
+    pop ebx
+    pop eax
+    sub eax, ebx
+    push eax
+    mov eax, ebp
+    mov ebx, -16
     add eax, ebx
     push eax
     pop eax
