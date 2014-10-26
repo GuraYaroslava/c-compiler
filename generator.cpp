@@ -135,6 +135,10 @@ string AsmArgRegister::RegNameToString() const
         return "bl";
     case AX:
         return "ax";
+    case ST0:
+        return "st";
+    case ST1:
+        return "st(1)";
     default:
         throw exception("invalid register value");
     }
