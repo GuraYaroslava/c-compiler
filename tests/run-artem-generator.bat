@@ -13,11 +13,11 @@ rem test 027: lvalue required as left operand of assignment
 for /L %%i in (28,1,30) do compiler -g generator/artem/0%%i.in generator/artem/0%%i.out
 rem test 031: lvalue required as left operand of assignment
 for /L %%i in (32,1,56) do compiler -g generator/artem/0%%i.in generator/artem/0%%i.out
-rem test 057: INC
-rem test 058: INC
+rem test 057: inc
+rem test 058: inc
 rem test 059: do-while
 rem test 060: do-while
-rem test 061: INC
+rem test 061: inc
 for /L %%i in (62,1,71) do compiler -g generator/artem/0%%i.in generator/artem/0%%i.out
 rem test 072-078: typedef
 rem test 079: inc
@@ -29,8 +29,17 @@ rem test 098: do-while
 rem test 099-104: inc
 rem test 105: do-while
 rem test 106: typedef
-rem test 107: float number
-rem ...
+for /L %%i in (107,1,136) do compiler -g generator/artem/%%i.in generator/artem/%%i.out
+rem test 137-141: type()
+rem test 142: inc
+rem test 143: inc
+for /L %%i in (144,1,144) do compiler -g generator/artem/%%i.in generator/artem/%%i.out
+rem test 145: inc, type()
+rem test 146-151: typedef
+rem test 152: type()
+rem test 153: inc
+rem test 154: dec
+for /L %%i in (155,1,159) do compiler -g generator/artem/%%i.in generator/artem/%%i.out
 
 cd C:\Users\Yaroslava\Documents\Visual Studio 2010\Projects\compiler\compiler\tests\generator\artem
 
@@ -59,6 +68,15 @@ for /L %%i in (62,1,71) do 0%%i.in.exe > 0%%i.out
 
 for /L %%i in (95,1,97) do C:\masm32\bin\Link /subsystem:console 0%%i.in.obj
 for /L %%i in (95,1,97) do 0%%i.in.exe > 0%%i.out
+
+for /L %%i in (107,1,136) do C:\masm32\bin\Link /subsystem:console %%i.in.obj
+for /L %%i in (107,1,136) do %%i.in.exe > %%i.out
+
+for /L %%i in (144,1,144) do C:\masm32\bin\Link /subsystem:console %%i.in.obj
+for /L %%i in (144,1,144) do %%i.in.exe > %%i.out
+
+for /L %%i in (155,1,159) do C:\masm32\bin\Link /subsystem:console %%i.in.obj
+for /L %%i in (155,1,159) do %%i.in.exe > %%i.out
 
 del *.obj
 del *.exe
