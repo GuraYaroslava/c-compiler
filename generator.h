@@ -60,6 +60,11 @@ typedef enum
     cmdSETE,
     cmdSETNE,
 
+    cmdSETB,
+    cmdSETA,
+    cmdSETBE,
+    cmdSETAE,
+
     cmdFDIVP,
     cmdFADDP,
     cmdFMULP,

@@ -466,6 +466,14 @@ string AsmCmdNameToString(AsmCmdName opcode)
         return "sete";
     case cmdSETNE:
         return "setne";
+    case cmdSETB:
+        return "setb";
+    case cmdSETBE:
+        return "setbe";
+    case cmdSETA:
+        return "seta";
+    case cmdSETAE:
+        return "setae";
     case cmdSETG:
         return "setg";
     case cmdSETGE:
