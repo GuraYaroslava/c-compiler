@@ -172,7 +172,7 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
     else
     {
         string msg = "redefinition: " + lexer.Peek()->GetText();
-        Expected(!symStack.Top()->Find(lexer.Peek()->GetText()) == NULL, &msg[0]);
+        Expected(!symStack.Top()->Find(lexer.Peek()->GetText()), &msg[0]);
         result = new SymVar(lexer.Get(), type);
     }
 
