@@ -400,6 +400,10 @@ string AsmCmdNameToString(AsmCmdName opcode)
 {
     switch (opcode)
     {
+    case cmdREAL4:
+        return "real4";
+    case cmdREAL8:
+        return "real8";
     case cmdMOV:
         return "mov";
     case cmdPUSH:

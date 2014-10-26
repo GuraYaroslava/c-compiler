@@ -9,6 +9,9 @@ AsmArgString* GenAsmString(const string&);
 
 typedef enum
 {
+    cmdREAL4,
+    cmdREAL8,
+
     cmdDD,
     cmdDB,
     cmdDQ,
