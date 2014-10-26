@@ -6,6 +6,9 @@ SymTypeScalar* floatType = new SymTypeScalar(new BaseToken("float", 0, 0, KEYWOR
 SymTypeScalar* charType = new SymTypeScalar(new BaseToken("char", 0, 0, KEYWORD, CHAR));
 SymTypePointer* stringType = new SymTypePointer(charType);
 
+AsmArgMemory* real4 = new AsmArgMemory("helper4");
+AsmArgMemory* real8 = new AsmArgMemory("helper8");
+
 SymType* GetWideType(SymType*, SymType*);
 
 bool IsIntegralType(SymType*);

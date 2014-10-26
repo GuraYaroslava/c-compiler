@@ -451,6 +451,8 @@ void Parser::GenerateCode()
 
     //generate globals symbols
     symStack.Top()->GenerateData(generator.data);
+    generator.data.AddCmd(cmdREAL4, real4, new AsmArgFloat(0.00000));
+    generator.data.AddCmd(cmdREAL8, real8, new AsmArgFloat(0.00000));
 
     //generate function declarations
     symStack.Top()->GenerateCode(generator.code);
