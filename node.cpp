@@ -90,6 +90,11 @@ void SyntaxNode::GenerateLvalue(AsmCode&)
 
 }
 
+void SyntaxNode::FPUGenerate(AsmCode&)
+{
+
+}
+
 void SyntaxNode::Error(int ln, int col, const string msg)
 {
     throw Exception(ln, col, msg);
@@ -176,15 +181,10 @@ SymType* NodeBinaryOp::GetType()
     switch (token->GetSubType())
     {
     case BIT_AND_ASSIGN:
-
     case BIT_XOR_ASSIGN:
-
     case BIT_OR_ASSIGN:
-
     case BIT_SHIFT_LEFT_ASSIGN:
-
     case BIT_SHIFT_RIGHT_ASSIGN:
-
     case MOD_ASSIGN:
         Expected(token->GetLine(), token->GetPosition(),
                  leftType->CanConvertTo(intType) && rightType->CanConvertTo(intType),
@@ -197,11 +197,8 @@ SymType* NodeBinaryOp::GetType()
         }
 
     case MUL_ASSIGN:
-
     case ADD_ASSIGN:
-
     case SUB_ASSIGN:
-
     case DIV_ASSIGN:
         Expected(token->GetLine(), token->GetPosition(),
                  left->IsModifiableLvalue(),
@@ -231,14 +228,14 @@ SymType* NodeBinaryOp::GetType()
             return intType;
         }
 
-        /*if (leftTypePointer || rightTypePointer)
-        {
-            Expected(token->GetLine(), token->GetPosition(),
-                     leftTypePointer && (IsIntegralType(rightType) || rightType->CanConvertTo(leftType))
-                     || rightTypePointer && (IsIntegralType(leftType) || leftType->CanConvertTo(rightType)),
-                     "operand types are incompatible");
-            return intType;
-        }*/
+        //if (leftTypePointer || rightTypePointer)
+        //{
+        //    Expected(token->GetLine(), token->GetPosition(),
+        //             leftTypePointer && (IsIntegralType(rightType) || rightType->CanConvertTo(leftType))
+        //             || rightTypePointer && (IsIntegralType(leftType) || leftType->CanConvertTo(rightType)),
+        //             "operand types are incompatible");
+        //    return intType;
+        //}
 
     case ADDITION:
         Expected(token->GetLine(), token->GetPosition(),
@@ -284,6 +281,13 @@ void NodeBinaryOp::Print(int width, int indent, ostream &out)
 
 void NodeBinaryOp::Generate(AsmCode& code)
 {
+    if (*GetType() == floatType && *token != ASSIGN
+        && *token != POINT && *token != ARROW)
+    {
+        GenerateWithFPU(code);
+        return;
+    }
+
     TokenType op = token->GetSubType();
 
     SymType* leftType = left->GetType();
@@ -478,6 +482,93 @@ void NodeBinaryOp::GenerateLvalue(AsmCode& code)
     code.AddCmd(cmdPUSH, EAX);
 }
 
+void NodeBinaryOp::FPUGenerate(AsmCode& code)
+{
+    Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, real4, EAX);
+    code.AddCmd(cmdFLD, real4);
+}
+
+void NodeBinaryOp::GenerateWithFPU(AsmCode& code)
+{
+    left->FPUGenerate(code);
+    right->FPUGenerate(code);
+
+    AsmCmdName cmd;
+    if (IsComparison(token->GetSubType()))
+    {
+        code.AddCmd(cmdXOR, EAX, EAX);
+        code.AddCmd(cmdFCOMPP);
+        code.AddCmd(cmdFNSTSW, AX);
+        code.AddCmd(cmdSAHF);
+        code.AddCmd(cmdMOV, EAX, 0);
+        switch (token->GetSubType())
+        {
+        case GREATER:
+            cmd = cmdSETB;
+            break;
+        case GREATER_EQUAL:
+            cmd = cmdSETBE;
+            break;
+        case LESS:
+            cmd = cmdSETA;
+            break;
+        case LESS_EQUAL:
+            cmd = cmdSETAE;
+            break;
+        case EQUAL:
+            cmd = cmdSETE;
+            break;
+        case NOT_EQUAL:
+            cmd = cmdSETNE;
+            break;
+        }
+        code.AddCmd(cmd, AL);
+        code.AddCmd(cmdPUSH, EAX);
+    }
+    else
+    {
+        switch (token->GetSubType())
+        {
+        case ADDITION:
+        case ADD_ASSIGN:
+            cmd = cmdFADDP;
+            break;
+        case SUBSTRACTION:
+        case SUB_ASSIGN:
+            cmd = cmdFSUBP;
+            break;
+        case DIVISION:
+        case DIV_ASSIGN:
+            cmd = cmdFDIVP;
+            break;
+        case MULTIPLICATION:
+        case MUL_ASSIGN:
+            cmd = cmdFMULP;
+            break;
+        default:
+            Error(token->GetLine(), token->GetPosition(), "not implemented");
+            break;
+        }
+        code.AddCmd(cmd, ST1, ST0);
+
+//-----------------------------------------------------------------------------
+        code.AddCmd(cmdFSTP, new AsmArgMemory("helper4"));
+        code.AddCmd(cmdPUSH, new AsmArgMemory("helper4"));
+//-----------------------------------------------------------------------------
+
+        if (IsAssignment(token->GetSubType()))
+        {
+            left->GenerateLvalue(code);
+            code.AddCmd(cmdPOP, EAX);
+            code.AddCmd(cmdPOP, EBX);
+            code.AddCmd(cmdMOV, new AsmArgIndirect(EAX), EBX);
+            code.AddCmd(cmdPUSH, EBX);
+        }
+    }
+}
+
 //-----------------------------------------------------------------------------
 NodeUnaryOp::NodeUnaryOp(int id_, BaseToken* oper_, SyntaxNode* arg_):
     SyntaxNode(id_, oper_)
@@ -537,7 +628,6 @@ SymType* NodeUnaryOp::GetType()
 
 void NodeUnaryOp::Generate(AsmCode& code)
 {
-    //code.AddCmd(cmdPUSH, EAX);
     switch(token->GetSubType())
     {
     case SUBSTRACTION:
@@ -545,8 +635,15 @@ void NodeUnaryOp::Generate(AsmCode& code)
         code.AddCmd(cmdPOP, EAX);
         if (*arg->GetType() == floatType)
         {
-
-        } else
+            code.AddCmd(cmdPUSH, EAX);
+            code.AddCmd(cmdPOP, EAX);
+            code.AddCmd(cmdMOV, real4, EAX);
+            code.AddCmd(cmdFLD, real4);
+            code.AddCmd(cmdFCHS);
+            code.AddCmd(cmdFSTP, real4);
+            code.AddCmd(cmdPUSH, real4);
+        }
+        else
         {
             code.AddCmd(cmdNEG, EAX);
             code.AddCmd(cmdPUSH, EAX);
@@ -603,6 +700,14 @@ void NodeUnaryOp::GenerateLvalue(AsmCode& code)
     default:
         throw Exception(token->GetLine(), token->GetPosition(), "O_o");
     }
+}
+
+void NodeUnaryOp::FPUGenerate(AsmCode& code)
+{
+    Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, real4, EAX);
+    code.AddCmd(cmdFLD, real4);
 }
 
 bool NodeUnaryOp::IsModifiableLvalue()
@@ -700,7 +805,7 @@ void NodeCall::Generate(AsmCode& code)
 
 //-----------------------------------------------------------------------------
 NodeArr::NodeArr(int id_, SymType *type_, SyntaxNode* name_, SyntaxNode* index_):
-    SyntaxNode(id_, NULL), type(type_), name(name_), index(index_) {}
+    SyntaxNode(id_, new BaseToken(OPERATOR, SQUARE_LEFT_BRACKET)), type(type_), name(name_), index(index_) {}
 
 NodeArr::~NodeArr() {}
 
@@ -803,6 +908,7 @@ void NodeVar::GenerateData(AsmCode& code)
     }
     else if (type == floatType)
     {
+        token->SetText(to_string((long double)(id)));
         code.AddCmd(cmdDD,
                     new AsmArgMemory("var_" + to_string((long double)(id))),
                     new AsmArgFloat(dynamic_cast<TokenVal <float> *>(token)->GetValue()));
@@ -834,29 +940,29 @@ void NodeVar::GenerateLvalue(AsmCode& code)
         }
         else
         {
-            code.AddCmd(cmdPUSH, new AsmArgMemory("var_"+symbol->name->GetText(), true));//!!!
+            code.AddCmd(cmdPUSH, new AsmArgMemory("var_"+symbol->name->GetText(), true));
         }
     }
     else
     {
-        SymType* type = symbol->GetType();
-        Expected(token->GetLine(), token->GetPosition(), type == intType, "WOW");
+        Expected(token->GetLine(), token->GetPosition(), false, "WOW");
     }
 }
 
 void NodeVar::Generate(AsmCode& code)
 {
-    if (*token == IDENTIFIER)
-    {
-        SymType* type = GetType();
-        if (dynamic_cast<SymTypeArray*>(type))
-        {
-            GenerateLvalue(code);
-            return;
-        }
+    SymType* type = symbol->GetType();
 
+    if (dynamic_cast<SymTypeArray*>(type))
+    {
+        GenerateLvalue(code);
+    }
+    else if (*token == IDENTIFIER)
+    {
         int size = symbol->GetByteSize();
         int steps = size / 4 + (size % 4 != 0);
+
+        //global
         for (int i = 0; i < steps && !dynamic_cast<SymVar*>(symbol)->local; ++i)
         {
             code.AddCmd(cmdPUSH,
@@ -867,18 +973,34 @@ void NodeVar::Generate(AsmCode& code)
                                             +"]"));
         }
 
+        //local
         for (int i = 0; i < steps && dynamic_cast<SymVar*>(symbol)->local; ++i)
         {
             code.AddCmd(cmdPUSH, new AsmArgIndirect(EBP, symbol->offset + 4 * (steps - i - 1)));
         }
-        return;
     }
-
-    SymType* type = symbol->GetType();
-    if (type == intType)
+    else if (type == intType)
     {
         code.AddCmd(cmdMOV, EAX, dynamic_cast<TokenVal <int> *>(token)->GetValue());
         code.AddCmd(cmdPUSH, EAX);
+    }
+    else if (type == floatType)
+    {
+        code.AddCmd(cmdPUSH, new AsmArgMemory("var_"+token->GetText()));
+    }
+}
+
+void NodeVar::FPUGenerate(AsmCode& code)
+{
+    if (dynamic_cast<SymVar*>(symbol)->local)
+    {
+        code.AddCmd(cmdMOV,EAX, new AsmArgIndirect(EBP, symbol->offset));
+        code.AddCmd(cmdMOV, real4, EAX);
+        code.AddCmd(cmdFLD, real4);
+    }
+    else
+    {
+        code.AddCmd(cmdFLD, new AsmArgMemory("var_" + token->GetText()));
     }
 }
 
@@ -898,6 +1020,16 @@ void NodePrintf::Generate(AsmCode& code)
         SymType* type = args[i]->GetType();
         args[i]->Generate(code);
         size += type->GetByteSize();
+        if (*type == floatType && (args[i]->token && !IsComparison(args[i]->token->GetSubType())))
+        {
+            code.AddCmd(cmdPOP, real4);
+            code.AddCmd(cmdFLD, real4);
+            code.AddCmd(cmdFSTP, real8);
+            code.AddCmd(cmdMOV, EAX, new AsmArgMemory("helper8", true));
+            code.AddCmd(cmdPUSH, new AsmArgIndirect(EAX, 4));
+            code.AddCmd(cmdPUSH, new AsmArgIndirect(EAX));
+            size += 4;
+        }
     }
     code.AddCmd(new AsmArgMemory("var_" + to_string((long double)format->id)));
     code.AddCmd(cmdADD, ESP, size);
@@ -943,6 +1075,32 @@ void NodeDummy::Print(int width, int indent, ostream& out)
 void NodeDummy::Generate(AsmCode& code)
 {
     arg->Generate(code);
+    SymType* opType = arg->GetType();
+    if (*type == floatType && *opType == intType)
+    {
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdMOV, real4, EAX);
+        code.AddCmd(cmdFILD, real4);
+        code.AddCmd(cmdFSTP, real4);
+        code.AddCmd(cmdPUSH, real4);
+    }
+    else if (*type == intType && *opType == floatType)
+    {
+        code.AddCmd(cmdPOP, EAX);
+        code.AddCmd(cmdMOV, real4, EAX);
+        code.AddCmd(cmdFLD, real4);
+
+        code.AddCmd(cmdFISTP, real4);
+        code.AddCmd(cmdPUSH, real4);
+    }
+}
+
+void NodeDummy::FPUGenerate(AsmCode& code)
+{
+    Generate(code);
+    code.AddCmd(cmdPOP, EAX);
+    code.AddCmd(cmdMOV, real4, EAX);
+    code.AddCmd(cmdFLD, real4);
 }
 
 //-----------------------------------------------------------------------------

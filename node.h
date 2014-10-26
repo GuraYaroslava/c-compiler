@@ -2,6 +2,9 @@
 
 #include "symbol.h"
 
+extern AsmArgMemory* real4;
+extern AsmArgMemory* real8;
+
 // for simple parser ----------------------------------------------------------
 class Node
 {
@@ -44,6 +47,7 @@ public:
     virtual void Generate(AsmCode&);
     virtual void GenerateData(AsmCode&);
     virtual void GenerateLvalue(AsmCode&);
+    virtual void FPUGenerate(AsmCode&);
 
     void Error(int, int, const string);
     void Expected(int, int, bool, const string);
@@ -70,6 +74,8 @@ public:
     void Print(int, int, ostream&);
     void Generate(AsmCode&);
     void GenerateLvalue(AsmCode&);
+    void FPUGenerate(AsmCode&);
+    void GenerateWithFPU(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -91,6 +97,7 @@ public:
     void Print(int, int, ostream&);
     void Generate(AsmCode&);
     void GenerateLvalue(AsmCode&);
+    void FPUGenerate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -159,6 +166,7 @@ public:
     void Generate(AsmCode&);
     void GenerateData(AsmCode&);
     void GenerateLvalue(AsmCode&);
+    void FPUGenerate(AsmCode&);
 };
 
 //-----------------------------------------------------------------------------
@@ -187,9 +195,7 @@ public:
 
     SymType* GetType();
 
-    //bool IsLvalue();
-    //bool IsModifiableLvalue();
-
     void Print(int, int, ostream&);
     void Generate(AsmCode&);
+    void FPUGenerate(AsmCode&);
 };
