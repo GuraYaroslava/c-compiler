@@ -283,14 +283,7 @@ string AsmArgFloat::Generate()
     return buff.str();
 }
 
-//-----------------------------------------------------------------------------
-AsmArgInt::AsmArgInt(int val_): val(val_) {}
-
-AsmArgInt::~AsmArgInt() {}
-
-string AsmArgInt::Generate()
 {
-    return to_string((long double)val);
 }
 
 //-----------------------------------------------------------------------------
