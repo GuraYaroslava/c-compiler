@@ -313,19 +313,6 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-class AsmArgInt: public AsmArg
-{
-private:
-    int val;
-
-public:
-    AsmArgInt(int);
-    ~AsmArgInt();
-
-   string Generate();
-};
-
-//-----------------------------------------------------------------------------
 class AsmCmdPrint: public AsmCmd0
 {
 private:
