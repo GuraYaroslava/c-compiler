@@ -55,6 +55,21 @@ AsmCmd2::AsmCmd2(AsmCmdName opcode, AsmArg* arg1_, AsmArg* arg2_):
 
 AsmCmd2::~AsmCmd2() {}
 
+bool AsmCmd2::operator==(AsmCmdName cmd)
+{
+    return opcode == cmd;
+}
+
+AsmArg* AsmCmd2::GetFirst()
+{
+    return arg1;
+}
+
+AsmArg* AsmCmd2::GetSecond()
+{
+    return arg2;
+}
+
 string AsmCmd2::Generate()
 {
     return opcode > cmdDQ

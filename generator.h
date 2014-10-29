@@ -147,6 +147,9 @@ public:
     AsmCmd2(AsmCmdName, AsmArg*, AsmArg*);
     ~AsmCmd2();
 
+    bool operator==(AsmCmdName);
+    AsmArg* GetFirst();
+    AsmArg* GetSecond();
     string Generate();
 };
 
