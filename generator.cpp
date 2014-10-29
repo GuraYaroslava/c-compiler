@@ -87,27 +87,32 @@ string AsmArg::Generate()
     return "0";
 }
 
-bool AsmArg::operator == (int) const
+bool AsmArg::operator==(int) const
 {
     return false;
 }
 
-bool AsmArg::operator == (AsmArg*) const
+bool AsmArg::operator==(string) const
 {
     return false;
 }
 
-bool AsmArg::operator == (AsmRegName) const
+bool AsmArg::operator==(AsmArg*) const
 {
     return false;
 }
 
-bool AsmArg::operator != (AsmArg* arg) const
+bool AsmArg::operator==(AsmRegName) const
+{
+    return false;
+}
+
+bool AsmArg::operator!=(AsmArg* arg) const
 {
     return !(*this == arg);
 }
 
-bool AsmArg::operator != (AsmRegName arg) const
+bool AsmArg::operator!=(AsmRegName arg) const
 {
     return !(*this == arg);
 }
@@ -122,7 +127,7 @@ string AsmArgImmediate::Generate()
     return to_string((long double)value);
 }
 
-bool AsmArgImmediate::operator == (int value_) const
+bool AsmArgImmediate::operator==(int value_) const
 {
     return value == value_;
 }
@@ -170,7 +175,11 @@ string AsmArgRegister::RegNameToString() const
     }
 }
 
-bool AsmArgRegister::operator == (AsmArg* arg) const
+bool AsmArgRegister::operator==(string arg) const
+{
+    return RegNameToString() == arg;
+}
+
 {
     AsmArgRegister* tmp = dynamic_cast<AsmArgRegister*>(arg);
     return tmp && tmp->reg == reg/* && !dynamic_cast<AsmArgIndirect*>(arg)*/;
@@ -189,13 +198,13 @@ string AsmArgIndirect::Generate()
     return "dword ptr [" + RegNameToString() + " + " + to_string((long double)offset) + "]";
 }
 
-bool AsmArgIndirect::operator == (AsmArg* arg) const
+bool AsmArgIndirect::operator==(AsmArg* arg) const
 {
     AsmArgIndirect* tmp = dynamic_cast<AsmArgIndirect*>(arg);
     return tmp && tmp->reg == reg && tmp->offset == offset;
 }
 
-bool AsmArgIndirect::operator == (AsmRegName) const
+bool AsmArgIndirect::operator==(AsmRegName) const
 {
     return false;
 }
@@ -213,7 +222,8 @@ string AsmArgMemory::Generate()
     return (lvalue ? "offset " : "") + name;
 }
 
-bool AsmArgMemory::operator == (AsmArg* arg) const
+
+bool AsmArgMemory::operator==(AsmArg* arg) const
 {
     AsmArgMemory* tmp = dynamic_cast<AsmArgMemory*>(arg);
     return tmp && tmp->name == name;

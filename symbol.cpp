@@ -40,12 +40,12 @@ bool SymType::CanConvertTo(SymType*)
     return false;
 }
 
-bool SymType::operator == (SymType* type_)
+bool SymType::operator==(SymType* type_)
 {
     return name->GetText() == type_->name->GetText();
 }
 
-bool SymType::operator != (SymType* type_)
+bool SymType::operator!=(SymType* type_)
 {
     return name != type_->name;
 }
@@ -117,7 +117,7 @@ bool SymTypeArray::CanConvertTo(SymType* to)
     return false;
 }
 
-bool SymTypeArray::operator == (SymType* type_)
+bool SymTypeArray::operator==(SymType* type_)
 {
     SymTypeArray* arr = dynamic_cast<SymTypeArray*>(type_);
     if (arr && *arr->type == type && arr->size == size)
@@ -171,7 +171,7 @@ bool SymTypePointer::CanConvertTo(SymType* to)
     return false;
 }
 
-bool SymTypePointer::operator == (SymType* type)
+bool SymTypePointer::operator==(SymType* type)
 {
     SymTypePointer* pointer = dynamic_cast<SymTypePointer*>(type);
     if (!pointer)
@@ -290,7 +290,7 @@ bool SymTypeFunc::IsModifiableLvalue()
     return false;
 }
 
-bool SymTypeFunc::operator == (SymType* type)
+bool SymTypeFunc::operator==(SymType* type)
 {
     SymTypeFunc* func = dynamic_cast<SymTypeFunc*>(type);
     if (!func)
@@ -471,7 +471,7 @@ int SymTable::GetByteSize()
     return bytes;
 }
 
-bool SymTable::operator == (SymTable* table)
+bool SymTable::operator==(SymTable* table)
 {
     if (GetSize() != table->GetSize())
     {

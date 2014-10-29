@@ -174,12 +174,13 @@ public:
 
     virtual string Generate();
 
-    virtual bool operator == (int) const;
-    virtual bool operator == (AsmArg*) const;
-    virtual bool operator == (AsmRegName) const;
+    virtual bool operator==(int) const;
+    virtual bool operator==(string) const;
+    virtual bool operator==(AsmArg*) const;
+    virtual bool operator==(AsmRegName) const;
 
-    bool operator != (AsmArg*) const;
-    bool operator != (AsmRegName) const;
+    virtual bool operator!=(AsmArg*) const;
+    virtual bool operator!=(AsmRegName) const;
 };
 
 //-----------------------------------------------------------------------------
@@ -194,7 +195,7 @@ public:
 
     string Generate();
 
-    bool operator == (int) const;
+    bool operator==(int) const;
 };
 
 //-----------------------------------------------------------------------------
@@ -211,9 +212,7 @@ public:
     ~AsmArgRegister();
 
     string Generate();
-
-    bool operator == (AsmArg*) const;
-
+    bool operator==(AsmArg*) const;
     friend class AsmArgIndirect;
 };
 
@@ -228,9 +227,8 @@ public:
     ~AsmArgIndirect();
 
     string Generate();
-
-    bool operator == (AsmArg*) const;
-    bool operator == (AsmRegName) const;
+    bool operator==(AsmArg*) const;
+    bool operator==(AsmRegName) const;
 };
 
 //-----------------------------------------------------------------------------
@@ -246,7 +244,7 @@ public:
 
     string Generate();
 
-    bool operator == (AsmArg*) const;
+    bool operator==(AsmArg*) const;
 };
 
 //-----------------------------------------------------------------------------

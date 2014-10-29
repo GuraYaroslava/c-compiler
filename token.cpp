@@ -80,12 +80,12 @@ void BaseToken::Print(ostream &fout)
     fout << "lx: " << GetText() << "        ";
 };
 
-bool BaseToken::operator == (TokenType subType_)
+bool BaseToken::operator==(TokenType subType_)
 {
     return subType == subType_ || type == subType_;
 }
 
-bool BaseToken::operator != (TokenType subType_)
+bool BaseToken::operator!=(TokenType subType_)
 {
     return subType != subType_;
 }

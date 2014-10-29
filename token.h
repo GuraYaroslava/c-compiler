@@ -131,8 +131,8 @@ public:
     TokenType GetType();
     TokenType GetSubType();
 
-    bool operator == (TokenType);
-    bool operator != (TokenType);
+    bool operator==(TokenType);
+    bool operator!=(TokenType);
 
     void InitTokenTypeTable();
 

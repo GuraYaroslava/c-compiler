@@ -44,8 +44,8 @@ public:
     virtual bool IsModifiableLvalue();
     virtual bool CanConvertTo(SymType*);
 
-    virtual bool operator == (SymType*);
-    virtual bool operator != (SymType*);
+    virtual bool operator==(SymType*);
+    virtual bool operator!=(SymType*);
 };
 
 //-----------------------------------------------------------------------------
@@ -74,7 +74,7 @@ public:
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
 
-    bool operator == (SymType*);
+    bool operator==(SymType*);
 
     int GetByteSize() const;
     void SymPrint(ostream&);
@@ -111,7 +111,7 @@ public:
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
 
-    bool operator == (SymType*);
+    bool operator==(SymType*);
     int GetByteSize() const;
     void SymPrint(ostream&);
 };
@@ -132,7 +132,7 @@ public:
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
 
-    bool operator == (SymType*);
+    bool operator==(SymType*);
 
     void SymPrint(ostream&);
     void Generate(AsmCode&);
@@ -182,7 +182,7 @@ public:
     int GetSize();
     int GetByteSize();
 
-    bool operator == (SymTable*);
+    bool operator==(SymTable*);
 
     void Print(ostream&);
 
