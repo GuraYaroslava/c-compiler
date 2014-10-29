@@ -29,6 +29,16 @@ AsmCmd1::AsmCmd1(AsmCmdName opcode, AsmArg* arg_): AsmCmd0(opcode), arg(arg_) {}
 
 AsmCmd1::~AsmCmd1() {}
 
+AsmArg* AsmCmd1::GetArgument()
+{
+    return arg;
+}
+
+bool AsmCmd1::operator==(AsmCmdName cmd)
+{
+    return opcode == cmd;
+}
+
 string AsmCmd1::Generate()
 {
     return AsmCmdNameToString(opcode)

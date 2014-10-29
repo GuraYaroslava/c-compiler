@@ -132,6 +132,8 @@ public:
     AsmCmd1(AsmCmdName, AsmArg*);
     ~AsmCmd1();
 
+    bool operator==(AsmCmdName);
+    AsmArg* GetArgument();
     string Generate();
 };
 
