@@ -158,6 +158,7 @@ class AsmRowCmd: public AsmCmd
 {
 private:
     string str;
+
 public:
     AsmRowCmd(string);
     ~AsmRowCmd();
@@ -213,7 +214,11 @@ public:
     ~AsmArgRegister();
 
     string Generate();
+    bool operator==(string) const;
     bool operator==(AsmArg*) const;
+    bool operator==(AsmRegName) const;
+    bool operator!=(AsmArg*) const;
+    bool operator!=(AsmRegName) const;
     friend class AsmArgIndirect;
 };
 

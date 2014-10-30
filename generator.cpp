@@ -147,6 +147,20 @@ string AsmArgRegister::Generate()
     return RegNameToString();
 }
 
+bool AsmArgRegister::operator!=(AsmArg* arg) const
+{
+    if (dynamic_cast<AsmArgRegister*>(arg) && !dynamic_cast<AsmArgIndirect*>(arg))
+    {
+        return reg != dynamic_cast<AsmArgRegister*>(arg)->reg;
+    }
+    return true;
+}
+
+bool AsmArgRegister::operator!=(AsmRegName arg) const
+{
+    return reg != arg;
+}
+
 string AsmArgRegister::RegNameToString() const
 {
     switch (reg)
@@ -185,9 +199,15 @@ bool AsmArgRegister::operator==(string arg) const
     return RegNameToString() == arg;
 }
 
+bool AsmArgRegister::operator==(AsmArg* arg) const
 {
     AsmArgRegister* tmp = dynamic_cast<AsmArgRegister*>(arg);
-    return tmp && tmp->reg == reg/* && !dynamic_cast<AsmArgIndirect*>(arg)*/;
+    return tmp && tmp->reg == reg && !dynamic_cast<AsmArgIndirect*>(arg);
+}
+
+bool AsmArgRegister::operator==(AsmRegName arg) const
+{
+    return reg == arg;
 }
 
 //-----------------------------------------------------------------------------
