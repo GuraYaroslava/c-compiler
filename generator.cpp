@@ -328,7 +328,11 @@ string AsmArgFloat::Generate()
     return buff.str();
 }
 
+bool AsmArgFloat::operator==(string arg) const
 {
+    std::ostringstream buff;
+    buff << fixed << val;
+    return buff.str() == arg;
 }
 
 //-----------------------------------------------------------------------------
