@@ -477,3 +477,7 @@ void Parser::GenerateCode(bool flag)
     generator.Generate();
 }
 
+void Parser::AsmOptimization()
+{
+    asmOptimizer.Optimize(generator.code);
+}

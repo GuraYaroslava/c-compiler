@@ -1,6 +1,6 @@
 #pragma once
 
-#include "generator.h"
+#include "asm_optimizer.h"
 #include "statement.h"
 #include "lexer.h"
 #include "node.h"
@@ -10,6 +10,8 @@ class Parser
 private:
     Lexer lexer;
     Generator generator;
+    AsmOptimizer asmOptimizer;
+
     SymTableStack symStack;
     vector <SyntaxNode*> nodeStack;
     vector <Statement*> stmtStack;
@@ -33,6 +35,7 @@ public:
 
     void Parse();
     void GenerateCode(bool withAsmOptimization = false);
+    void AsmOptimization();
 
     void ParseDeclaration();
     SymType* ParseTypeSpecifier();
