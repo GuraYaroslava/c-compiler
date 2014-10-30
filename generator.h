@@ -351,6 +351,13 @@ public:
     AsmCode();
     ~AsmCode();
 
+    AsmCmd* operator[](int);
+    void Insert(AsmCmd*, int);
+    void Delete(int);
+    void Delete(int, int);
+    void Move(int, int);
+    int Size();
+
     void AddCmd(string);
 
     void AddCmd(AsmCmd*);

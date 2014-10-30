@@ -353,6 +353,38 @@ AsmCode::AsmCode() {}
 
 AsmCode::~AsmCode() {}
 
+AsmCmd* AsmCode::operator[](int i)
+{
+    return cmds[i];
+}
+
+void AsmCode::Insert(AsmCmd* item, int i)
+{
+    cmds.insert(cmds.begin() +  i, item);
+}
+
+void AsmCode::Delete(int i, int j)
+{
+    cmds.erase(cmds.begin() + i, cmds.begin() + j + 1);
+}
+
+void AsmCode::Delete(int i)
+{
+    cmds.erase(cmds.begin() + i);
+}
+
+void AsmCode::Move(int from, int to)
+{
+    AsmCmd* tmp = cmds[from];
+    cmds.erase(cmds.begin() + from);
+    cmds.insert(cmds.begin() + to, tmp);
+}
+
+int AsmCode::Size()
+{
+    return cmds.size();
+}
+
 void AsmCode::AddCmd(string row)
 {
 
