@@ -234,6 +234,12 @@ bool AsmArgIndirect::operator==(AsmRegName) const
     return false;
 }
 
+bool AsmArgIndirect::usesRegister(AsmArg* arg) const
+{
+    AsmArgRegister* tmp = dynamic_cast<AsmArgRegister*>(arg);
+    return tmp && tmp->reg == reg;
+}
+
 //-----------------------------------------------------------------------------
 AsmArgMemory::AsmArgMemory(const string& name_, bool lvalue_):
     name(name_),

@@ -233,6 +233,7 @@ public:
     ~AsmArgIndirect();
 
     string Generate();
+    bool usesRegister(AsmArg*) const;
     bool operator==(AsmArg*) const;
     bool operator==(AsmRegName) const;
 };
