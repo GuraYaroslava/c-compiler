@@ -441,7 +441,7 @@ void Parser::Init()
 }
 
 
-void Parser::GenerateCode()
+void Parser::GenerateCode(bool flag)
 {
     //generate consts
     for (int i = 0, size = consts.size(); i < size; ++i)
@@ -451,8 +451,8 @@ void Parser::GenerateCode()
 
     //generate globals symbols
     symStack.Top()->GenerateData(generator.data);
-    generator.data.AddCmd(cmdREAL4, real4, new AsmArgFloat(0.00000));
-    generator.data.AddCmd(cmdREAL8, real8, new AsmArgFloat(0.00000));
+    generator.data.AddCmd(cmdREAL4, real4, new AsmArgFloat(0));
+    generator.data.AddCmd(cmdREAL8, real8, new AsmArgFloat(0));
 
     //generate function declarations
     symStack.Top()->GenerateCode(generator.code);
@@ -468,6 +468,12 @@ void Parser::GenerateCode()
     //end of start
     generator.code.AddCmd(cmdRET, new AsmArg());
 
-    //generate body of main function
+    if (flag)
+    {
+        AsmOptimization();
+    }
+
+    //print asm code
     generator.Generate();
 }
+

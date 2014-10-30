@@ -32,7 +32,7 @@ public:
     BaseToken* GetUnary();
 
     void Parse();
-    void GenerateCode();
+    void GenerateCode(bool withAsmOptimization = false);
 
     void ParseDeclaration();
     SymType* ParseTypeSpecifier();
