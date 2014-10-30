@@ -251,6 +251,7 @@ public:
 
     string Generate();
 
+    bool operator==(string) const;
     bool operator==(AsmArg*) const;
 };
 

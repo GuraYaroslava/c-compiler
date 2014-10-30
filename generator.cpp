@@ -253,6 +253,10 @@ string AsmArgMemory::Generate()
     return (lvalue ? "offset " : "") + name;
 }
 
+bool AsmArgMemory::operator==(string arg) const
+{
+    return name == name;
+}
 
 bool AsmArgMemory::operator==(AsmArg* arg) const
 {
