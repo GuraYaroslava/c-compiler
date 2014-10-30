@@ -279,6 +279,7 @@ public:
     ~AsmArgLabel();
 
     string Generate();
+    bool operator==(string) const;
 };
 
 //-----------------------------------------------------------------------------

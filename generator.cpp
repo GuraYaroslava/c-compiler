@@ -291,6 +291,11 @@ AsmArgLabel::AsmArgLabel(string name_): name(name_) {}
 
 AsmArgLabel::~AsmArgLabel() {}
 
+bool AsmArgLabel::operator==(string arg) const
+{
+    return name == arg;
+}
+
 string AsmArgLabel::Generate()
 {
     return name;
