@@ -306,6 +306,11 @@ AsmArgString::AsmArgString(string val_): val(val_) {}
 
 AsmArgString::~AsmArgString() {}
 
+bool AsmArgString::operator==(string arg) const
+{
+    return val == arg;
+}
+
 string AsmArgString::Generate()
 {
     return val;

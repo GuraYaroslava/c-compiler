@@ -309,6 +309,7 @@ public:
     ~AsmArgString();
 
     string Generate();
+    bool operator==(string) const;
 };
 
 //-----------------------------------------------------------------------------
