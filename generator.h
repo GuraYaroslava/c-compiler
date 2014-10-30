@@ -196,6 +196,7 @@ public:
     string Generate();
 
     bool operator==(int) const;
+    bool operator==(string) const;
 };
 
 //-----------------------------------------------------------------------------

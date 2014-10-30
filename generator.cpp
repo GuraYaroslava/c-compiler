@@ -132,6 +132,11 @@ bool AsmArgImmediate::operator==(int value_) const
     return value == value_;
 }
 
+bool AsmArgImmediate::operator==(string value_) const
+{
+    return to_string((long double)value) == value_;
+}
+
 //-----------------------------------------------------------------------------
 AsmArgRegister::AsmArgRegister(AsmRegName reg_): AsmArg(), reg(reg_) {}
 
