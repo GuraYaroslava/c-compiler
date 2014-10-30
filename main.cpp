@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
     if (argc <= 1)
     {
-        cout << "Usage: " << argv[0] << " <key: -s -sp -p -d -g> <input file name> <output file name>" << endl;
+        cout << "Usage: " << argv[0] << " <key: -s -sp -p -d -g or -g--opt> <input file name> <output file name>" << endl;
         return EXIT_SUCCESS;
     }
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
             //char fin_[100];
             //cin.getline(fin_, 100);
 
-            string asmout =  string((char*) argv[2]) + ".asm";
+            string asmout = string((char*) argv[2]) + ".asm";
             //string asmout = "out.asm";
 
             Parser parser(argv[2], asmout.c_str());
@@ -135,6 +135,17 @@ int main(int argc, char* argv[])
 
             //parser.PrintSymTables(fout);
             //parser.PrintStmtTrees(5, 5, fout);
+        }
+        else if (!strcmp(argv[1], "-g--opt"))
+        {
+            string asmout =  string((char*) argv[2]) + ".opt.asm";
+            Parser parser(argv[2], asmout.c_str());
+
+            while (!parser.Eof())
+            {
+                parser.Parse();
+            }
+            parser.GenerateCode(true);
         }
     }
     catch (Exception exp)
