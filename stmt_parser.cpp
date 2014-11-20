@@ -24,11 +24,11 @@ Statement* Parser::ParseStatement()
     }
 }
 
-StmtBlock* Parser::ParseBlock(bool flag)
+StmtBlock* Parser::ParseBlock(bool inFunction)
 {
     lexer.Get();
     StmtBlock* result = new StmtBlock();
-    result->locals->shift = !flag ? 4 : symStack.Top()->shift + symStack.Top()->GetByteSize();
+    result->locals->shift = inFunction ? symStack.Top()->shift + symStack.Top()->GetByteSize() : 4;
     symStack.Push(result->locals);
 
     while (*lexer.Peek() != FIGURE_RIGHT_BRACKET)
@@ -49,7 +49,7 @@ StmtBlock* Parser::ParseBlock(bool flag)
         }
     }
 
-    if (flag)
+    if (inFunction)
     {
         lexer.Get();
     }
@@ -136,9 +136,9 @@ StmtJump* Parser::ParseJump()
         break;
 
     case RETURN:
-        Expected(parseFunc != NULL, "return statement not within a func");
+        Expected(parseFunc.back() != NULL, "return statement not within a func");//как быть в случае ф-ции, объ€вленной внутри др. ф-ции???
         SyntaxNode* arg = *lexer.Peek() == SEMICOLON ? NULL : ParseExpression();
-        result = new StmtReturn(arg, parseFunc);
+        result = new StmtReturn(arg, parseFunc.back());
         break;
     }
 

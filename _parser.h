@@ -1,11 +1,14 @@
 #pragma once
 
+#include "_parser_base.h"
 #include "asm_optimizer.h"
 #include "statement.h"
 #include "lexer.h"
 #include "node.h"
 
-class Parser
+const int INF = numeric_limits<int>::max();
+
+class Parser: public BaseParser
 {
 private:
     Lexer lexer;
@@ -13,8 +16,7 @@ private:
     AsmOptimizer asmOptimizer;
 
     SymTableStack symStack;
-    vector <SyntaxNode*> nodeStack;
-    vector <Statement*> stmtStack;
+    vector <Statement*> stmtStack;//!!!
 
     map <TokenType, int> precedences;
     map <TokenType, bool> unary_oper;
@@ -32,10 +34,14 @@ public:
     void Next();
 
     BaseToken* GetUnary();
+    void SetUnUsed(const string&);
+    void PushLocals(SymTable*);
+    void PopLocals();
 
     void Parse();
     void GenerateCode(bool withAsmOptimization = false);
-    void AsmOptimization();
+    void AsmOptimize();
+    void Optimize();
 
     void ParseDeclaration();
     SymType* ParseTypeSpecifier();
@@ -48,7 +54,7 @@ public:
     void ParseParameterList();
 
     Statement* ParseStatement();
-    StmtBlock* ParseBlock(bool flag = false);
+    StmtBlock* ParseBlock(bool inFanction = false);
     StmtIf* ParseIf();
     StmtFor* ParseFor();
     StmtWhile* ParseWhile();
@@ -68,12 +74,12 @@ public:
     void Expected(TokenType, TokenType);
     void Expected(bool, const char*);
 
-    void PrintTree(SyntaxNode*, int, int, ostream&);
-    void PrintStmtTrees(int, int, ostream&);
-    void PrintNodeTrees(int, int, ostream&);
+    void PrintStmtTrees(int, ostream&);//!!!
     void PrintSymTables(ostream&);
 
-    int counter;
-    SymTypeFunc* parseFunc;
-    StmtIteration* parseIter;
+    int counter; //for generation nodes ids
+    vector <SymTypeFunc*> parseFunc; //parsed whether the function at this time?
+    StmtIteration* parseIter; //parsed whether the iteration at this time?
+
+    friend class StmtBlock;
 };

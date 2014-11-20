@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vector>
-
+#include "_parser_base.h"
 #include "token.h"
 #include "generator.h"
 #include "statement_base.h"
 #include "utils.h"
 
+class Parser;
 class SymTypeScalar;
 class SymTypePointer;
 
@@ -22,16 +23,17 @@ class Symbol
 {
 public:
     BaseToken* name;
-
     int offset;
 
     Symbol(BaseToken*);
     ~Symbol();
 
     virtual SymType* GetType();
-    virtual void Generate(AsmCode&);
-    virtual void SymPrint(ostream&);
     virtual int GetByteSize() const;
+    virtual void Print(int, ostream&);
+    virtual void Generate(AsmCode&);
+    virtual void Optimize(bool&, BaseParser&);
+    virtual void SetUnUsed(BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -58,7 +60,6 @@ public:
     bool IsModifiableLvalue();
     bool CanConvertTo(SymType*);
     int GetByteSize() const;
-    //void SymPrint(ostream&);
 };
 
 //-----------------------------------------------------------------------------
@@ -77,7 +78,7 @@ public:
     bool operator==(SymType*);
 
     int GetByteSize() const;
-    void SymPrint(ostream&);
+    void Print(int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
@@ -95,8 +96,7 @@ public:
     bool CanConvertTo(SymType*);
     int GetByteSize() const;
     int GetShiftForBase();
-
-    void SymPrint(ostream&);
+    void Print(int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
@@ -113,7 +113,7 @@ public:
 
     bool operator==(SymType*);
     int GetByteSize() const;
-    void SymPrint(ostream&);
+    void Print(int, ostream&);
 };
 
 //-----------------------------------------------------------------------------
@@ -134,8 +134,10 @@ public:
 
     bool operator==(SymType*);
 
-    void SymPrint(ostream&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+    void Optimize(bool&, BaseParser&);
+    void SetUnUsed(BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -148,16 +150,20 @@ public:
     friend class SymTable;
 
     bool local;
+    int used;
 
     SymVar(BaseToken*, SymType*);
     SymVar(BaseToken*);
     ~SymVar();
 
-    int GetByteSize() const;
     SymType* GetType();
     void SetType(SymType*);
+
+    int GetByteSize() const;
+    void Print(int, ostream&);
     void Generate(AsmCode&);
-    void SymPrint(ostream&);
+    void Optimize(bool&, BaseParser&);
+    void SetUnUsed(BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -174,6 +180,8 @@ public:
     SymTable();
     ~SymTable();
 
+    void SetUsed(const string&);
+    void SetUnUsed(const string&);
     Symbol* Find(const string&);
 
     void Add(Symbol*);
@@ -184,10 +192,12 @@ public:
 
     bool operator==(SymTable*);
 
-    void Print(ostream&);
+    void Print(int, ostream&);
 
     void GenerateData(AsmCode&);
     void GenerateCode(AsmCode&);
+    void Optimize(bool&, BaseParser&);
+    void Delete(int);
 };
 
 //-----------------------------------------------------------------------------
@@ -199,6 +209,8 @@ public:
     SymTableStack();
     ~SymTableStack();
 
+    void SetUsed(const string&);
+    void SetUnUsed(const string&);
     Symbol* Find(const string&);
 
     void Add(Symbol*);

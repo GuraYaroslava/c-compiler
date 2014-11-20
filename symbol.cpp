@@ -5,14 +5,9 @@ Symbol::Symbol(BaseToken* name_): name(name_), offset(0) {}
 
 Symbol::~Symbol() {}
 
-void Symbol::Generate(AsmCode&)
+void Symbol::SetUnUsed(BaseParser&)
 {
 
-}
-
-void Symbol::SymPrint(ostream& out)
-{
-    out << "`" << name->GetText() << "`";
 }
 
 SymType* Symbol::GetType()
@@ -109,7 +104,7 @@ bool SymTypeArray::CanConvertTo(SymType* to)
     //}
 
     SymTypePointer* p = dynamic_cast<SymTypePointer*>(to);
-    if (p && *p->refType == type)
+    if (p && *p->refType == type || *this == to)
     {
         return true;
     }
@@ -126,12 +121,6 @@ bool SymTypeArray::operator==(SymType* type_)
     }
 
     return false;
-}
-
-void SymTypeArray::SymPrint(ostream &out)
-{
-    out << "array " << size << " of ";
-    type->SymPrint(out);
 }
 
 int SymTypeArray::GetByteSize() const
@@ -190,12 +179,6 @@ bool SymTypePointer::operator==(SymType* type)
     return true;
 }
 
-void SymTypePointer::SymPrint(ostream& out)
-{
-    out << "pointer to ";
-    refType->SymPrint(out);
-}
-
 int SymTypePointer::GetByteSize() const
 {
     return 4;
@@ -223,17 +206,6 @@ bool SymTypeStruct::CanConvertTo(SymType* to)
     }
 
     return true;
-}
-
-void SymTypeStruct::SymPrint(ostream& out)
-{
-    out << "struct ";
-    Symbol::SymPrint(out);
-    if (fields->GetSize() > 0)
-    {
-        out << endl << "fields:" << endl;
-        fields->Print(out);
-    }
 }
 
 int SymTypeStruct::GetByteSize() const
@@ -285,6 +257,11 @@ SymTypeFunc::SymTypeFunc(SymType* type_):
 
 SymTypeFunc::~SymTypeFunc() {}
 
+void SymTypeFunc::SetUnUsed(BaseParser& parser)
+{
+    body->SetUnUsed(parser);
+}
+
 bool SymTypeFunc::IsModifiableLvalue()
 {
     return false;
@@ -306,52 +283,26 @@ bool SymTypeFunc::CanConvertTo(SymType* to)
     return *this == to;
 }
 
-void SymTypeFunc::SymPrint(ostream& out)
-{
-    out << "function(";
-
-    if (!params->symbols.empty())
-    {
-        int size = params->symbols.size()-1;
-        for (int i = 0; i < size; ++i)
-        {
-            params->symbols[i]->SymPrint(out);
-            out << ", ";
-        }
-        params->symbols[size]->SymPrint(out);
-    }
-
-    out << ") returning ";
-    type->SymPrint(out);
-
-    //if (body)
-    //{
-    //    out << endl;
-    //    body->StmtPrint(out);
-    //}
-}
-
-void SymTypeFunc::Generate(AsmCode& code)
-{
-    code.AddCmd(cmdPUSH, EBP);
-    code.AddCmd(cmdMOV, EBP, ESP);
-    body->Generate(code);
-    code.AddCmd(end);
-    code.AddCmd(cmdMOV, ESP, EBP);
-    code.AddCmd(cmdPOP, EBP);
-    code.AddCmd(cmdRET, new AsmArg());
-}
-
 //-----------------------------------------------------------------------------
 SymVar::SymVar(BaseToken* name_, SymType* type_):
     Symbol(name_),
     type(type_),
-    local(false)
+    local(false),
+    used(0)
     {}
 
-SymVar::SymVar(BaseToken* name_): Symbol(name_), type(NULL), local(false) {}
+SymVar::SymVar(BaseToken* name_): Symbol(name_), type(NULL), local(false), used(false) {}
 
 SymVar::~SymVar() {}
+
+void SymVar::SetUnUsed(BaseParser& parser)
+{
+    if (dynamic_cast<SymTypeFunc*>(type))
+    {
+        type->SetUnUsed(parser);
+    }
+    --used;
+}
 
 SymType* SymVar::GetType()
 {
@@ -362,30 +313,6 @@ void SymVar::SetType(SymType* type_)
 {
     type = type_;
 }
-
-void SymVar::Generate(AsmCode& code)
-{
-    if (dynamic_cast<SymTypeFunc*>(type))
-    {
-        dynamic_cast<SymTypeFunc*>(type)->end = new AsmArgLabel("end_func_"+name->GetText());
-        code.AddCmd(new AsmLabel("func_"+name->GetText()));
-        type->Generate(code);
-        return;
-    }
-
-    int size = type->GetByteSize();
-    int dwords = size / 4 + (size % 4 != 0);
-    code.AddCmd(cmdDD, new AsmArgMemory("var_"+name->GetText()), new AsmArgDup(dwords));
-}
-
-void SymVar::SymPrint(ostream& out)
-{
-    out << "variable ";
-    Symbol::SymPrint(out);
-
-    out << " type of ";
-    type->SymPrint(out);
-};
 
 int SymVar::GetByteSize() const
 {
@@ -489,36 +416,19 @@ bool SymTable::operator==(SymTable* table)
     return true;
 }
 
-void SymTable::Print(ostream& out)
+void SymTable::SetUsed(const string& name)
 {
-    for (int i = 0, size = symbols.size(); i < size; ++i)
+    if (GetIndexByName.count(name) == 1)
     {
-        symbols[i]->SymPrint(out);
-        out << endl;
+        dynamic_cast<SymVar*>(symbols[GetIndexByName.at(name)])->used += 1;
     }
 }
 
-void SymTable::GenerateData(AsmCode& data)
+void SymTable::SetUnUsed(const string& name)
 {
-    for (int i = 0, size = GetSize(); i < size; ++i)
+    if (GetIndexByName.count(name) == 1)
     {
-        SymVar* sym = dynamic_cast<SymVar*>(symbols[i]);
-        if (sym && !dynamic_cast<SymTypeFunc*>(sym->type))
-        {
-            sym->Generate(data);
-        }
-    }
-}
-
-void SymTable::GenerateCode(AsmCode& code)
-{
-    for (int i = 0, size = GetSize(); i < size; ++i)
-    {
-        SymVar* sym = dynamic_cast<SymVar*>(symbols[i]);
-        if (sym && dynamic_cast<SymTypeFunc*>(sym->type))
-        {
-            sym->Generate(code);
-        }
+        dynamic_cast<SymVar*>(symbols[GetIndexByName.at(name)])->used -= 1;
     }
 }
 
@@ -561,4 +471,21 @@ SymTable* SymTableStack::Top()
 {
     SymTable* tbl = tables.back();
     return tables.size() > 0 ? tables.back() : 0;
+}
+
+void SymTableStack::SetUsed(const string& name)
+{
+    Symbol* symbol = NULL;
+    for (int i = tables.size() - 1; i > -1; --i)
+    {
+        tables[i]->SetUsed(name);
+    }
+}
+
+void SymTableStack::SetUnUsed(const string& name)
+{
+    for (int i = tables.size() - 1; i > -1; --i)
+    {
+        tables[i]->SetUnUsed(name);
+    }
 }

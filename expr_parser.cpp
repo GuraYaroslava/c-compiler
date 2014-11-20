@@ -5,34 +5,13 @@
 #define UNARY 13
 #define MAX 15
 
-const int INF = numeric_limits<int>::max();
-
-Parser::Parser(const char* fin, const char* asmout):
-    lexer(fin),
-    generator(asmout),
-    parseFunc(NULL),
-    parseIter(NULL),
-    counter(0)
-{
-    Init();
-}
-
-Parser::~Parser() {}
-
 void Parser::Parse()
 {
     BaseToken* token = lexer.Peek();
 
-    if (*token == STRUCT
-        || dynamic_cast<SymType*>(symStack.Find(token->GetText())))
-    {
-        ParseDeclaration();
-    }
-    else
-    {
-        Statement* stmt = ParseStatement();
-        stmtStack.push_back(stmt);
-    }
+    (*token == STRUCT || dynamic_cast<SymType*>(symStack.Find(token->GetText()))) ?
+        ParseDeclaration() : stmtStack.push_back(ParseStatement());
+
     if (*lexer.Peek() == SEMICOLON)
     {
         lexer.Get();
@@ -119,12 +98,13 @@ SyntaxNode* Parser::ParsePrimaryExpression()
     if (*token == IDENTIFIER)
     {
         Symbol* symbol = symStack.Find(token->GetText());
-        if (!symbol && parseFunc)
+        if (!symbol && !parseFunc.empty())
         {
-            symbol = parseFunc->params->Find(token->GetText());
+            symbol = parseFunc.back()->params->Find(token->GetText());
         }
         Expected(symbol != NULL, "identifier is undefined");
         result = new NodeVar(counter++, symbol);
+        symStack.SetUsed(token->GetText());
     }
     else if (*token == CONSTANT || *token == STRING)
     {
@@ -169,7 +149,7 @@ void Parser::ParseFuncCall(SyntaxNode*& node)
 {
     SymTypeFunc* type = dynamic_cast<SymTypeFunc*>(node->GetType());
     Expected(type != NULL, "expression must have (pointer-to-) function type");
-
+    //symStack.SetUsed(node->token->GetText());
     node = new NodeCall(counter++, type, node);
     while (*lexer.Peek() != ROUND_RIGHT_BRACKET)
     {
@@ -196,7 +176,6 @@ void Parser::ParseArrIndex(SyntaxNode*& node)
     }
     Expected(type != NULL, "expression must have array type");
     Expected(*lexer.Peek() != SQUARE_RIGHT_BRACKET, "unknown size");
-
     SyntaxNode* index = ParseExpression();
     node = new NodeArr(counter++, type, node, index);
 
@@ -254,59 +233,6 @@ SyntaxNode* Parser::ParsePrintf(BaseToken* token)
     return result;
 }
 
-void Parser::PrintStmtTrees(int width, int indent, ostream& out)
-{
-    for (int i = 0, size = stmtStack.size(); i < size; ++i)
-    {
-        out << "stmt " << i << ":" << endl;
-        stmtStack[i]->StmtPrint(out, indent);
-        out << endl;
-    }
-}
-
-void Parser::PrintNodeTrees(int width, int indent, ostream& out)
-{
-    for (int i = 0, size = nodeStack.size(); i < size; ++i)
-    {
-        out << "tree " << i << ":" << endl;
-        nodeStack[i]->Print(width, indent, out);
-        out << endl;
-    }
-}
-
-void Parser::PrintTree(SyntaxNode* node, int width, int indent, ostream& out)
-{
-    node->Print(width, indent, out);
-}
-
-void Parser::Error(const char* msg)
-{
-    throw Exception(lexer.GetLine(), lexer.GetPos(), msg);
-}
-
-void Parser::Error(const string msg)
-{
-    throw Exception(lexer.GetLine(), lexer.GetPos(), msg);
-}
-
-void Parser::Expected(TokenType actual, TokenType expected)
-{
-    BaseToken* t = new BaseToken();
-    if (actual != expected)
-    {
-        Error("expected a " + t->tokenTypeToString[expected]);
-    }
-}
-
-void Parser::Expected(bool actual, const char* msg)
-{
-    bool expected = true;
-    if (actual != expected)
-    {
-        Error(msg);
-    }
-}
-
 BaseToken* Parser::GetUnary()
 {
     BaseToken* oper = lexer.Peek();
@@ -315,169 +241,4 @@ BaseToken* Parser::GetUnary()
         return lexer.Get();
     }
     return NULL;
-}
-
-bool Parser::Eof()
-{
-    return *lexer.Peek() == EOF_ ? true : false;
-}
-
-void Parser::Next()
-{
-    if (*lexer.Peek() == SEMICOLON)
-    {
-        lexer.Get();
-    }
-}
-
-void Parser::PrintSymTables(ostream& out)
-{
-    for (int i = 0, size = symStack.tables.size(); i < size; ++i)
-    {
-        if (symStack.tables[i]->GetSize() > 0)
-        {
-            out << "table " << i << ":" << endl;
-        }
-        else
-        {
-            continue;
-        }
-        symStack.tables[i]->Print(out);
-        out << endl;
-    }
-}
-
-void Parser::Init()
-{
-    SymTable* predefined = new SymTable();
-    predefined->Add(intType);
-    predefined->Add(floatType);
-    predefined->Add(charType);
-    symStack.Push(predefined);
-    symStack.Push(new SymTable());
-
-    precedences[BOF_] = INF;
-    precedences[EOF_] = INF;
-
-    precedences[COMMA] = 1;
-
-    precedences[ASSIGN] = 2;
-    precedences[ADD_ASSIGN] = 2;
-    precedences[SUB_ASSIGN] = 2;
-    precedences[MUL_ASSIGN] = 2;
-    precedences[DIV_ASSIGN] = 2;
-    precedences[MOD_ASSIGN] = 2;
-    precedences[BIT_SHIFT_LEFT_ASSIGN] = 2;
-    precedences[BIT_SHIFT_RIGHT_ASSIGN] = 2;
-    precedences[BIT_AND_ASSIGN] = 2;
-    precedences[BIT_XOR_ASSIGN] = 2;
-    precedences[BIT_OR_ASSIGN] = 2;
-
-    precedences[OR] = 3;
-    precedences[AND] = 4;
-
-    precedences[BIT_OR] = 5;
-    precedences[BIT_XOR] = 6;
-    precedences[BIT_AND] = 7;
-
-    precedences[EQUAL] = 8;
-    precedences[NOT_EQUAL] = 8;
-
-    precedences[LESS] = 9;
-    precedences[GREATER] = 9;
-    precedences[LESS_EQUAL] = 9;
-    precedences[GREATER_EQUAL] = 9;
-
-    precedences[BIT_SHIFT_LEFT] = 10;
-    precedences[BIT_SHIFT_RIGHT] = 10;
-
-    precedences[SUBSTRACTION] = 11;
-    precedences[ADDITION] = 11;
-
-    precedences[MULTIPLICATION] = 12;
-    precedences[DIVISION] = 12;
-    precedences[MODULO] = 12;
-
-    //UNARY operator precedence = 13
-    unary_oper[NOT] = true;
-    unary_oper[BIT_NOT] = true;
-    unary_oper[BIT_AND] = true;// address of an object
-
-    unary_oper[ADDITION] = true;
-    unary_oper[SUBSTRACTION] = true;
-    unary_oper[MULTIPLICATION] = true;// indirection through a pointer
-
-    precedences[SEMICOLON] = INF;
-
-    //POSTFIX
-    precedences[ARROW] = 14;
-    precedences[POINT] = 14;
-
-    precedences[ROUND_LEFT_BRACKET] = 14;
-    precedences[ROUND_RIGHT_BRACKET] = INF;
-
-    precedences[SQUARE_LEFT_BRACKET] = 14;
-    precedences[SQUARE_RIGHT_BRACKET] = INF;
-
-    //Associativity
-    right_assoc_oper[NOT] = true;
-    right_assoc_oper[BIT_NOT] = true;
-    //right_assoc_oper[ADDITION] = true;// unary
-    //right_assoc_oper[SUBSTRACTION] = true;// unary
-    right_assoc_oper[MULTIPLICATION] = true;
-
-    right_assoc_oper[ASSIGN] = true;
-    right_assoc_oper[ADD_ASSIGN] = true;
-    right_assoc_oper[SUB_ASSIGN] = true;
-    right_assoc_oper[MUL_ASSIGN] = true;
-    right_assoc_oper[DIV_ASSIGN] = true;
-    right_assoc_oper[MOD_ASSIGN] = true;
-
-    right_assoc_oper[BIT_AND_ASSIGN] = true;
-    right_assoc_oper[BIT_XOR_ASSIGN] = true;
-    right_assoc_oper[BIT_OR_ASSIGN] = true;
-    right_assoc_oper[BIT_SHIFT_LEFT_ASSIGN] = true;
-    right_assoc_oper[BIT_SHIFT_RIGHT_ASSIGN] = true;
-}
-
-
-void Parser::GenerateCode(bool flag)
-{
-    //generate consts
-    for (int i = 0, size = consts.size(); i < size; ++i)
-    {
-        consts[i]->GenerateData(generator.data);
-    }
-
-    //generate globals symbols
-    symStack.Top()->GenerateData(generator.data);
-    generator.data.AddCmd(cmdREAL4, real4, new AsmArgFloat(0));
-    generator.data.AddCmd(cmdREAL8, real8, new AsmArgFloat(0));
-
-    //generate function declarations
-    symStack.Top()->GenerateCode(generator.code);
-
-    //start
-    generator.code.AddCmd(new AsmLabel("start"));
-
-    //call main function
-    generator.code.AddCmd(cmdSUB, ESP, 4);
-    generator.code.AddCmd(cmdCALL, new AsmArgLabel("func_main"));
-    generator.code.AddCmd(cmdADD, ESP, 4);
-
-    //end of start
-    generator.code.AddCmd(cmdRET, new AsmArg());
-
-    if (flag)
-    {
-        AsmOptimization();
-    }
-
-    //print asm code
-    generator.Generate();
-}
-
-void Parser::AsmOptimization()
-{
-    asmOptimizer.Optimize(generator.code);
 }

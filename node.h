@@ -1,6 +1,7 @@
 #pragma once
 
 #include "symbol.h"
+#include "_parser_base.h"
 
 extern AsmArgMemory* real4;
 extern AsmArgMemory* real8;
@@ -31,23 +32,30 @@ public:
     friend class NodeArr;
     friend class NodeCall;
     friend class NodeBinaryOp;
+    friend class NodeUnaryOp;
     friend class NodePrintf;
     friend class NodeDummy;
-    friend SyntaxNode* MakeConversion(SyntaxNode* n, SymType* l, SymType* r);
+    friend SyntaxNode* MakeConversion(SyntaxNode*, SymType*, SymType*);
 
     SyntaxNode(int, BaseToken*);
     ~SyntaxNode();
 
     virtual SymType* GetType();
-
+    virtual float Calculate();
+    virtual bool IsConstant();
     virtual bool IsLvalue();
     virtual bool IsModifiableLvalue();
 
-    virtual void Print(int, int, ostream&);
+    virtual void Print(int, ostream&);
     virtual void Generate(AsmCode&);
     virtual void GenerateData(AsmCode&);
     virtual void GenerateLvalue(AsmCode&);
     virtual void FPUGenerate(AsmCode&);
+    virtual void PushFromFPUStack(AsmCode&);
+    //virtual void PushToFPUStack(AsmCode&);
+    virtual SyntaxNode* Optimize(bool&, BaseParser&);
+    virtual SyntaxNode* FoldConsts(bool&, BaseParser&);
+    virtual void SetUnUsed(BaseParser&);
 
     void Error(int, int, const string);
     void Expected(int, int, bool, const string);
@@ -71,11 +79,16 @@ public:
     bool IsLvalue();
     bool IsModifiableLvalue();
 
-    void Print(int, int, ostream&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
     void GenerateLvalue(AsmCode&);
     void FPUGenerate(AsmCode&);
     void GenerateWithFPU(AsmCode&);
+
+    void SetUnUsed(BaseParser&);
+    SyntaxNode* Optimize(bool&, BaseParser&);
+    SyntaxNode* FoldConsts(bool&, BaseParser&);
+    float Calculate();
 };
 
 //-----------------------------------------------------------------------------
@@ -94,10 +107,15 @@ public:
     bool IsLvalue();
     bool IsModifiableLvalue();
 
-    void Print(int, int, ostream&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
     void GenerateLvalue(AsmCode&);
     void FPUGenerate(AsmCode&);
+    void SetUnUsed(BaseParser&);
+
+    SyntaxNode* Optimize(bool&, BaseParser&);
+    SyntaxNode* FoldConsts(bool&, BaseParser&);
+    float Calculate();
 };
 
 //-----------------------------------------------------------------------------
@@ -118,8 +136,11 @@ public:
     bool IsModifiableLvalue();
 
     void AddArg(SyntaxNode*);
-    void Print(int, int, ostream&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+
+    void SetUnUsed(BaseParser&);
+    SyntaxNode* Optimize(bool&, BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -140,9 +161,11 @@ public:
     bool IsLvalue();
     bool IsModifiableLvalue();
 
-    void Print(int, int, ostream&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
     void GenerateLvalue(AsmCode&);
+    SyntaxNode* Optimize(bool&, BaseParser&);
+    void SetUnUsed(BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -153,20 +176,24 @@ private:
 
 public:
     friend class NodeBinaryOp;
+    friend class StmtIf;
     NodeVar(int, Symbol*);
     ~NodeVar();
 
     SymType* GetType();
-
+    bool IsConstant();
     bool IsLvalue();
     bool IsModifiableLvalue();
 
-    void Print(int, int, ostream&);
+    void Print(int, ostream&);
 
     void Generate(AsmCode&);
     void GenerateData(AsmCode&);
     void GenerateLvalue(AsmCode&);
     void FPUGenerate(AsmCode&);
+
+    void SetUnUsed(BaseParser&);
+    float Calculate();
 };
 
 //-----------------------------------------------------------------------------
@@ -180,9 +207,10 @@ public:
     ~NodePrintf();
 
     void Generate(AsmCode&);
-
-    void Print(int, int, ostream&);
+    void SetUnUsed(BaseParser&);
+    void Print(int, ostream&);
 };
+
 //-----------------------------------------------------------------------------
 class NodeDummy: public NodeUnaryOp
 {
@@ -195,7 +223,11 @@ public:
 
     SymType* GetType();
 
-    void Print(int, int, ostream&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
     void FPUGenerate(AsmCode&);
+
+    void SetUnUsed(BaseParser&);
+    SyntaxNode* Optimize(bool&, BaseParser&);
+    float Calculate();
 };

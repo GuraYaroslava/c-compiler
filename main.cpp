@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
             {
                 fout << "tree " << index++ << ":" << endl;
                 SyntaxNode* root = parser.ParseExpression();
-                parser.PrintTree(root, 10, 0, fout);
+                //parser.PrintTree(root, 10, 0, fout);
                 fout << endl;
                 parser.Next();
             }
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
             //char fin_[100];
             //cin.getline(fin_, 100);
 
-            string asmout = string((char*) argv[2]) + ".asm";
+            string asmout = string((char*)argv[2]) + ".asm";
             //string asmout = "out.asm";
 
             Parser parser(argv[2], asmout.c_str());
@@ -138,14 +138,23 @@ int main(int argc, char* argv[])
         }
         else if (!strcmp(argv[1], "-g--opt"))
         {
+            /*char fin_[100];
+            cin.getline(fin_, 100);*/
+
             string asmout =  string((char*) argv[2]) + ".opt.asm";
+            //string asmout = "out.opt.asm";
+
             Parser parser(argv[2], asmout.c_str());
+            //Parser parser(fin_, asmout.c_str());
 
             while (!parser.Eof())
             {
                 parser.Parse();
             }
+            parser.Optimize();
             parser.GenerateCode(true);
+
+            parser.PrintSymTables(fout);
         }
     }
     catch (Exception exp)

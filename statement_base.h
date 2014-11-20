@@ -7,6 +7,8 @@ public:
     Statement();
     ~Statement();
 
+    virtual Statement* Optimize(bool&, BaseParser&);
     virtual void Generate(AsmCode&);
-    virtual void StmtPrint(ostream&, int);
+    virtual void Print(int, ostream&s);
+    virtual void SetUnUsed(BaseParser&);
 };

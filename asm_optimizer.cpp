@@ -1,4 +1,10 @@
+#include "_parser.h"
 #include "asm_optimizer.h"
+
+void Parser::AsmOptimize()
+{
+    asmOptimizer.Optimize(generator.code);
+}
 
 static bool IsMemory(AsmArg* arg)
 {
@@ -11,12 +17,14 @@ static bool IsMemory(AsmArg* arg)
 
 static bool UsesStack(AsmCmd* cmd)
 {
-    if (AsmCmd2* binaryOpCode = dynamic_cast<AsmCmd2*>(cmd))
+    AsmCmd2* binaryOpCode = dynamic_cast<AsmCmd2*>(cmd);
+    AsmCmd1* unaryOpCode = dynamic_cast<AsmCmd1*>(cmd);
+    if (binaryOpCode)
     {
         return *binaryOpCode->GetFirst() == EBP || *binaryOpCode->GetFirst() == ESP
             || *binaryOpCode->GetSecond() == EBP || *binaryOpCode->GetSecond() == ESP;
     }
-    else if (AsmCmd1* unaryOpCode = dynamic_cast<AsmCmd1*>(cmd))
+    else if (unaryOpCode)
     {
         return *unaryOpCode == cmdPOP || *unaryOpCode == cmdPUSH
             || *unaryOpCode == cmdCALL || *unaryOpCode == cmdRET;
@@ -30,7 +38,9 @@ static bool UsesStack(AsmCmd* cmd)
 
 static bool IsArgument(AsmArg* arg, AsmCmd* cmd)
 {
-    if (AsmCmd2* binaryOpCode = dynamic_cast<AsmCmd2*>(cmd))
+    AsmCmd2* binaryOpCode = dynamic_cast<AsmCmd2*>(cmd);
+    AsmCmd1* unaryOpCode = dynamic_cast<AsmCmd1*>(cmd);
+    if (binaryOpCode)
     {
         AsmArgIndirect* ind = dynamic_cast<AsmArgIndirect*>(arg);
         AsmArgIndirect* ind1 = dynamic_cast<AsmArgIndirect*>(binaryOpCode->GetFirst());
@@ -39,7 +49,7 @@ static bool IsArgument(AsmArg* arg, AsmCmd* cmd)
             || ind1 && ind1->usesRegister(arg) || ind2 && ind2->usesRegister(arg)
             || *binaryOpCode->GetFirst() == arg || *binaryOpCode->GetSecond() == arg;
     }
-    else if (AsmCmd1* unaryOpCode = dynamic_cast<AsmCmd1*>(cmd))
+    else if (unaryOpCode)
     {
         AsmArgIndirect* ind = dynamic_cast<AsmArgIndirect*>(arg);
         AsmArgIndirect* ind1 = dynamic_cast<AsmArgIndirect*>(unaryOpCode->GetArgument());
@@ -113,19 +123,15 @@ bool PushPopToMovOptimization::Optimize(AsmCode& code, int index)
     AsmCmd1* cmd1 = dynamic_cast<AsmCmd1*>(code[index]);
     AsmCmd1* cmd2 = dynamic_cast<AsmCmd1*>(code[index + 1]);
 
-    if (cmd1 && cmd2 && *cmd1 == cmdPUSH  && *cmd2 == cmdPOP)
+    if (cmd1 && cmd2
+        && *cmd1 == cmdPUSH  && *cmd2 == cmdPOP
+        && *cmd1->GetArgument() != cmd2->GetArgument()
+        && !IsMemory(cmd1->GetArgument()) && !IsMemory(cmd2->GetArgument()))
     {
-        if (*cmd1->GetArgument() != cmd2->GetArgument())
-        {
-            if (IsMemory(cmd1->GetArgument()) && IsMemory(cmd2->GetArgument()))
-            {
-                return false;
-            }
             AsmCmd2* optCmd = new AsmCmd2(cmdMOV, cmd2->GetArgument(), cmd1->GetArgument());
             code.Delete(index, index + 1);
             code.Insert(optCmd, index);
             return true;
-        }
     }
 
     return false;
@@ -227,6 +233,10 @@ AsmOptimizer::AsmOptimizer()
     optimizations.push_back(new MovChainOptimization());
     optimizations.push_back(new AddSubZero());
     optimizations.push_back(new PopToUpPushToDown());
+//______add:_____|________|
+//    mov eax, 8 |        |
+//               | push 8 |
+//    push eax   |        |
 }
 
 AsmOptimizer::~AsmOptimizer() {}

@@ -74,7 +74,7 @@ string AsmCmd2::Generate()
 {
     return opcode > cmdDQ
         ? AsmCmdNameToString(opcode) + " " + arg1->Generate() + ", " + arg2->Generate()
-        : arg1->Generate() + " " + AsmCmdNameToString(opcode) + " " + arg2->Generate();
+        : arg1->Generate() + " " + AsmCmdNameToString(opcode) + " " + arg2->Generate();///???
 }
 
 //-----------------------------------------------------------------------------
@@ -425,9 +425,9 @@ void AsmCode::AddCmd(AsmLabel* label)
     cmds.push_back(label);
 }
 
-void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg, int size)
+void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg, int val)
 {
-    cmds.push_back(new AsmCmd2(cmd, new AsmArgRegister(reg), new AsmArgImmediate(size)));
+    cmds.push_back(new AsmCmd2(cmd, new AsmArgRegister(reg), new AsmArgImmediate(val)));
 }
 
 void AsmCode::AddCmd(AsmCmdName cmd, AsmRegName reg)
@@ -531,10 +531,6 @@ string AsmCmdNameToString(AsmCmdName opcode)
         return "add";
     case cmdSUB:
         return "sub";
-    //case cmdINC:
-        //return "inc";
-    //case cmdDEC:
-        //return "dec";
     case cmdRET:
         return "ret";
     case cmdDB:

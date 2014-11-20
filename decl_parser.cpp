@@ -18,7 +18,7 @@ void Parser::ParseDeclaration()
 
     while (true)
     {
-        if (parseFunc)
+        if (!parseFunc.empty())
         {
             symStack.Add(symbol, 0);
         }
@@ -31,6 +31,7 @@ void Parser::ParseDeclaration()
         {
             BaseToken* oper = lexer.Get();
             SyntaxNode* left = new NodeVar(counter++, symbol);
+            symStack.SetUsed(left->token->GetText());
             SyntaxNode* right = ParseExpression(precedences[COMMA]+1);
             NodeBinaryOp* node = new NodeBinaryOp(counter++, left, oper, right);
             stmtStack.push_back(new StmtExpr(node));
@@ -205,9 +206,9 @@ SymVar* Parser::ParseDeclarator(SymType* type, bool parseParams)
 
         if (*lexer.Peek() == FIGURE_LEFT_BRACKET)
         {
-            parseFunc = t;
+            parseFunc.push_back(t);
             t->body = ParseBlock();
-            parseFunc = NULL;
+            parseFunc.pop_back();
         }
         result->SetType(t);
     }

@@ -69,15 +69,15 @@ typedef enum
     cmdFADDP,
     cmdFMULP,
     cmdFSUBP,
-    cmdFLD,
-    cmdFSTP,
-    cmdFCHS,
+    cmdFLD,//add to stack FPU
+    cmdFSTP,//copy ST(0) to m(32/64)real and pop register stack
+    cmdFCHS,//neg ST(0)
     cmdFILD,
     cmdFISTP,
     cmdFLD1,
     cmdFCOMPP,
-    cmdFNSTSW,
-    cmdSAHF,
+    cmdFNSTSW,//from reg SWR to AX
+    cmdSAHF,//from AX to EFLAGS
 } AsmCmdName;
 
 string AsmCmdNameToString(AsmCmdName);
@@ -223,6 +223,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
+//generation pointer to register with offset
 class AsmArgIndirect: public AsmArgRegister
 {
 private:
@@ -239,6 +240,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
+//generate variable or address to variable (lv)
 class AsmArgMemory: public AsmArg
 {
 private:

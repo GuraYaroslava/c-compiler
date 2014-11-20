@@ -15,8 +15,11 @@ public:
     StmtExpr(SyntaxNode*);
     ~StmtExpr();
 
-    void StmtPrint(ostream&, int);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+    void SetUnUsed(BaseParser&);
+    Statement* Optimize(bool&, BaseParser&);
+    float Calculate();
 };
 
 //-----------------------------------------------------------------------------
@@ -32,10 +35,14 @@ public:
     StmtBlock();
     ~StmtBlock();
 
+    void SetUnUsed(BaseParser&);
     void AddStatement(Statement*);
-    void StmtPrint(ostream&, int);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
-    friend class Parser;
+    void Delete(int);
+    Statement* Optimize(bool&, BaseParser&);
+
+   friend class Parser;
 };
 
 //-----------------------------------------------------------------------------
@@ -50,8 +57,11 @@ public:
     StmtIf(SyntaxNode*,  Statement*, Statement*);
     ~StmtIf();
 
-    void StmtPrint(ostream&, int);
+    void SetUnUsed(BaseParser&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+    Statement* Optimize(bool&, BaseParser&);
+    Statement* DeadCodeEliminate(bool&, BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -82,16 +92,18 @@ public:
 class StmtFor: public StmtIteration
 {
 private:
-    StmtExpr *expr1;
-    StmtExpr *expr2;
-    StmtExpr *expr3;
+    SyntaxNode* expr1;
+    SyntaxNode* expr2;
+    SyntaxNode* expr3;
 
 public:
     StmtFor(SyntaxNode*, SyntaxNode*, SyntaxNode*);
     ~StmtFor();
 
-    void StmtPrint(ostream&, int);
+    void SetUnUsed(BaseParser&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+    Statement* Optimize(bool&, BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -104,8 +116,10 @@ public:
     StmtWhile(SyntaxNode*);
     ~StmtWhile();
 
-    void StmtPrint(ostream&, int);
+    void SetUnUsed(BaseParser&);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+    Statement* Optimize(bool&, BaseParser&);
 };
 
 //-----------------------------------------------------------------------------
@@ -126,7 +140,7 @@ public:
     StmtBreak(Statement*);
     ~StmtBreak();
 
-    void StmtPrint(ostream& out, int);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
 };
 
@@ -137,7 +151,7 @@ public:
     StmtContinue(Statement*);
     ~StmtContinue();
 
-    void StmtPrint(ostream& out, int);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
 };
 
@@ -152,6 +166,7 @@ public:
     StmtReturn(SyntaxNode*, SymTypeFunc*);
     ~StmtReturn();
 
-    void StmtPrint(ostream& out, int);
+    void Print(int, ostream&);
     void Generate(AsmCode&);
+    Statement* Optimize(bool&, BaseParser&);
 };
