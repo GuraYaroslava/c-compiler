@@ -1,4 +1,5 @@
 del *.exe
+del *.asm
 
 copy "C:\Users\Yaroslava\Documents\Visual Studio 2010\Projects\compiler\Debug\compiler.exe" "C:\Users\Yaroslava\Documents\Visual Studio 2010\Projects\compiler\compiler\tests"
 
@@ -8,7 +9,6 @@ for /L %%i in (10,1,77) do compiler -g generator/0%%i.in generator/0%%i.out
 cd C:\Users\Yaroslava\Documents\Visual Studio 2010\Projects\compiler\compiler\tests\generator
 
 echo off
-
 
 echo. 2> *.asm
 

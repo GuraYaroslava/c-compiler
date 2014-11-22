@@ -1,0 +1,19 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+{
+    function:     printf
+        format:     "bodyIf"
+
+
+}
+return
+    0
+}
+
+

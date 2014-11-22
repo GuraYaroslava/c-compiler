@@ -34,51 +34,51 @@ float SyntaxNode::Calculate()
 
 float NodeBinaryOp::Calculate()
 {
-    float fl = left->Calculate();
-    float fr = right->Calculate();
-    int il = (int)fl;
-    int ir = (int)fr;
+    float floatLeft = left->Calculate();
+    float floatRight = right->Calculate();
+    int intLeft = (int)floatLeft;
+    int intRight = (int)floatRight;
 
     switch (token->GetSubType())
     {
     case COMMA:
-        return float(fr);
+        return float(floatRight);
     case OR:
-        return float(fl || fr);
+        return float(floatLeft || floatRight);
     case AND:
-        return float(fl && fr);
+        return float(floatLeft && floatRight);
     case BIT_OR:
-        return float(il |  ir);
+        return float(intLeft |  intRight);
     case BIT_XOR:
-        return float(il ^  ir);
+        return float(intLeft ^  intRight);
     case BIT_AND:
-        return float(il &  ir);
+        return float(intLeft &  intRight);
     case EQUAL:
-        return float(fl == fr);
+        return float(floatLeft == floatRight);
     case NOT_EQUAL:
-        return float(fl != fr);
+        return float(floatLeft != floatRight);
     case LESS:
-        return float(fl <  fr);
+        return float(floatLeft <  floatRight);
     case GREATER:
-        return float(fl >  fr);
+        return float(floatLeft >  floatRight);
     case LESS_EQUAL:
-        return float(fl <= fr);
+        return float(floatLeft <= floatRight);
     case GREATER_EQUAL:
-        return float(fl >= fr);
+        return float(floatLeft >= floatRight);
     case BIT_SHIFT_LEFT:
-        return float(il << ir);
+        return float(intLeft << intRight);
     case BIT_SHIFT_RIGHT:
-        return float(il >> ir);
+        return float(intLeft >> intRight);
     case ADDITION:
-        return float(fl +  fr);
+        return float(floatLeft +  floatRight);
     case SUBSTRACTION:
-        return float(fl -  fr);
+        return float(floatLeft -  floatRight);
     case MULTIPLICATION:
-        return float(fl *  fr);
+        return float(floatLeft *  floatRight);
     case DIVISION:
-        return float(fl /  fr);
+        return float(floatLeft /  floatRight);
     case MODULO:
-        return float(il %  ir);
+        return float(intLeft %  intRight);
     //ERROR
     }
 }
@@ -95,7 +95,7 @@ SyntaxNode* NodeBinaryOp::FoldConsts(bool& successOprimization, BaseParser& pars
 
     if (left->IsConstant() && right->IsConstant())
     {
-        if (GetType() == intType) // CHAR??? FLOAT???
+        if (GetType() == intType)
         {
             SymVar* symbol = new SymVar(new TokenVal <int> ("", 0, 0, CONSTANT, NUMBER_INT, 0), intType);
             dynamic_cast<TokenVal <int> *>(symbol->name)->SetValue((int)Calculate());
@@ -109,15 +109,15 @@ SyntaxNode* NodeBinaryOp::FoldConsts(bool& successOprimization, BaseParser& pars
 
 float NodeUnaryOp::Calculate()
 {
-    float fl = arg->Calculate();
+    float value = arg->Calculate();
     switch (token->GetSubType())
     {
     case SUBSTRACTION:
-        return -fl;
+        return -value;
     case NOT:
-        return !fl;
+        return !value;
     default:
-        return fl;
+        return value;
     }
 }
 
@@ -259,8 +259,6 @@ Statement* StmtIf::DeadCodeEliminate(bool& successOprimization, BaseParser& pars
             delete bodyIf; bodyIf = NULL;
             return bodyElse;
         }
-        //delete condition; condition = NULL;
-        //delete bodyIf; bodyIf = NULL;
         this->SetUnUsed(parser);
         return NULL;
     }
@@ -284,10 +282,6 @@ Statement* StmtFor::Optimize(bool& successOprimization, BaseParser& parser)
         expr2 = expr2->Optimize(successOprimization, parser);
         if (expr2->IsConstant() && !expr2->Calculate())
         {
-            //delete expr1; expr1 = NULL;
-            //delete expr2; expr2 = NULL;
-            //delete expr3; expr3 = NULL;
-            //delete body; body = NULL;
             successOprimization = true;
             this->SetUnUsed(parser);
             return NULL;
@@ -304,8 +298,6 @@ Statement* StmtWhile::Optimize(bool& successOprimization, BaseParser& parser)
     condition = condition->Optimize(successOprimization, parser);
     if (condition->IsConstant() && !condition->Calculate())
     {
-        //delete condition; condition = NULL;
-        //delete body; body = NULL;
         successOprimization = true;
         this->SetUnUsed(parser);
         return NULL;

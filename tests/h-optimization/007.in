@@ -1,0 +1,12 @@
+int main()
+{
+    if (0)
+    {
+        printf("bodyIf");
+    }
+    else
+    {
+        printf("bodyElse");
+    }
+    return 0;
+}

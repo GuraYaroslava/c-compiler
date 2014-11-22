@@ -1,0 +1,36 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+variable `a` type of `int`
+        a
+    = <
+        0
+
+while
+    1
+{
+if
+        a
+    > <
+        4
+then
+    break
+        a
+    += <
+        1
+
+    function:     printf
+        format:     "bodyFor\n"
+
+
+}
+return
+    0
+}
+
+

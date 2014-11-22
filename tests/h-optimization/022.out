@@ -1,0 +1,40 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `Add` type of function(variable `a` type of `int`, variable `b` type of `int`) returning `int`
+{
+return
+        a
+    + <
+        b
+}
+
+variable `main` type of function() returning `int`
+{
+variable `a` type of `int`
+        a
+    = <
+        5
+
+{
+return
+    0
+}
+    function:     printf
+        format:     "%d"
+        args: 
+            function:             Add
+            args: 
+                a
+                5
+
+
+
+return
+    0
+}
+
+

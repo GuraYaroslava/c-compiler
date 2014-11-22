@@ -1,0 +1,9 @@
+int main()
+{
+    int a = 1;
+    for (a = 25*4-100; a < 6; a += (3 * ((5 + (36 + 4)) / 5)) % 5)
+    {
+        printf("bodyFor\n");
+    }
+    return 0;
+}

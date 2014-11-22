@@ -1,0 +1,60 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+variable `i` type of `int`
+        i
+    = <
+        0
+
+while
+        i
+    == <
+        0
+{
+    function:     printf
+        format:     "one _ start\n"
+
+
+while
+        i
+    == <
+        0
+{
+    function:     printf
+        format:     "two _ start\n"
+
+
+while
+        i
+    == <
+        0
+{
+    function:     printf
+        format:     "while #three\n"
+
+
+        i
+    -= <
+        1
+
+}
+    function:     printf
+        format:     "two _ end\n"
+
+
+}
+    function:     printf
+        format:     "one _ end"
+
+
+}
+return
+    0
+}
+
+

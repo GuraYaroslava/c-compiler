@@ -1,0 +1,41 @@
+int main()
+{
+
+    int i = 0;
+    for (; i == 0; i-= 1)
+    {
+        printf("one _ start\n");
+        int a = 1;
+        for (a = 0; a < 2; a += 1)
+        {
+            printf("two _ start\n");
+            int b;
+
+            for (; 0; )
+            {
+                break;
+            }
+
+            for (; !10; )
+            {
+                break;
+            }
+
+            for (; 3 < 2; )
+            {
+                break;
+            }
+
+            for (b = 0; b < 3; b += 1)
+            {
+                int e;
+                printf("three\n");
+            }
+            printf("two _ end\n");
+        }
+        int f;
+        printf("one _ end");
+    }
+
+    return 0;
+}

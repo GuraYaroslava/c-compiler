@@ -1,0 +1,37 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+variable `a` type of `int`
+variable `b` type of `int`
+        a
+    = <
+        1
+
+        b
+    = <
+            7
+        + <
+            a
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            a
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            b
+
+
+return
+    0
+}
+
+

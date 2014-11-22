@@ -1,0 +1,86 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+variable `i` type of `int`
+        i
+    = <
+        0
+
+for
+#1 
+#2 
+    i
+== <
+    0
+#3 
+    i
+-= <
+    1
+{
+variable `a` type of `int`
+    function:     printf
+        format:     "one _ start\n"
+
+
+        a
+    = <
+        1
+
+for
+#1 
+    a
+= <
+    0
+#2 
+    a
+< <
+    2
+#3 
+    a
++= <
+    1
+{
+variable `b` type of `int`
+    function:     printf
+        format:     "two _ start\n"
+
+
+for
+#1 
+    b
+= <
+    0
+#2 
+    b
+< <
+    3
+#3 
+    b
++= <
+    1
+{
+    function:     printf
+        format:     "three\n"
+
+
+}
+    function:     printf
+        format:     "two _ end\n"
+
+
+}
+    function:     printf
+        format:     "one _ end"
+
+
+}
+return
+    0
+}
+
+

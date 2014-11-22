@@ -1,0 +1,50 @@
+int main()
+{
+
+    int Add(int a, int b)
+    {
+        return a + b;
+    }
+
+    int i = 0;
+    while (i == 0)
+    {
+        printf("one _ start\n");
+        int a;
+        while (i == 0)
+        {
+            printf("two _ start\n");
+            int b;
+
+            while (0)
+            {
+                Add(1, 1);
+                printf("one\n");
+            }
+
+            while (0)
+            {
+                Add(2, 2);
+                printf("two\n");
+            }
+
+            while (0)
+            {
+                Add(3, 3);
+                printf("three\n");
+            }
+
+            while (i == 0)
+            {
+                int e;
+                printf("while #three\n");
+                i -= 1;
+            }
+            printf("two _ end\n");
+        }
+        int f;
+        printf("one _ end");
+    }
+
+    return 0;
+}

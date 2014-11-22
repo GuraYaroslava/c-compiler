@@ -1,0 +1,50 @@
+int Mul(int a, int b)
+{
+    return a * b;
+}
+
+int Add(int a, int b)
+{
+    return a + b;
+}
+
+int Sub(int a, int b)
+{
+    return a - b;
+}
+
+int main()
+{
+    int a = 5;
+    int b;
+    int c;
+    if (0)
+    {
+        return 0;
+        printf("bodyIf");
+    }
+    else
+    {
+        int d;
+        int e;
+        int g;
+        {
+            int d;
+            int e;
+            {
+                int d;
+                int e;
+                int g;
+            }
+            int g;
+        }
+        return 0;
+        printf("bodyElse");
+        printf("bodyElse");
+        printf("bodyElse");
+        printf("bodyElse");
+    }
+
+    printf("%d", Add(a, 5));
+    return 0;
+}

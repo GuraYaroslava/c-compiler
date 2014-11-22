@@ -1,0 +1,23 @@
+int Mul(int a, int b)
+{
+    return a * b;
+}
+
+int Add(int a, int b)
+{
+    return a + b;
+}
+
+int main()
+{
+    int a = 1, b = 1;
+
+    int Sub(int a, int b)
+    {
+        Mul(a, b);
+        return a - b;
+    }
+
+    printf("%d", Add(a, 5));
+    return 0;
+}

@@ -1,0 +1,31 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `Add` type of function(variable `a` type of `int`, variable `b` type of `int`) returning `int`
+{
+return
+        a
+    + <
+        b
+}
+
+variable `main` type of function() returning `int`
+{
+    function:     printf
+        format:     "%d\n"
+        args: 
+            function:             Add
+            args: 
+                127
+                128
+
+
+
+return
+    0
+}
+
+

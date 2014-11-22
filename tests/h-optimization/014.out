@@ -1,0 +1,62 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+variable `a` type of array 3 of `int`
+        array: 
+            a
+        index: 
+            0
+    = <
+        127
+
+        array: 
+            a
+        index: 
+            1
+    = <
+        128
+
+        array: 
+            a
+        index: 
+            2
+    = <
+        129
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            array: 
+                a
+            index: 
+                0
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            array: 
+                a
+            index: 
+                1
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            array: 
+                a
+            index: 
+                2
+
+
+return
+    0
+}
+
+

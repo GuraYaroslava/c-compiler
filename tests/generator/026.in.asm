@@ -149,8 +149,6 @@ func_main:
     invoke crt_printf, addr var_51
     add esp, 4
     push dword ptr [var_a + 0]
-    pop eax
-    push eax
     invoke crt_printf, addr var_55
     add esp, 4
     mov eax, 0

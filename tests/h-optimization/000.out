@@ -1,0 +1,43 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+    function:     printf
+        format:     "%d\n"
+        args: 
+            40
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            1
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            1
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            56
+
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            3
+
+
+return
+    0
+}
+
+

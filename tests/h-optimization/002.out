@@ -1,0 +1,24 @@
+table 0:
+`int`
+`float`
+`char`
+
+table 1:
+variable `main` type of function() returning `int`
+{
+variable `a` type of `int`
+        a
+    = <
+        100
+
+    function:     printf
+        format:     "%d\n"
+        args: 
+            a
+
+
+return
+    0
+}
+
+

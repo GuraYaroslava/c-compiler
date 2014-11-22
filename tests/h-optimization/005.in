@@ -1,0 +1,12 @@
+int main()
+{
+    if ((3 * ((5 + (36 + 4)) / 5)) % 5)
+    {
+        printf("bodyIf");
+    }
+    else
+    {
+        printf("bodyElse");
+    }
+    return 0;
+}

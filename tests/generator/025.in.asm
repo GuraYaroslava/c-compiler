@@ -11,6 +11,7 @@ includelib c:\masm32\lib\msvcrt.lib
     var_20 db "%d", 0dh, 0ah, 0
     var_25 db "%d", 0dh, 0ah, 0
     var_30 db "%d", 0dh, 0ah, 0
+    var_35 db "%d", 0dh, 0ah, 0
     helper4 real4 0.000000
     helper8 real8 0.000000
 
@@ -135,7 +136,7 @@ func_main:
     add esp, 4
     mov eax, 0
     push eax
-    mov eax, 1
+    mov eax, 0
     push eax
     pop eax
     pop ebx
@@ -151,6 +152,25 @@ func_main:
     setne al
     push eax
     invoke crt_printf, addr var_30
+    add esp, 4
+    mov eax, 0
+    push eax
+    mov eax, 1
+    push eax
+    pop eax
+    pop ebx
+    cmp eax, 0
+    mov eax, 0
+    setne al
+    cmp ebx, 0
+    mov ebx, 0
+    setne bl
+    add eax, ebx
+    cmp eax, 0
+    mov eax, 0
+    setne al
+    push eax
+    invoke crt_printf, addr var_35
     add esp, 4
     mov eax, 0
     push eax

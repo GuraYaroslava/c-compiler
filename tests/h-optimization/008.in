@@ -1,0 +1,8 @@
+int main()
+{
+    for (; -1 > 0;)
+    {
+        printf("bodyFor");
+    }
+    return 0;
+}

@@ -1,0 +1,9 @@
+int main()
+{
+    printf("%d\n", 36 + 4);
+    printf("%d\n", 24 == 24);
+    printf("%d\n", 24 != 42);
+    printf("%d\n", 14 << 2);//56
+    printf("%d\n", 12 >> 2);//3
+    return 0;
+}
