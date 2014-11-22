@@ -164,4 +164,10 @@ public:
         Type value_ = /*dynamic_cast<TokenVal<Type>*>(token)->*/value;
         return value_;
     }
+
+    void SetValue(Type value_)
+    {
+        value = value_;
+    }
+
 };
